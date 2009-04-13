@@ -1,0 +1,161 @@
+#!/usr/bin/python
+
+import pygame
+import sys
+import math
+
+from random import randrange
+from colorsys import hsv_to_rgb
+
+NCRATONS=40
+MARGIN=12.
+MIN_X=-150
+MIN_Y=-150
+MIN_H=-150
+MAX_X=150
+MAX_Y=150
+MAX_H=150
+
+cratons = []
+
+class Craton(object):
+    def __init__(self, i):
+        self.x = randrange(MIN_X, MAX_X+1)
+        self.y = randrange(MIN_Y, MAX_Y+1)
+        self.driftx = randrange(MIN_X, MAX_X+1)
+        self.drifty = randrange(MIN_Y, MAX_Y+1)
+        self.height = randrange(MIN_H, MAX_H+1)
+        self.colour = hsv_to_rgb(i/float(NCRATONS), 1.0, 1.0)
+        self.colour = [ j*255 for j in self.colour ]
+        self.neighbours = set()
+
+    def d2(self, x, y):
+        dx = self.x - x
+        dy = self.y - y
+        return dx*dx + dy*dy
+
+    def add_nbr(self, c):
+        if c not in self.neighbours:
+            self.neighbours.add(c)
+
+    def average(self):
+        tot = 2 * self.height
+        for c in self.neighbours:
+            tot += c.height
+        self.height = tot / (len(self.neighbours) + 2)
+
+class Loc(object):
+    def __init__(self, c1, c2, d1, d2):
+        self.nearest = c1
+        self.neighbour = c2
+        self.nearest_d = math.sqrt(d1)
+        self.neighbour_d = math.sqrt(d2)
+        self.height = c1.height
+
+        # Work out blending at craton edges
+        # The direction from this craton to the next
+        cr_dx = self.neighbour.x - self.nearest.x
+        cr_dy = self.neighbour.y - self.nearest.y
+        # The difference in craton movement
+        m_dx = self.neighbour.driftx - self.nearest.driftx
+        m_dy = self.neighbour.drifty - self.nearest.drifty
+        # How much are the cratons drifting towards or away from each other?
+        # Stress/strain
+        ss = cr_dx * m_dy - cr_dy * m_dx
+
+        if self.nearest.height > self.neighbour.height:
+            da = self.nearest_d
+            db = self.neighbour_d
+        else:
+            da = self.neighbour_d
+            db = self.nearest_d
+
+        if math.fabs(da - db) < MARGIN:
+            blend = (da - db + MARGIN)/MARGIN
+            peakheight = c2.height + (c2.height - c1.height) * ss / 10000.
+            self.height = (1-blend) * c1.height + blend * peakheight
+
+def to_scr(x, y):
+    return ((MAX_X-MIN_X)+x*2, (MAX_Y-MIN_Y)+y*2)
+
+# Generate a set of cratons
+for i in range(0, NCRATONS):
+    cratons.append(Craton(i))
+
+# Generate for each point in the output space the nearest and
+# next-nearest craton centre
+loc = [ [ 0 for y in range(MIN_Y, MAX_Y+1) ] for x in range(MIN_X, MAX_X+1) ]
+for x in range(MIN_X, MAX_X+1):
+    for y in range(MIN_Y, MAX_Y+1):
+        d = 1e8
+        d2 = 1e8
+        cton = None
+        cton2 = None
+        for c in cratons:
+            dist = c.d2(x, y)
+            if dist < d:
+                d2 = d
+                d = dist
+                cton2 = cton
+                cton = c
+            elif dist < d2:
+                d2 = dist
+                cton2 = c
+
+        loc[x][y] = Loc(cton, cton2, d, d2)
+        cton.add_nbr(cton2)
+        cton2.add_nbr(cton)
+
+for c in cratons:
+    c.average()
+
+# Draw the output
+pygame.init()
+screen = pygame.display.set_mode(((MAX_X-MIN_X+1)*2, (MAX_Y-MIN_Y+1)*2))
+screen.fill((0,0,0))
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+
+    for x in range(MIN_X, MAX_X+1):
+        for y in range(MIN_Y, MAX_Y+1):
+            if loc[x][y].nearest.height > loc[x][y].neighbour.height:
+                da = loc[x][y].nearest_d
+                ca = loc[x][y].nearest
+                db = loc[x][y].neighbour_d
+                cb = loc[x][y].neighbour
+            else:
+                db = loc[x][y].nearest_d
+                cb = loc[x][y].nearest
+                da = loc[x][y].neighbour_d
+                ca = loc[x][y].neighbour
+
+            colh = float(loc[x][y].height-MIN_H)/float(MAX_H-MIN_H+1) * 255
+            if colh > 255 or colh < 0:
+                col = (0, 255, 0)
+            else:
+                col = (colh, colh, colh)
+                
+            pygame.draw.rect(screen,
+                             col,
+                             pygame.Rect(to_scr(x, y), (2, 2)))
+
+    for c in cratons:
+        pygame.draw.circle(screen,
+                           (0, 0, 0),
+                           to_scr(c.x, c.y),
+                           3)
+        pygame.draw.line(screen,
+                         (0, 0, 0),
+                         to_scr(c.x, c.y),
+                         to_scr(c.x + c.driftx/10., c.y + c.drifty/10.)
+                         )
+        for n in c.neighbours:
+            pygame.draw.line(screen,
+                             (255, 0, 0),
+                             to_scr(c.x, c.y),
+                             to_scr(n.x, n.y)
+                             )
+                        

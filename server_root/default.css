@@ -1,0 +1,27 @@
+table.top_level {
+	width: 100%;
+}
+
+table.top_level td {
+	margin: 5px;
+	border: solid 2px black;
+	padding: 5px;
+}
+
+#top_panel table {
+	width: 100%;
+}
+
+#top_panel td {
+	border: 0px none;
+	text-align: center;
+	margin: 0px;
+	padding: 0px;
+}
+
+.panel {
+	background: #ddd;
+	border: 2px solid black;
+	padding: 5px;
+	width: 100%;
+}

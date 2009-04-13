@@ -1,0 +1,18 @@
+#!/usr/bin/python
+
+######
+# Create a new player
+
+from Player import Player
+from Alignment import Alignment
+from Database import DB
+
+p = Player('darksatanic', Alignment.WOOD)
+p.set_prop("x", 2)
+p.set_prop("y", 3)
+
+print p._id
+
+p.save()
+
+DB.commit()

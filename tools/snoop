@@ -1,0 +1,8 @@
+#!/usr/bin/python
+
+from Player import Player
+
+p = Player.load_by_name('darksatanic')
+
+for (k, v) in p.__dict__.items():
+    print str(k) + "\t" + str(v)

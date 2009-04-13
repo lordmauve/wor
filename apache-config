@@ -1,0 +1,47 @@
+<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	ServerName worldofrodney.org
+	ServerAlias www.worldofrodney.org
+	ServerAlias test.worldofrodney.org
+
+	PythonDebug On
+	
+	# First, map the file paths to the server root
+	DocumentRoot /home/hrm/develop/wor/server_root
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+
+	PythonAutoReload On
+	PythonOption wor.root_path /home/hrm/develop/wor
+	PythonPath "sys.path + ['/home/hrm/develop/wor/library', '/home/hrm/develop/wor/handlers']"
+
+	# Now map the REST API to a suitable set of paths:
+	<Location /api>
+		Order deny,allow
+		Allow from all
+
+		AuthType Digest
+		AuthName WoR
+		AuthDigestDomain /api
+		AuthDigestProvider file
+		AuthUserFile /home/hrm/develop/wor/authn_file
+		Require valid-user
+
+		SetHandler mod_python
+	</Location>
+	<Location /api/player>
+		PythonHandler hd_player::default_handler
+	</Location>
+	<Location /api/player/act>
+		PythonHandler hd_player::action_handler
+	</Location>
+	<Location /api/player/inventory>
+		PythonHandler hd_player::inventory_handler
+	</Location>
+
+	LogLevel warn
+	ErrorLog /var/log/apache2/wor.error.log
+	CustomLog /var/log/apache2/wor.access.log combined
+</VirtualHost>
