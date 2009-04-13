@@ -1,0 +1,7 @@
+######
+# Base configuration
+
+import os
+
+base_dir = "/home/hrm/develop/wor"
+log_dir = os.path.join(base_dir, "logs")
