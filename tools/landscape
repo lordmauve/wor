@@ -4,7 +4,7 @@ import pygame
 import sys
 import math
 
-from random import randrange
+from random import randrange, random
 from colorsys import hsv_to_rgb
 
 NCRATONS=40
@@ -26,15 +26,20 @@ cratons = []
 
 class Craton(object):
     def __init__(self, i,
-                 x = randrange(MIN_X, MAX_X+1),
-                 y = randrange(MIN_Y, MAX_Y+1),
-                 height = randrange(0, 150),
+                 x = None,
+                 y = None,
+                 height = None,
                  driftx = None,
                  drifty = None):
+        if x == None: x = randrange(MIN_X, MAX_X+1)
+        if y == None: y = randrange(MIN_Y, MAX_Y+1)
+        if height == None: height = randrange(0, 150)
+        
         self.i = i
         self.x = x
         self.y = y
         self.height = height
+        
         if driftx == None or drifty == None:
             r = randrange(0, MAX_D)+1
             t = math.radians(randrange(0, 360))
@@ -152,8 +157,11 @@ class Loc(object):
     def mountains(self):
         self.height += self.nearest.mountains(self.px, self.py)
 
+    def distance_ratio(self):
+        return self.nearest_d / self.neighbour_d
+
 def to_scr(x, y):
-    return ((MAX_X-MIN_X)+x*2, (MAX_Y-MIN_Y)+y*2)
+    return ((MAX_X-MIN_X)+x*2+(y%2), (MAX_Y-MIN_Y)+y*2)
 
 # Generate a set of cratons
 for i in range(0, NCRATONS):
@@ -188,24 +196,89 @@ for x in range(MIN_X, MAX_X+1):
         cton2.add_nbr(cton)
 
 # Average out the cratons
-for c in cratons:
-    c.average()
+#for c in cratons:
+#    c.average()
 
-# Now, for each point, add in the drift effects
-for x in range(MIN_X, MAX_X+1):
-    for y in range(MIN_Y, MAX_Y+1):
-        loc[x][y].mountains()
+# Set up a triangle
+# Scale large enough to fit the square in it
+scale = int(math.ceil(math.log((MAX_X-MIN_X+1) * (1+2/math.sqrt(3))) / math.log(2) ))
+print "Triangle scale =", scale
+fnoise = [ [ None for y in range(0, (1 << scale) + 1 - x) ] for x in range(0, (1 << scale) + 1) ]
+# Work out the best relative offsets of the zero point in square and triangle
+# Centred horizontally
+diff_x = MIN_X + int(math.ceil(MIN_X * 2 / math.sqrt(3)))
+diff_y = MIN_Y
 
-#for x in range(MIN_Y, MAX_Y+1):
-#    print x, loc[x][0].height
+# A function to map square coords into triangle ones
+s_to_t = lambda x, y: (x - int(math.floor((y - diff_y)/2)) - diff_x, y - diff_y)
+# And its inverse
+t_to_s = lambda x, y: (x + int(math.floor((y + diff_y)/2)) + diff_x, y + diff_y)
+
+# Just check sanity
+ok = 0
+(tx, ty) = s_to_t(MIN_X, MIN_Y)
+if ty >= 0 and tx >= 0 and ty-tx < (1 << scale + 1):
+    print "SW point in triangle"
+    ok += 1
+(tx, ty) = s_to_t(MIN_X, MAX_Y)
+if ty >= 0 and tx >= 0 and ty-tx < (1 << scale + 1):
+    print "NW point in triangle"
+    ok += 1
+(tx, ty) = s_to_t(MAX_X, MIN_Y)
+if ty >= 0 and tx >= 0 and ty-tx < (1 << scale + 1):
+    print "SE point in triangle"
+    ok += 1
+(tx, ty) = s_to_t(MAX_X, MAX_Y)
+if ty >= 0 and tx >= 0 and ty-tx < (1 << scale + 1):
+    print "NE point in triangle"
+    ok += 1
+if ok < 4:
+    print "FAIL"
+    sys.exit(1)
+
+# Now, for each point near a craton edge, there's a small chance of it having a
+# height set
+for sx in range(MIN_X, MAX_X+1):
+    for sy in range(MIN_Y, MAX_Y+1):
+        if loc[sx][sy].distance_ratio() > 0.85:
+            if random() < 0.005: # One part in 200
+                # Set a point in the triangle
+                (tx, ty) = s_to_t(sx, sy)
+                fnoise[tx][ty] = loc[sx][sy].height # This should be a more complex height calculation
+        else:
+            if random() < 0.001: # One part in 1000
+                (tx, ty) = s_to_t(sx, sy)
+                fnoise[tx][ty] = loc[sx][sy].height
+
+# Set the corners
+fnoise[0][0] = randrange(MIN_H, MAX_H)
+fnoise[1 << scale][0] = randrange(MIN_H, MAX_H)
+fnoise[0][1 << scale] = randrange(MIN_H, MAX_H)
+
+# Compute the fractal noise function
+for sc in range(scale-1, -1, -1):
+    stride = 1 << sc
+    for x in range(0, 1 << scale + 1, stride):
+        for y in range(0, (1 << scale) - x + 1, stride):
+            tot = fnoise[x][y]
+            count = 1
+            # FIXME
+            
+
+# Transfer the triangle back to the square
+for sx in range(MIN_X, MAX_X+1):
+    for sy in range(MIN_Y, MAX_Y+1):
+        (tx, ty) = s_to_t(sx, sy)
+        loc[sx][sy].height = fnoise[tx][ty]
 
 # Work out the dynamic range of the landscape
 min_h = 1e6
 max_h = -1e6
 for x in range(MIN_X, MAX_X+1):
     for y in range(MIN_Y, MAX_Y+1):
-        min_h = min(min_h, loc[x][y].height)
-        max_h = max(max_h, loc[x][y].height)
+        if loc[x][y].height != None:
+            min_h = min(min_h, loc[x][y].height)
+            max_h = max(max_h, loc[x][y].height)
 
 print "Height range:", min_h, "to", max_h
 
@@ -221,7 +294,10 @@ while True:
 
     for x in range(MIN_X, MAX_X+1):
         for y in range(MIN_Y, MAX_Y+1):
-            colh = float(loc[x][y].height-min_h)/float(max_h-min_h+1) * 255
+            if loc[x][y].height == None:
+                colh = 0
+            else:
+                colh = float(loc[x][y].height-min_h)/float(max_h-min_h+1) * 255
             if colh > 255 or colh < 0:
                 col = (0, 255, 0)
             else:
