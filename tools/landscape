@@ -9,25 +9,44 @@ from colorsys import hsv_to_rgb
 
 NCRATONS=40
 MARGIN=12.
+
 MIN_X=-150
 MIN_Y=-150
-MIN_H=-150
+MIN_H=0
 MAX_X=150
 MAX_Y=150
-MAX_H=150
+MAX_H=500
+
+MAX_D=20
+
+MOUNTAIN_THRESHOLD = 40
+MOUNTAIN_HALF = 50
 
 cratons = []
 
 class Craton(object):
-    def __init__(self, i):
-        self.x = randrange(MIN_X, MAX_X+1)
-        self.y = randrange(MIN_Y, MAX_Y+1)
-        self.driftx = randrange(MIN_X, MAX_X+1)
-        self.drifty = randrange(MIN_Y, MAX_Y+1)
-        self.height = randrange(MIN_H, MAX_H+1)
+    def __init__(self, i,
+                 x = randrange(MIN_X, MAX_X+1),
+                 y = randrange(MIN_Y, MAX_Y+1),
+                 height = randrange(0, 150),
+                 driftx = None,
+                 drifty = None):
+        self.i = i
+        self.x = x
+        self.y = y
+        self.height = height
+        if driftx == None or drifty == None:
+            r = randrange(0, MAX_D)+1
+            t = math.radians(randrange(0, 360))
+            self.driftx = r * math.cos(t)
+            self.drifty = r * math.sin(t)
+        else:
+            self.driftx = driftx
+            self.drifty = drifty
         self.colour = hsv_to_rgb(i/float(NCRATONS), 1.0, 1.0)
         self.colour = [ j*255 for j in self.colour ]
         self.neighbours = set()
+        self.relations = set()
 
     def d2(self, x, y):
         dx = self.x - x
@@ -37,6 +56,7 @@ class Craton(object):
     def add_nbr(self, c):
         if c not in self.neighbours:
             self.neighbours.add(c)
+            self.relations.add(CratonRelation(self, c))
 
     def average(self):
         tot = 2 * self.height
@@ -44,49 +64,110 @@ class Craton(object):
             tot += c.height
         self.height = tot / (len(self.neighbours) + 2)
 
+    def mountains(self, x, y):
+        tot = 0
+        for rel in self.relations:
+            tot += rel.mountains(x, y)
+
+        return tot
+
+class CratonRelation(object):
+    def __init__(self, c1, c2):
+        self.c1 = c1
+        self.c2 = c2
+
+        print "From", c1.i, "to", c2.i
+        
+        # The direction and distance from this craton to the edge of the next
+        cr_dx = c2.x - c1.x
+        cr_dy = c2.y - c1.y
+        self.cr_d = math.sqrt(cr_dx * cr_dx + cr_dy * cr_dy) / 2.0
+
+        print "cr =", cr_dx, cr_dy
+        print "cr_d =", self.cr_d
+        
+        # Normalised direction vector
+        self.cr_nx = cr_dx / self.cr_d / 2.0
+        self.cr_ny = cr_dy / self.cr_d / 2.0
+        print "cr_n =", self.cr_nx, self.cr_ny
+        # The difference in craton movement
+        m_dx = c2.driftx - c1.driftx
+        m_dy = c2.drifty - c1.drifty
+        print "m =", m_dx, m_dy
+        
+        # How much are the cratons drifting towards or away from each other?
+        # Stress/strain
+        ss = self.cr_nx * m_dx + self.cr_ny * m_dy
+        print "ss =", ss
+
+        # Peak height, maximum:
+        print "Sides =", c1.height, c2.height
+        lowerside = min(c1.height, c2.height)
+        upperside = max(c1.height, c2.height)
+        scaling = math.fabs(ss) / (2.0 * MAX_D)
+        print "Scaling =", scaling
+        
+        if ss < 0 and math.fabs(c1.height - c2.height) < MOUNTAIN_THRESHOLD:
+            print "Sides similar in height, moving together: mountain-building"
+            spot = lowerside * scaling + upperside
+        else:
+            print "Sides moving apart, or much higher"
+            if scaling < 0.5:
+                spot = upperside - (upperside - lowerside) * (scaling + 0.5)
+            else:
+                spot = lowerside - (lowerside * 0.3 * (scaling - 0.5))
+
+        print "Spot =", spot
+
+        # Function params
+        self.mult = spot - c1.height
+
+        # We fall off at a half-distance of MOUNTAIN_HALF
+        self.l = math.log(0.5) / MOUNTAIN_HALF
+
+    def f(self, x):
+        return self.mult * math.exp(self.l * (self.cr_d - x))
+
+    def mountains(self, px, py):
+        # How far are we in the direction between cratons?
+        d = self.cr_nx * px + self.cr_ny * py
+
+        # Return the extra height for this pair of cratons
+        rv = self.f(d)
+        return rv
+
 class Loc(object):
-    def __init__(self, c1, c2, d1, d2):
+    def __init__(self, x, y, c1, c2, d1, d2):
+        self.x = x
+        self.y = y
         self.nearest = c1
         self.neighbour = c2
         self.nearest_d = math.sqrt(d1)
         self.neighbour_d = math.sqrt(d2)
-        self.height = c1.height
+        self.height = self.nearest.height # Initial height
+        # Our position on this craton
+        self.px = self.x - self.nearest.x
+        self.py = self.y - self.nearest.y
 
-        # Work out blending at craton edges
-        # The direction from this craton to the next
-        cr_dx = self.neighbour.x - self.nearest.x
-        cr_dy = self.neighbour.y - self.nearest.y
-        # The difference in craton movement
-        m_dx = self.neighbour.driftx - self.nearest.driftx
-        m_dy = self.neighbour.drifty - self.nearest.drifty
-        # How much are the cratons drifting towards or away from each other?
-        # Stress/strain
-        ss = cr_dx * m_dy - cr_dy * m_dx
-
-        if self.nearest.height > self.neighbour.height:
-            da = self.nearest_d
-            db = self.neighbour_d
-        else:
-            da = self.neighbour_d
-            db = self.nearest_d
-
-        if math.fabs(da - db) < MARGIN:
-            blend = (da - db + MARGIN)/MARGIN
-            peakheight = c2.height + (c2.height - c1.height) * ss / 10000.
-            self.height = (1-blend) * c1.height + blend * peakheight
+    def mountains(self):
+        self.height += self.nearest.mountains(self.px, self.py)
 
 def to_scr(x, y):
     return ((MAX_X-MIN_X)+x*2, (MAX_Y-MIN_Y)+y*2)
 
 # Generate a set of cratons
-for i in range(0, NCRATONS):
-    cratons.append(Craton(i))
+#for i in range(0, NCRATONS):
+#    cratons.append(Craton(i))
+
+cratons.append(Craton(0, -50, 0, 30, 10, 1))
+cratons.append(Craton(1, 50, 0, 50, -10, 1))
+cratons.append(Craton(2, 0, 75, 70, -10, 1))
 
 # Generate for each point in the output space the nearest and
 # next-nearest craton centre
 loc = [ [ 0 for y in range(MIN_Y, MAX_Y+1) ] for x in range(MIN_X, MAX_X+1) ]
 for x in range(MIN_X, MAX_X+1):
-    for y in range(MIN_Y, MAX_Y+1):
+    for y in range(MIN_Y, MAX_Y+1): 
         d = 1e8
         d2 = 1e8
         cton = None
@@ -102,12 +183,31 @@ for x in range(MIN_X, MAX_X+1):
                 d2 = dist
                 cton2 = c
 
-        loc[x][y] = Loc(cton, cton2, d, d2)
+        loc[x][y] = Loc(x, y, cton, cton2, d, d2)
         cton.add_nbr(cton2)
         cton2.add_nbr(cton)
 
+# Average out the cratons
 for c in cratons:
     c.average()
+
+# Now, for each point, add in the drift effects
+for x in range(MIN_X, MAX_X+1):
+    for y in range(MIN_Y, MAX_Y+1):
+        loc[x][y].mountains()
+
+#for x in range(MIN_Y, MAX_Y+1):
+#    print x, loc[x][0].height
+
+# Work out the dynamic range of the landscape
+min_h = 1e6
+max_h = -1e6
+for x in range(MIN_X, MAX_X+1):
+    for y in range(MIN_Y, MAX_Y+1):
+        min_h = min(min_h, loc[x][y].height)
+        max_h = max(max_h, loc[x][y].height)
+
+print "Height range:", min_h, "to", max_h
 
 # Draw the output
 pygame.init()
@@ -121,18 +221,7 @@ while True:
 
     for x in range(MIN_X, MAX_X+1):
         for y in range(MIN_Y, MAX_Y+1):
-            if loc[x][y].nearest.height > loc[x][y].neighbour.height:
-                da = loc[x][y].nearest_d
-                ca = loc[x][y].nearest
-                db = loc[x][y].neighbour_d
-                cb = loc[x][y].neighbour
-            else:
-                db = loc[x][y].nearest_d
-                cb = loc[x][y].nearest
-                da = loc[x][y].neighbour_d
-                ca = loc[x][y].neighbour
-
-            colh = float(loc[x][y].height-MIN_H)/float(MAX_H-MIN_H+1) * 255
+            colh = float(loc[x][y].height-min_h)/float(max_h-min_h+1) * 255
             if colh > 255 or colh < 0:
                 col = (0, 255, 0)
             else:
@@ -150,7 +239,7 @@ while True:
         pygame.draw.line(screen,
                          (0, 0, 0),
                          to_scr(c.x, c.y),
-                         to_scr(c.x + c.driftx/10., c.y + c.drifty/10.)
+                         to_scr(c.x + c.driftx, c.y + c.drifty)
                          )
         for n in c.neighbours:
             pygame.draw.line(screen,
