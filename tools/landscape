@@ -156,12 +156,12 @@ def to_scr(x, y):
     return ((MAX_X-MIN_X)+x*2, (MAX_Y-MIN_Y)+y*2)
 
 # Generate a set of cratons
-#for i in range(0, NCRATONS):
-#    cratons.append(Craton(i))
+for i in range(0, NCRATONS):
+    cratons.append(Craton(i))
 
-cratons.append(Craton(0, -50, 0, 30, 10, 1))
-cratons.append(Craton(1, 50, 0, 50, -10, 1))
-cratons.append(Craton(2, 0, 75, 70, -10, 1))
+#cratons.append(Craton(0, -50, 0, 30, 10, 1))
+#cratons.append(Craton(1, 50, 0, 50, -10, 1))
+#cratons.append(Craton(2, 0, 75, 70, -10, 1))
 
 # Generate for each point in the output space the nearest and
 # next-nearest craton centre
