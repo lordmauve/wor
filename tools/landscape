@@ -21,6 +21,8 @@ MAX_D=20
 
 MOUNTAIN_THRESHOLD = 40
 MOUNTAIN_HALF = 50
+SMOOTHNESS = 1
+SEED_SCALE = 4
 
 cratons = []
 
@@ -145,14 +147,20 @@ class Loc(object):
     def __init__(self, x, y, c1, c2, d1, d2):
         self.x = x
         self.y = y
-        self.nearest = c1
-        self.neighbour = c2
-        self.nearest_d = math.sqrt(d1)
-        self.neighbour_d = math.sqrt(d2)
-        self.height = self.nearest.height # Initial height
-        # Our position on this craton
-        self.px = self.x - self.nearest.x
-        self.py = self.y - self.nearest.y
+        if c1 != None:
+            self.nearest = c1
+            self.neighbour = c2
+            self.nearest_d = math.sqrt(d1)
+            self.neighbour_d = math.sqrt(d2)
+            self.height = self.nearest.height # Initial height
+            # Our position on this craton
+            self.px = self.x - self.nearest.x
+            self.py = self.y - self.nearest.y
+        else:
+            self.height = 0
+
+        self.new_water = 0
+        self.tot_water = 0
 
     def mountains(self):
         self.height += self.nearest.mountains(self.px, self.py)
@@ -160,8 +168,182 @@ class Loc(object):
     def distance_ratio(self):
         return self.nearest_d / self.neighbour_d
 
+    def flow(self, *nbrs):
+        my_height = self.height + self.water
+        downhill = []
+        hd = 0 # The amount of height difference we're flowing into
+        count = 0 # The number of hexes we're flowing into
+        for n in nbrs:
+            if n.height + n.water < my_height:
+                hd += my_height - (n.height + n.water)
+                count += 1
+                downhill.append(n)
+
+        # We now want to allocate n.hd / hd of the water in this hex to hex n
+        for n in downhill:
+            nhd = my_height - (n.height + n.water)
+            self.new_water += nhd/hd*self.water
+
 def to_scr(x, y):
     return ((MAX_X-MIN_X)+x*2+(y%2), (MAX_Y-MIN_Y)+y*2)
+
+def calc_fnoise(fnoise, scale):
+    ymx = 1 << scale
+    for sc in range(scale-1, -1, -1):
+        stride = 1 << sc
+        xbit = True
+        for x in range(0, 1 << scale + 1, stride):
+            xbit = not xbit
+            ybit = True
+            maxy = (1 << scale) - x
+            for y in range(0, maxy + 1, stride):
+                ybit = not ybit
+                if fnoise[x][y] != None:
+                    continue
+                tot = 0.0
+                count = 0.0
+                if xbit:
+                    if ybit:
+                        if y - stride >= 0 and (y-stride) + (x+stride) <= ymx:
+                            count += 2
+                            tot += 2* fnoise[x+stride][y-stride]
+                        if x - stride >= 0 and (y+stride) + (x-stride) <= ymx:
+                            count += 2
+                            tot += 2* fnoise[x-stride][y+stride]
+                        if x - stride >= 0 and y - stride >= 0:
+                            count += 1
+                            tot += fnoise[x-stride][y-stride]
+                        if (y+stride) + (x+stride) <= ymx:
+                            count += 1
+                            tot += fnoise[x+stride][y+stride]
+                    else:
+                        if x - stride >= 0:
+                            count += 2
+                            tot += 2* fnoise[x-stride][y]
+                        if y + (x+stride) <= ymx:
+                            count += 2
+                            tot += 2* fnoise[x+stride][y]
+                        if ( (y+2*stride) + (x-stride) <= ymx
+                             and x - stride >= 0):
+                            count += 1
+                            tot += fnoise[x-stride][y+2*stride]
+                        if y - 2*stride >= 0:
+                            count += 1
+                            tot += fnoise[x+stride][y-2*stride]
+                else:
+                    if ybit:
+                        if y - stride >= 0:
+                            count += 2
+                            tot += 2* fnoise[x][y-stride]
+                        if y + stride <= maxy:
+                            count += 2
+                            tot += 2* fnoise[x][y+stride]
+                        if x - 2*stride >= 0:
+                            count += 1
+                            tot += fnoise[x-2*stride][y+stride]
+                        if ( (y-stride) + (x+2*stride) <= ymx
+                            and y - stride >= 0):
+                            count += 1
+                            tot += fnoise[x+2*stride][y-stride]
+                    else:
+                        print "xbit and ybit are both false: WTF?"
+    
+                if count == 0.0:
+                    print "Count is zero: WTF?", stride, x, y, xbit, ybit, maxx, maxy
+    
+                fnoise[x][y] = tot / count
+
+                rrange = stride >> SMOOTHNESS
+
+                fnoise[x][y] += randrange(-rrange, rrange+1)
+
+def hydro(loc):
+    # Start with a rain shower
+    for x in range(MIN_X, MAX_X + 1):
+        for y in range(MIN_Y, MAX_Y + 1):
+            loc[x][y].water = 0.1
+
+    # Model water flow
+    for i in range(0, 100):
+        sys.stdout.write(".")
+        if i % 10 == 0:
+            sys.stdout.write("/")
+        sys.stdout.flush()
+        hydro_flow(loc)
+
+def hydro_flow(loc):
+    for x in range(MIN_X, MAX_X + 1):
+        for y in range(MIN_Y, MAX_Y + 1):
+            loc[x][y].flow(loc[x-1][y],
+                           loc[x+1][y],
+                           loc[x-1+y%2][y+1],
+                           loc[x+y%2][y+1],
+                           loc[x-1+y%2][y-1],
+                           loc[x+y%2][y-1])
+    
+    # Move across the new values
+    for x in range(MIN_X, MAX_X + 1):
+        for y in range(MIN_Y, MAX_Y + 1):
+            loc[x][y].water = loc[x][y].new_water
+            loc[x][y].tot_water += loc[x][y].water
+            loc[x][y].new_water = 0
+            
+def plot(f):
+    # Work out the dynamic range of the landscape
+    min_h = 1e12
+    max_h = -1e12
+    for x in range(MIN_X, MAX_X+1):
+        for y in range(MIN_Y, MAX_Y+1):
+            if loc[x][y].height != None:
+                min_h = min(min_h, loc[x][y].height)
+                max_h = max(max_h, loc[x][y].height)
+
+    print "Height range:", min_h, "to", max_h
+
+    # Draw the output
+    pygame.init()
+    screen = pygame.display.set_mode(((MAX_X-MIN_X+1)*2, (MAX_Y-MIN_Y+1)*2))
+    screen.fill((0,0,0))
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+        for x in range(MIN_X, MAX_X+1):
+            for y in range(MIN_Y, MAX_Y+1):
+                if loc[x][y].height == None:
+                    colh = 0
+                else:
+                    colh = float(loc[x][y].height-min_h)/float(max_h-min_h+1) * 255
+
+                if colh > 255 or colh < 0:
+                    col = (0, 255, 0)
+                else:
+                    col = (colh, colh, colh)
+                
+                pygame.draw.rect(screen,
+                                 col,
+                                 pygame.Rect(to_scr(x, y), (2, 2)))
+
+        for c in cratons:
+            pygame.draw.circle(screen,
+                               (0, 0, 0),
+                               to_scr(c.x, c.y),
+                               3)
+            pygame.draw.line(screen,
+                             (0, 0, 0),
+                             to_scr(c.x, c.y),
+                             to_scr(c.x + c.driftx, c.y + c.drifty)
+                             )
+            for n in c.neighbours:
+                pygame.draw.line(screen,
+                                 (255, 0, 0),
+                                 to_scr(c.x, c.y),
+                                 to_scr(n.x, n.y)
+                                 )
+
+###############################################################
 
 # Generate a set of cratons
 for i in range(0, NCRATONS):
@@ -180,20 +362,20 @@ for x in range(MIN_X, MAX_X+1):
         d2 = 1e8
         cton = None
         cton2 = None
-        for c in cratons:
-            dist = c.d2(x, y)
-            if dist < d:
-                d2 = d
-                d = dist
-                cton2 = cton
-                cton = c
-            elif dist < d2:
-                d2 = dist
-                cton2 = c
-
+#        for c in cratons:
+#            dist = c.d2(x, y)
+#            if dist < d:
+#                d2 = d
+#                d = dist
+#                cton2 = cton
+#                cton = c
+#            elif dist < d2:
+#                d2 = dist
+#                cton2 = c
+#
         loc[x][y] = Loc(x, y, cton, cton2, d, d2)
-        cton.add_nbr(cton2)
-        cton2.add_nbr(cton)
+#        cton.add_nbr(cton2)
+#        cton2.add_nbr(cton)
 
 # Average out the cratons
 #for c in cratons:
@@ -217,38 +399,39 @@ t_to_s = lambda x, y: (x + int(math.floor((y + diff_y)/2)) + diff_x, y + diff_y)
 # Just check sanity
 ok = 0
 (tx, ty) = s_to_t(MIN_X, MIN_Y)
-if ty >= 0 and tx >= 0 and ty-tx < (1 << scale + 1):
+if ty >= 0 and tx >= 0 and ty+tx < (1 << scale + 1):
     print "SW point in triangle"
     ok += 1
 (tx, ty) = s_to_t(MIN_X, MAX_Y)
-if ty >= 0 and tx >= 0 and ty-tx < (1 << scale + 1):
+if ty >= 0 and tx >= 0 and ty+tx < (1 << scale + 1):
     print "NW point in triangle"
     ok += 1
 (tx, ty) = s_to_t(MAX_X, MIN_Y)
-if ty >= 0 and tx >= 0 and ty-tx < (1 << scale + 1):
+if ty >= 0 and tx >= 0 and ty+tx < (1 << scale + 1):
     print "SE point in triangle"
     ok += 1
 (tx, ty) = s_to_t(MAX_X, MAX_Y)
-if ty >= 0 and tx >= 0 and ty-tx < (1 << scale + 1):
+if ty >= 0 and tx >= 0 and ty+tx < (1 << scale + 1):
     print "NE point in triangle"
     ok += 1
 if ok < 4:
     print "FAIL"
     sys.exit(1)
 
-# Now, for each point near a craton edge, there's a small chance of it having a
-# height set
-for sx in range(MIN_X, MAX_X+1):
-    for sy in range(MIN_Y, MAX_Y+1):
-        if loc[sx][sy].distance_ratio() > 0.85:
-            if random() < 0.005: # One part in 200
-                # Set a point in the triangle
-                (tx, ty) = s_to_t(sx, sy)
-                fnoise[tx][ty] = loc[sx][sy].height # This should be a more complex height calculation
-        else:
-            if random() < 0.001: # One part in 1000
-                (tx, ty) = s_to_t(sx, sy)
-                fnoise[tx][ty] = loc[sx][sy].height
+# Now, for each point in a grid of given size, near a craton edge,
+# there's a small chance of it having a height set
+#for tx in range(0, (1 << scale) + 1, 1 << SEED_SCALE):
+#    for ty in range(0, (1 << scale) + 1 - tx, 1 << SEED_SCALE):
+#        (sx, sy) = t_to_s(tx, ty)
+#        if sx < MIN_X or sx >= MAX_X or sy < MIN_Y or sy >= MAX_Y:
+#            continue
+#        if loc[sx][sy].distance_ratio() > 0.85:
+#            if random() < 0.2:
+#                # Set a point in the triangle
+#                fnoise[tx][ty] = loc[sx][sy].height # This should be a more complex height calculation
+#        else:
+#            if random() < 0.1:
+#                fnoise[tx][ty] = loc[sx][sy].height
 
 # Set the corners
 fnoise[0][0] = randrange(MIN_H, MAX_H)
@@ -256,14 +439,7 @@ fnoise[1 << scale][0] = randrange(MIN_H, MAX_H)
 fnoise[0][1 << scale] = randrange(MIN_H, MAX_H)
 
 # Compute the fractal noise function
-for sc in range(scale-1, -1, -1):
-    stride = 1 << sc
-    for x in range(0, 1 << scale + 1, stride):
-        for y in range(0, (1 << scale) - x + 1, stride):
-            tot = fnoise[x][y]
-            count = 1
-            # FIXME
-            
+calc_fnoise(fnoise, scale)
 
 # Transfer the triangle back to the square
 for sx in range(MIN_X, MAX_X+1):
@@ -271,56 +447,9 @@ for sx in range(MIN_X, MAX_X+1):
         (tx, ty) = s_to_t(sx, sy)
         loc[sx][sy].height = fnoise[tx][ty]
 
-# Work out the dynamic range of the landscape
-min_h = 1e6
-max_h = -1e6
-for x in range(MIN_X, MAX_X+1):
-    for y in range(MIN_Y, MAX_Y+1):
-        if loc[x][y].height != None:
-            min_h = min(min_h, loc[x][y].height)
-            max_h = max(max_h, loc[x][y].height)
+# Do some modelling of hydrology
+hydro(loc)
 
-print "Height range:", min_h, "to", max_h
-
-# Draw the output
-pygame.init()
-screen = pygame.display.set_mode(((MAX_X-MIN_X+1)*2, (MAX_Y-MIN_Y+1)*2))
-screen.fill((0,0,0))
-
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
-
-    for x in range(MIN_X, MAX_X+1):
-        for y in range(MIN_Y, MAX_Y+1):
-            if loc[x][y].height == None:
-                colh = 0
-            else:
-                colh = float(loc[x][y].height-min_h)/float(max_h-min_h+1) * 255
-            if colh > 255 or colh < 0:
-                col = (0, 255, 0)
-            else:
-                col = (colh, colh, colh)
-                
-            pygame.draw.rect(screen,
-                             col,
-                             pygame.Rect(to_scr(x, y), (2, 2)))
-
-    for c in cratons:
-        pygame.draw.circle(screen,
-                           (0, 0, 0),
-                           to_scr(c.x, c.y),
-                           3)
-        pygame.draw.line(screen,
-                         (0, 0, 0),
-                         to_scr(c.x, c.y),
-                         to_scr(c.x + c.driftx, c.y + c.drifty)
-                         )
-        for n in c.neighbours:
-            pygame.draw.line(screen,
-                             (255, 0, 0),
-                             to_scr(c.x, c.y),
-                             to_scr(n.x, n.y)
-                             )
-                        
+# Plot the landscape
+#plot(lambda x, y: loc[x][y].height)
+plot(lambda x, y: loc[x][y].tot_water)
