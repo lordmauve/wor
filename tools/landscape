@@ -41,6 +41,7 @@ class Craton(object):
         self.x = x
         self.y = y
         self.height = height
+        self.cragginess = random()+1.0
         
         if driftx == None or drifty == None:
             r = randrange(0, MAX_D)+1
@@ -169,20 +170,14 @@ class Loc(object):
         return self.nearest_d / self.neighbour_d
 
     def flow(self, *nbrs):
-        my_height = self.height + self.water
-        downhill = []
-        hd = 0 # The amount of height difference we're flowing into
-        count = 0 # The number of hexes we're flowing into
+        downhill = self
+        lowest = self.height
         for n in nbrs:
-            if n.height + n.water < my_height:
-                hd += my_height - (n.height + n.water)
-                count += 1
-                downhill.append(n)
+            if n.height < lowest:
+                downhill = n
+                lowest = n.height
 
-        # We now want to allocate n.hd / hd of the water in this hex to hex n
-        for n in downhill:
-            nhd = my_height - (n.height + n.water)
-            self.new_water += nhd/hd*self.water
+        # FIXME
 
 def to_scr(x, y):
     return ((MAX_X-MIN_X)+x*2+(y%2), (MAX_Y-MIN_Y)+y*2)
@@ -253,7 +248,7 @@ def calc_fnoise(fnoise, scale):
     
                 fnoise[x][y] = tot / count
 
-                rrange = stride >> SMOOTHNESS
+                rrange = stride >> SMOOTHNESS * loc[x][y].nearest.cragginess
 
                 fnoise[x][y] += randrange(-rrange, rrange+1)
 
