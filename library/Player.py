@@ -6,6 +6,7 @@ import pickle
 import Actor
 from SimpleAction import SimpleAction
 from SimpleTimedCounter import SimpleTimedCounter
+from Logger import log
 
 class Player(Actor.Actor):
     table = 'player'
@@ -17,6 +18,7 @@ class Player(Actor.Actor):
     @staticmethod
     def _load(pid):
         player = Actor.load_actor(pid, Player.table)
+        player._type = "Player"
         Player.cache_by_id[player._id] = player
         #Player.cache_by_name[player.username] = player
         return player
@@ -32,6 +34,7 @@ class Player(Actor.Actor):
         row = cur.fetchone()
         if row == None:
             return None
+        log.debug("Loading player %d" % row[0])
         return Player._load(row[0])
 
     @staticmethod
@@ -41,6 +44,7 @@ class Player(Actor.Actor):
         return _load(pid)
 
     def __getnewargs__(self):
+        log.debug("__getnewargs__ called for player", self._id)
         self._type = "Player"
 
     ####
@@ -60,6 +64,7 @@ class Player(Actor.Actor):
                       'password': password }
                     )
         self._id = cur.lastrowid
+        self._type = "Player"
 
     ####
     # Movement
