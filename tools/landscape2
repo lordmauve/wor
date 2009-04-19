@@ -90,10 +90,7 @@ def plot(f):
 
                 dx = x-CX
                 dy = y-CY
-                if (dx < 0 and dy < 0) or (dx >= 0 and dy >= 0):
-                    r = abs(dx) + abs(dy)
-                else:
-                    r = max(abs(dx), abs(dy))
+                r = max(abs(dx), abs(dy), abs(dx+dy))
                 
                 if loc[x][y].height == None:
                     col = (255, 0, 0)
