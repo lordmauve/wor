@@ -433,9 +433,6 @@ fnoise[0][0] = randrange(MIN_H, MAX_H)
 fnoise[1 << scale][0] = randrange(MIN_H, MAX_H)
 fnoise[0][1 << scale] = randrange(MIN_H, MAX_H)
 
-# Compute the fractal noise function
-calc_fnoise(fnoise, scale)
-
 # Transfer the triangle back to the square
 for sx in range(MIN_X, MAX_X+1):
     for sy in range(MIN_Y, MAX_Y+1):
