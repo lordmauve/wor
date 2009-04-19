@@ -1,0 +1,227 @@
+#!/usr/bin/python
+
+import pygame
+import sys
+import math
+
+from random import randrange, random, seed
+from colorsys import hsv_to_rgb
+
+NCRATONS=40
+MARGIN=12.
+
+SCALE=10
+MAX_H=500
+MAX_X=(1<<SCALE)+1
+PRESEED=1<<8 # 256px between control points
+CRAGGINESS=3.0
+
+VPO_X=300
+VPO_Y=40
+VP=384
+
+CX=VPO_X + VP/2.0 * (1.0 - 1.0/math.sqrt(3))
+CY=VPO_Y + VP/2.0
+CR=160
+
+cratons = []
+
+seed(123458)
+
+class Craton(object):
+    def __init__(self, i,
+                 x = None,
+                 y = None,
+                 height = None):
+        if x == None: x = randrange(VPO_X-VP/2, VPO_X+3*VP/2)
+        if y == None: y = randrange(VPO_Y, VPO_Y+VP)
+        if height == None: height = randrange(0, MAX_H)
+        
+        self.i = i
+        self.x = x
+        self.y = y
+        self.height = height
+
+        craggy = random()
+        self.craggy = 3.0*craggy + 1.0
+
+#        self.colour = hsv_to_rgb(i/float(NCRATONS), 0.1, 1.0)
+        self.colour = hsv_to_rgb(craggy * 2.0 / 3.0, 0.1, 1.0)
+        self.colour = [ j*256 for j in self.colour ]
+
+    def d2(self, x, y):
+        dx = x - self.x
+        dy = y - self.y
+        return dx*dx + dx*dy + dy*dy
+
+class Loc(object):
+    def __init__(self, x, y, c1, d1):
+        self.x = x
+        self.y = y
+        self.nearest = c1
+        self.nearest_d = math.sqrt(d1)
+        self.height = None # Initial height
+
+def to_scr(x, y):
+    return ((x-VPO_X)*2 + y, (y-VPO_Y)*2)
+            
+def plot(f):
+    # Work out the dynamic range of the landscape
+    min_h = 1e12
+    max_h = -1e12
+    for x in range(0, MAX_X):
+        for y in range(0, MAX_X-x):
+            if loc[x][y].height != None:
+                min_h = min(min_h, loc[x][y].height)
+                max_h = max(max_h, loc[x][y].height)
+
+    print "Height range:", min_h, "to", max_h
+
+    # Draw the output
+    pygame.init()
+    screen = pygame.display.set_mode((VP*2, VP*2))
+    screen.fill((0,0,0))
+
+    for depth in range(96, 129, 8):
+        for x in range(VPO_X-VP/2, VPO_X+3*VP/2):
+            for y in range(VPO_Y, VPO_Y+VP):
+                if x+y >= MAX_X:
+                    continue
+
+                dx = x-CX
+                dy = y-CY
+                if (dx < 0 and dy < 0) or (dx >= 0 and dy >= 0):
+                    r = abs(dx) + abs(dy)
+                else:
+                    r = max(abs(dx), abs(dy))
+                
+                if loc[x][y].height == None:
+                    col = (255, 0, 0)
+                elif abs(r - CR) < 1.0:
+                    col = (0, 255, 0)
+                else:
+                    c = float(loc[x][y].height-min_h)/float(max_h-min_h+1)
+                    if(c * 256 < depth):
+                        col = (0, 0, 255)
+                    else:
+                        col = [int(c*loc[x][y].nearest.colour[i]) for i in (0, 1, 2)]
+                        #col = [int(c * 256) for i in (0, 1, 2)]
+
+                pygame.draw.rect(screen,
+                                 col,
+                                 pygame.Rect(to_scr(x, y), (2, 2)))
+
+        for c in cratons:
+            pygame.draw.circle(screen, (255, 0, 0), to_scr(c.x, c.y), 2)
+
+        pygame.image.save(screen, "layer-%03d.tga" % depth)
+        print "Saved %d" % depth
+
+def calc_fnoise(fnoise):
+    for sc in range(SCALE-1, -1, -1):
+        stride = 1 << sc
+        print sc, stride
+        xbit = True
+        for x in range(0, MAX_X, stride):
+            xbit = not xbit
+            ybit = True
+            maxy = MAX_X - x
+            for y in range(0, maxy, stride):
+                ybit = not ybit
+                if fnoise[x][y].height != None:
+                    continue
+                tot = 0.0
+                count = 0.0
+                if xbit:
+                    if ybit:
+                        if y - stride >= 0 and (y-stride) + (x+stride) <= MAX_X:
+                            count += 2
+                            tot += 2* fnoise[x+stride][y-stride].height
+                        if x - stride >= 0 and (y+stride) + (x-stride) <= MAX_X:
+                            count += 2
+                            tot += 2* fnoise[x-stride][y+stride].height
+                        if x - stride >= 0 and y - stride >= 0:
+                            count += 1
+                            tot += fnoise[x-stride][y-stride].height
+                        if (y+stride) + (x+stride) <= MAX_X:
+                            count += 1
+                            tot += fnoise[x+stride][y+stride].height
+                    else:
+                        if x - stride >= 0:
+                            count += 2
+                            tot += 2* fnoise[x-stride][y].height
+                        if y + (x+stride) <= MAX_X:
+                            count += 2
+                            tot += 2* fnoise[x+stride][y].height
+                        if ( (y+2*stride) + (x-stride) <= MAX_X
+                             and x - stride >= 0):
+                            count += 1
+                            tot += fnoise[x-stride][y+2*stride].height
+                        if y - 2*stride >= 0:
+                            count += 1
+                            tot += fnoise[x+stride][y-2*stride].height
+                else:
+                    if ybit:
+                        if y - stride >= 0:
+                            count += 2
+                            tot += 2* fnoise[x][y-stride].height
+                        if y + stride <= maxy:
+                            count += 2
+                            tot += 2* fnoise[x][y+stride].height
+                        if x - 2*stride >= 0:
+                            count += 1
+                            tot += fnoise[x-2*stride][y+stride].height
+                        if ( (y-stride) + (x+2*stride) <= MAX_X
+                            and y - stride >= 0):
+                            count += 1
+                            tot += fnoise[x+2*stride][y-stride].height
+                    else:
+                        print "xbit and ybit are both false: WTF?"
+    
+                if count == 0.0:
+                    print "Count is zero: WTF?", stride, x, y, xbit, ybit, maxx, maxy
+    
+                fnoise[x][y].height = tot / count
+
+                rrange = stride * CRAGGINESS * loc[x][y].nearest.craggy
+
+                fnoise[x][y].height += randrange(-math.floor(rrange),
+                                                 math.floor(rrange)+1)
+
+# Generate a set of cratons
+for i in range(0, NCRATONS):
+    cratons.append(Craton(i))
+
+#cratons.append(Craton(0, -50, 0, 30))
+#cratons.append(Craton(1, 50, 0, 50))
+#cratons.append(Craton(2, 0, 75, 70))
+
+# Compute for each point in the output space the nearest craton
+loc = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+for x in range(0, MAX_X):
+    for y in range(0, MAX_X-x): 
+        d = 1e8
+        cton = None
+        for c in cratons:
+            dist = c.d2(x, y)
+            if dist < d:
+                d = dist
+                cton = c
+
+        loc[x][y] = Loc(x, y, cton, d)
+
+# Average out the cratons
+#for c in cratons:
+#    c.average()
+
+# Set a bunch of corners
+for x in range(0, MAX_X, PRESEED):
+    for y in range(0, MAX_X-x, PRESEED):
+        loc[x][y].height = randrange(0, MAX_H)
+
+# Compute the fractal noise function
+calc_fnoise(loc)
+
+# Plot the landscape
+#plot(lambda x, y: loc[x][y].height)
+plot(lambda x, y: loc[x][y].tot_water)
