@@ -45,8 +45,8 @@ class Player(Actor.Actor):
 
     ####
     # Create a new player
-    def __init__(self, id, password, align):
-        super(Player, self).__init__(id)
+    def __init__(self, name, password, align):
+        super(Player, self).__init__()
         self.align = align
         self.ap = SimpleTimedCounter(120, 360, 240) # Start at 120, maximum 240, get one more every 6 minutes (240 per day)
         self.hp = 300
@@ -55,11 +55,11 @@ class Player(Actor.Actor):
         cur = DB.cursor()
         cur.execute('INSERT INTO ' + self.table
                     + ' (username, password)'
-                    + 'VALUES (%(name)s, )',
-                    { 'username': name }
+                    + 'VALUES (%(username)s, %(password)s)',
+                    { 'username': name,
+                      'password': password }
                     )
         self._id = cur.lastrowid
-
 
     ####
     # Movement

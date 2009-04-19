@@ -36,15 +36,14 @@ class Actor(object):
         state = pickle.dumps(self)
 
         cur = DB.cursor()
-        cur.execute('UPDATE ' + self.table
-                    + ' SET state=%(state)s WHERE id=%(id)d',
-                    { 'id': self._id,
-                      'state': state }
-                    )
+        sql = 'UPDATE ' + self.table + ' SET state=%(state)s WHERE id=%(identity)s'
+        mapping = { 'identity': self._id,
+                    'state': state }
+        cur.execute(sql, mapping)
 
         self._changed = False
 
-    def __init__(self, name):
+    def __init__(self):
         """Create a completely new actor"""
         self.messages = "You spring into the world, fresh and new!"
         self._changed = True
