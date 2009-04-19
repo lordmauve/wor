@@ -27,13 +27,13 @@ def default_handler(req):
     
     player = Player.load_by_name(req.user)
 
-    log.debug("Action handler\n")
+    log.debug("Action handler")
 
     if player == None:
-        req.write("Null player\n")
+        req.write("Null player")
         return apache.HTTP_INTERNAL_SERVER_ERROR
 
-    log.debug("Player:" + str(player) + "\n")
+    log.debug("Player", player._id)
 
     if req.method == "GET":
         for k in public_properties:
@@ -53,13 +53,13 @@ def action_handler(req):
 
     player = Player.load_by_name(req.user)
 
-    log.debug("Action handler\n")
+    log.debug("Action handler")
 
     if player == None:
-        req.write("Null player\n")
+        req.write("Null player")
         return apache.HTTP_INTERNAL_SERVER_ERROR
 
-    log.debug("Player:", player, "\n")
+    log.debug("Player:", player._id)
 
     if req.method == "GET":
         acts = player.actions()

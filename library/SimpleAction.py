@@ -16,7 +16,7 @@ class SimpleAction(Action):
         self.action = action
         self.uid = uid
         self.parent = parent
-        self.fuid = self.parent._type + "." + self.parent._id + "." + self.uid
+        self.fuid = "%s.%d.%s" % (self.parent._type, self.parent._id, self.uid)
 
     def display(self):
         return "%(message)s <button onclick='act_simple(\"%(fuid)s\")'>%(cap)s (%(ap)d AP)</button>" % self.__dict__
