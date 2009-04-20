@@ -15,6 +15,43 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: location; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE location (
+    id integer NOT NULL,
+    x integer NOT NULL,
+    y integer NOT NULL,
+    layer character varying(32) NOT NULL,
+    state text,
+    override integer
+);
+
+
+ALTER TABLE public.location OWNER TO wor;
+
+--
+-- Name: location_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
+--
+
+CREATE SEQUENCE location_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.location_id_seq OWNER TO wor;
+
+--
+-- Name: location_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: wor
+--
+
+ALTER SEQUENCE location_id_seq OWNED BY location.id;
+
+
+--
 -- Name: player; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
 --
 
@@ -52,7 +89,30 @@ ALTER SEQUENCE player_id_seq OWNED BY player.id;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: wor
 --
 
+ALTER TABLE location ALTER COLUMN id SET DEFAULT nextval('location_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: wor
+--
+
 ALTER TABLE player ALTER COLUMN id SET DEFAULT nextval('player_id_seq'::regclass);
+
+
+--
+-- Name: location_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY location
+    ADD CONSTRAINT location_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: location_x_key; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY location
+    ADD CONSTRAINT location_x_key UNIQUE (x, y, layer, override);
 
 
 --
