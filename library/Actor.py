@@ -36,10 +36,11 @@ class Actor(object):
         state = pickle.dumps(self)
 
         cur = DB.cursor()
-        sql = 'UPDATE ' + self.table + ' SET state=%(state)s WHERE id=%(identity)s'
-        mapping = { 'identity': self._id,
-                    'state': state }
-        cur.execute(sql, mapping)
+        cur.execute('UPDATE ' + self.table
+                    + ' SET state=%(state)s WHERE id=%(identity)s',
+                    { 'identity': self._id,
+                      'state': state }
+                    )
 
         self._changed = False
 
