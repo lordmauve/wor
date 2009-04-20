@@ -2,21 +2,20 @@
 # Representative of a coordinate: also includes orientation
 
 class Position:
-    North = 0
-    East = 0
-    South = 0
-    West = 0
-    
-    def __init__(self, x, y, layer, up=North):
+    def __init__(self, x, y, layer):
         self.x = x
         self.y = y
         self.layer = layer
-        self.up = up
 
     def distance(self, them):
+        """Compute the Euclidean distance between this position and
+        the position of"them"."""
         return sqrt(self.distance_squared(them))
 
     def distance_squared(self, them):
+        """Compute the square of the Euclidean distance between this
+        position and the position of "them"."""
+
         # The metric we use is a dot-product on a non-orthonormal
         # basis. Our unit basis vectors are (1, 0) and (1/2,
         # sqrt(3)/2) in the cartesian system, and point East and
@@ -45,8 +44,7 @@ class Position:
         return x0 * x0 + x0 * x1 + x1 * x1
 
     def hop_distance(self, them):
-        # Computes the number of hops using a "Manhattan Distance"
-        # metric
+        """Computes the number of hex hops between here and there."""
         dx = self.x - them.x
         dy = self.y - them.y
 
