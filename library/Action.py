@@ -13,5 +13,5 @@ class Action(object):
     def display(self):
         return "Action"
 
-    def perform(self):
+    def perform(self, req):
         pass

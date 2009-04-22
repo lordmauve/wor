@@ -22,7 +22,7 @@ def load_actor(id, table):
         return Actor(0)
 
     obj = pickle.loads(row[0])
-    obj._id = id
+    obj._id = int(id)
     obj._changed = False
     return obj
 
@@ -137,3 +137,9 @@ class Actor(object):
         """Create and return a hash of all possible actions this
         player might perform"""
         return {}
+
+    def perform_action(self, actid, req):
+        """Perform an action as requested. req is a mod_python request
+        object"""
+        actions = self.actions()
+        actions[actid].perform(req)
