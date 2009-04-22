@@ -41,7 +41,7 @@ class Player(Actor.Actor):
     def load(pid):
         if pid in Player.cache_by_id:
             return Player.cache_by_id[pid]
-        return _load(pid)
+        return Player._load(pid)
 
     def __getnewargs__(self):
         log.debug("__getnewargs__ called for player", self._id)
@@ -84,5 +84,5 @@ class Player(Actor.Actor):
         
         return acts
 
-    def say_boo(self):
-        self.message("Boo!")
+    def say_boo(self, parent):
+        log.info("Boo!")

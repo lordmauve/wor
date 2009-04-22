@@ -1,16 +1,26 @@
 ////////////
 // Main function: Called to initiate loading the page contents
 
+var api = "http://" + document.domain + "/api";
+
 function load_game()
 {
+	update_player_details();
+	update_player_actions();
+}
+
+function update_player_details()
+{
   var player_req = get_ajax_object();
-  var api = "http://" + document.domain + "/api";
 
   player_req.onreadystatechange = function() { load_basic_player(player_req); };
   player_req.open("GET", api + "/player", true,
 		  "darksatanic", "wor");
   player_req.send("");
+}
 
+function update_player_actions()
+{
   var player_act_req = get_ajax_object();
   player_act_req.onreadystatechange = function() { load_player_act(player_act_req); };
   player_act_req.open("GET", api + "/player/act", true,

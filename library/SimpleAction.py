@@ -2,6 +2,7 @@
 # A simple single-button action
 
 from Action import Action
+from Logger import log
 
 class SimpleAction(Action):
     def __init__(self, parent, uid="use", cap="Use", ap=1,
@@ -16,12 +17,13 @@ class SimpleAction(Action):
         self.action = action
         self.uid = uid
         self.parent = parent
+        log.debug("SimpleAction: " + str(type(self.parent._id)))
         self.fuid = "%s.%d.%s" % (self.parent._type, self.parent._id, self.uid)
 
     def display(self):
         return "%(message)s <button onclick='act_simple(\"%(fuid)s\")'>%(cap)s (%(ap)d AP)</button>" % self.__dict__
 
-    def perform(self):
+    def perform(self, req):
         if not self.valid():
             self.parent.message(failmessage)
             return False
