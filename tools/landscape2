@@ -15,7 +15,7 @@ SCALE=10
 MAX_H=500
 MAX_X=(1<<SCALE)+1
 PRESEED=1<<8 # 256px between control points
-CRAGGINESS=3.0
+CRAGGINESS=1.0
 
 VPO_X=300
 VPO_Y=40
@@ -68,22 +68,24 @@ def to_scr(x, y):
             
 def plot(f):
     # Work out the dynamic range of the landscape
-    min_h = 1e12
-    max_h = -1e12
+    min_v = 1e12
+    max_v = -1e12
     for x in range(0, MAX_X):
         for y in range(0, MAX_X-x):
-            if loc[x][y].height != None:
-                min_h = min(min_h, loc[x][y].height)
-                max_h = max(max_h, loc[x][y].height)
+            v = f(x, y)
+            if v != None:
+                min_v = min(min_v, v)
+                max_v = max(max_v, v)
 
-    print "Height range:", min_h, "to", max_h
+    print "Value range:", min_v, "to", max_v
 
     # Draw the output
     pygame.init()
     screen = pygame.display.set_mode((VP*2, VP*2))
     screen.fill((0,0,0))
 
-    for depth in range(96, 129, 8):
+#    for depth in range(96, 129, 8):
+    for depth in range(0, 1):
         for x in range(VPO_X-VP/2, VPO_X+3*VP/2):
             for y in range(VPO_Y, VPO_Y+VP):
                 if x+y >= MAX_X:
@@ -91,14 +93,17 @@ def plot(f):
 
                 dx = x-CX
                 dy = y-CY
+#                r = math.sqrt(dx*dx + dx*dy + dy*dy)
                 r = max(abs(dx), abs(dy), abs(dx+dy))
-                
-                if loc[x][y].height == None:
+
+                v = f(x, y)
+                if v == None:
                     col = (255, 0, 0)
                 elif abs(r - CR) < 1.0:
                     col = (0, 255, 0)
                 else:
-                    c = float(loc[x][y].height-min_h)/float(max_h-min_h+1)
+                    c = float(v-min_v)/float(max_v-min_v+1)
+                    c = math.pow(c, 0.3)
                     if(c * 256 < depth):
                         col = (0, 0, 255)
                     else:
@@ -186,6 +191,26 @@ def calc_fnoise(fnoise):
                 fnoise[x][y].height += randrange(-math.floor(rrange),
                                                  math.floor(rrange)+1)
 
+def find_min(loc, x, y, min_h, min_pos):
+    if x > 0 and y > 0 and x+y < MAX_X:
+        if loc[x][y].height < min_h:
+            return (loc[x][y].height, loc[x][y])
+    return (min_h, min_pos)
+
+def set_downhill(loc):
+    for x in range(0, MAX_X):
+        for y in range(0, MAX_X-x):
+            min_h = loc[x][y].height
+            min_pos = None
+            (min_h, min_pos) = find_min(loc, x-1, y, min_h, min_pos)
+            (min_h, min_pos) = find_min(loc, x+1, y, min_h, min_pos)
+            (min_h, min_pos) = find_min(loc, x, y-1, min_h, min_pos)
+            (min_h, min_pos) = find_min(loc, x, y+1, min_h, min_pos)
+            (min_h, min_pos) = find_min(loc, x-1, y+1, min_h, min_pos)
+            (min_h, min_pos) = find_min(loc, x+1, y-1, min_h, min_pos)
+            loc[x][y].downhill = min_pos
+            loc[x][y].water = 0
+
 # Generate a set of cratons
 for i in range(0, NCRATONS):
     cratons.append(Craton(i))
@@ -215,11 +240,30 @@ for x in range(0, MAX_X):
 # Set a bunch of corners
 for x in range(0, MAX_X, PRESEED):
     for y in range(0, MAX_X-x, PRESEED):
-        loc[x][y].height = randrange(0, MAX_H)
+        if 0 <= y <= CY-CR/2:
+            loc[x][y].height = 0
+        else:
+            loc[x][y].height = randrange(0, MAX_H)
 
 # Compute the fractal noise function
 calc_fnoise(loc)
 
+# Work out which way is downhill
+set_downhill(loc)
+
+# Run downhill for each position until we can't go down any
+# further. Keep track of the quantities
+for x in range(0, MAX_X):
+    for y in range(0, MAX_X-x):
+        px = x
+        py = y
+        while loc[px][py].downhill != None:
+            nx = loc[px][py].downhill.x
+            ny = loc[px][py].downhill.y
+            px = nx
+            py = ny
+            loc[px][py].water += 1
+
 # Plot the landscape
 #plot(lambda x, y: loc[x][y].height)
-plot(lambda x, y: loc[x][y].tot_water)
+plot(lambda x, y: loc[x][y].water)
