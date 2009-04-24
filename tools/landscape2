@@ -12,7 +12,7 @@ NCRATONS=40
 MARGIN=12.
 
 SCALE=10
-MAX_H=500
+MAX_H=256
 MAX_X=(1<<SCALE)+1
 PRESEED=1<<8 # 256px between control points
 CRAGGINESS=1.0
@@ -36,7 +36,7 @@ class Craton(object):
                  height = None):
         if x == None: x = randrange(VPO_X-VP/2, VPO_X+3*VP/2)
         if y == None: y = randrange(VPO_Y, VPO_Y+VP)
-        if height == None: height = randrange(0, MAX_H)
+        if height == None: height = randrange(-MAX_H, MAX_H+1)
         
         self.i = i
         self.x = x
@@ -60,32 +60,31 @@ class Loc(object):
         self.x = x
         self.y = y
         self.nearest = c1
-        self.nearest_d = math.sqrt(d1)
+#        self.nearest_d = math.sqrt(d1)
         self.height = None # Initial height
 
 def to_scr(x, y):
     return ((x-VPO_X)*2 + y, (y-VPO_Y)*2)
             
-def plot(f):
+def plot(f, prefix, gamma, min_level, max_level, step_level):
     # Work out the dynamic range of the landscape
-    min_v = 1e12
-    max_v = -1e12
+    max_v = -1e8
     for x in range(0, MAX_X):
         for y in range(0, MAX_X-x):
             v = f(x, y)
             if v != None:
-                min_v = min(min_v, v)
-                max_v = max(max_v, v)
+                max_v = max(max_v, abs(v))
 
-    print "Value range:", min_v, "to", max_v
+    print "Value range:", -max_v, "to", max_v
 
     # Draw the output
     pygame.init()
     screen = pygame.display.set_mode((VP*2, VP*2))
     screen.fill((0,0,0))
 
-#    for depth in range(96, 129, 8):
-    for depth in range(0, 1):
+    dcount = 0
+    for depth in range(min_level, max_level, step_level):
+        dcount += 1
         for x in range(VPO_X-VP/2, VPO_X+3*VP/2):
             for y in range(VPO_Y, VPO_Y+VP):
                 if x+y >= MAX_X:
@@ -93,20 +92,20 @@ def plot(f):
 
                 dx = x-CX
                 dy = y-CY
-#                r = math.sqrt(dx*dx + dx*dy + dy*dy)
-                r = max(abs(dx), abs(dy), abs(dx+dy))
+#                r = math.sqrt(dx*dx + dx*dy + dy*dy)  # Circle (2-metric)
+                r = max(abs(dx), abs(dy), abs(dx+dy)) # Hexagon (1-metric)
 
                 v = f(x, y)
                 if v == None:
                     col = (255, 0, 0)
-                elif abs(r - CR) < 1.0:
+                elif abs(r - CR) < 0.8:
                     col = (0, 255, 0)
                 else:
-                    c = float(v-min_v)/float(max_v-min_v+1)
-                    c = math.pow(c, 0.3)
-                    if(c * 256 < depth):
+                    if v < depth:
                         col = (0, 0, 255)
                     else:
+                        c = float((v+max_v)/(max_v*2.0+1))
+                        c = math.pow(c, gamma)
                         col = [int(c*loc[x][y].nearest.colour[i]) for i in (0, 1, 2)]
                         #col = [int(c * 256) for i in (0, 1, 2)]
 
@@ -117,7 +116,7 @@ def plot(f):
         for c in cratons:
             pygame.draw.circle(screen, (255, 0, 0), to_scr(c.x, c.y), 2)
 
-        pygame.image.save(screen, "layer-%03d.tga" % depth)
+        pygame.image.save(screen, "%s-%d-%03d.tga" % (prefix, dcount, depth))
         print "Saved %d" % depth
 
 def calc_fnoise(fnoise):
@@ -237,7 +236,7 @@ for x in range(0, MAX_X):
 #for c in cratons:
 #    c.average()
 
-# Set a bunch of corners
+# Set a bunch of seed points
 for x in range(0, MAX_X, PRESEED):
     for y in range(0, MAX_X-x, PRESEED):
         if 0 <= y <= CY-CR/2:
@@ -265,5 +264,5 @@ for x in range(0, MAX_X):
             loc[px][py].water += 1
 
 # Plot the landscape
-#plot(lambda x, y: loc[x][y].height)
-plot(lambda x, y: loc[x][y].water)
+plot(lambda x, y: loc[x][y].height, "level", 1.0, -32, 33, 16)
+plot(lambda x, y: loc[x][y].water, "hydro", 1.0, 128, 129, 1)
