@@ -14,7 +14,7 @@ MARGIN=12.
 SCALE=10
 MAX_H=256
 MAX_X=(1<<SCALE)+1
-PRESEED=1<<8 # 256px between control points
+PRESEED=1<<6 # 64px between control points
 CRAGGINESS=1.0
 
 VPO_X=300
@@ -104,6 +104,7 @@ def plot(f, prefix, gamma, min_level, max_level, step_level):
                     if v < depth:
                         col = (0, 0, 255)
                     else:
+                        # Normalise to range [0.0, 1.0)
                         c = float((v+max_v)/(max_v*2.0+1))
                         c = math.pow(c, gamma)
                         col = [int(c*loc[x][y].nearest.colour[i]) for i in (0, 1, 2)]
@@ -179,10 +180,10 @@ def calc_fnoise(fnoise):
                             tot += fnoise[x+2*stride][y-stride].height
                     else:
                         print "xbit and ybit are both false: WTF?"
-    
+
                 if count == 0.0:
                     print "Count is zero: WTF?", stride, x, y, xbit, ybit, maxx, maxy
-    
+
                 fnoise[x][y].height = tot / count
 
                 rrange = stride * CRAGGINESS * loc[x][y].nearest.craggy
@@ -239,10 +240,18 @@ for x in range(0, MAX_X):
 # Set a bunch of seed points
 for x in range(0, MAX_X, PRESEED):
     for y in range(0, MAX_X-x, PRESEED):
-        if 0 <= y <= CY-CR/2:
-            loc[x][y].height = 0
+        if y <= CY-CR/3.0:
+            # Bottom third is a touch lower than sea-level
+            loc[x][y].height = -MAX_H/10.0
+        elif CY-CR/3.0 <= y <= CY+CR/3.0:
+            # Middle third is mountainous
+            ypos = (y-CY) / CR * 3.0
+            loc[x][y].height = MAX_H * math.cos(ypos*math.pi/2.0)
+            rrange = int(math.ceil(MAX_H/10.0))
+            loc[x][y].height += randrange(-rrange, rrange+1)
         else:
-            loc[x][y].height = randrange(0, MAX_H)
+            # Bottom third is flattish
+            loc[x][y].height = randrange(int(MAX_H/5.0), int(MAX_H/3.0))
 
 # Compute the fractal noise function
 calc_fnoise(loc)
@@ -265,4 +274,4 @@ for x in range(0, MAX_X):
 
 # Plot the landscape
 plot(lambda x, y: loc[x][y].height, "level", 1.0, -32, 33, 16)
-plot(lambda x, y: loc[x][y].water, "hydro", 1.0, 128, 129, 1)
+plot(lambda x, y: loc[x][y].water, "hydro", 0.7, -10001, -10000, 1)
