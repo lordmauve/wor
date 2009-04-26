@@ -66,7 +66,7 @@ class Player(Actor.Actor):
         # Start at 120AP, get one more every 6 minutes (240 per day),
         # maximum 240.
         # FIXME: Add "actor" and "power" values to this class
-        self.ap = SimpleTimedCounter(120, 360, 240)
+        self.ap = SimpleTimedCounter(self, 120, 360, 240)
         self.hp = 300
         self.maxhp = 300
         self.onload_list = [ self.ap ]
