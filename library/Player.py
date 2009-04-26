@@ -2,29 +2,29 @@
 # Player Character
 
 from Database import DB
-import pickle
 import Actor
 from SimpleAction import SimpleAction
 from SimpleTimedCounter import SimpleTimedCounter
 from Logger import log
 
 class Player(Actor.Actor):
-    table = 'player'
+    _table = 'player'
     cache_by_id = {}
     cache_by_name = {}
 
     ####
-    # Load a named instance of this object
+    # Load an instance of this object
     @staticmethod
-    def _load(pid):
-        player = Actor.load_actor(pid, Player.table)
-        player._type = "Player"
-        Player.cache_by_id[player._id] = player
-        #Player.cache_by_name[player.username] = player
-        return player
+    def load(pid):
+        """Implement caching for loading a player by ID"""
+        if pid in Player.cache_by_id:
+            return Player.cache_by_id[pid]
+        return Player._load(pid)
 
     @staticmethod
     def load_by_name(name):
+        """Additional function to load a player by name instead of by
+        ID"""
         if name in Player.cache_by_name:
             return Player.cache_by_name[name]
 
@@ -34,17 +34,28 @@ class Player(Actor.Actor):
         row = cur.fetchone()
         if row == None:
             return None
-        log.debug("Loading player %d" % row[0])
+        log.debug("Loading player %s (=%d)" % (name, row[0]))
         return Player._load(row[0])
 
     @staticmethod
-    def load(pid):
-        if pid in Player.cache_by_id:
-            return Player.cache_by_id[pid]
-        return Player._load(pid)
+    def _load(pid):
+        """Internal function used in loading a player -- called by
+        both load() and load_by_name()"""
+        player = Player.load_object(pid, Player._table)
+        Player.cache_by_id[player._id] = player
+        Player.cache_by_name[player.name] = player
+        player._on_load()
+        return player
 
-    def __getnewargs__(self):
-        log.debug("__getnewargs__ called for player", self._id)
+    ####
+    # Additional indices to write to the database on save
+    def _save_indices(self):
+        return { 'username': self.name }
+
+    ####
+    # Called on unpickling -- i.e. on load
+    def _on_load(self):
+        log.debug("_on_load called for player", self._id)
         self._type = "Player"
 
     ####
@@ -52,18 +63,17 @@ class Player(Actor.Actor):
     def __init__(self, name, password, align):
         super(Player, self).__init__()
         self.align = align
-        self.ap = SimpleTimedCounter(120, 360, 240) # Start at 120, maximum 240, get one more every 6 minutes (240 per day)
+        # Start at 120AP, get one more every 6 minutes (240 per day),
+        # maximum 240.
+        # FIXME: Add "actor" and "power" values to this class
+        self.ap = SimpleTimedCounter(120, 360, 240)
         self.hp = 300
         self.maxhp = 300
+        self.onload_list = [ self.ap ]
+        self.name = name
 
-        cur = DB.cursor()
-        cur.execute('INSERT INTO ' + self.table
-                    + ' (username, password)'
-                    + 'VALUES (%(username)s, %(password)s)',
-                    { 'username': name,
-                      'password': password }
-                    )
-        self._id = cur.lastrowid
+        print "New ID =", self._id
+
         self._type = "Player"
 
     ####
