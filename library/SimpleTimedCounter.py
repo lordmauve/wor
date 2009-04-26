@@ -5,9 +5,10 @@ import time
 import OnLoad
 
 class SimpleTimedCounter(OnLoad.OnLoad):
-    # FIXME: Add "owner" and "power" properties so that we can modify
-    # the interval properly? (Or punt to a different class?)
-    def __init__(self, value, interval, maximum, minimum=0, increment=1, last=time.time()):
+    # FIXME: Add "power" property so that we can modify the interval
+    # properly? (Or punt to a different class?)
+    def __init__(self, parent, value, interval, maximum, minimum=0, increment=1, last=time.time()):
+        super(SimpleTimedCounter, self).__init__(parent)
         self.value = value
         self.interval = interval
         self.minimum = minimum
