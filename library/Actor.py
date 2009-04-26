@@ -1,86 +1,31 @@
 ##########
 # Generic actor: covers players, NPCs, monsters
 
-from Database import DB
+import SerObject
+import Util
 import pickle
 import copy
 import psycopg2
 
-####
-# Construction and loading
-def load_actor(id, table):
-    """Get the actor with the given id"""
-    try:
-        cur = DB.cursor()
-        cur.execute('SELECT state FROM ' + table
-                    + ' WHERE id=%(id)s',
-                    { 'id': id }
-                    )
-        row = cur.fetchone()
-    except psycopg2.Error, dbex:
-        sys.stderr.write("Database exception:" + dbex + "\n")
-        return Actor(0)
-
-    obj = pickle.loads(row[0])
-    obj._id = int(id)
-    obj._changed = False
-    return obj
-
-class Actor(object):
+class Actor(SerObject.SerObject):
     ####
-    # Saving the object
-    def save(self):
-        if not self._changed:
-            return
-
-        state = pickle.dumps(self)
-
-        cur = DB.cursor()
-        cur.execute('UPDATE ' + self.table
-                    + ' SET state=%(state)s WHERE id=%(identity)s',
-                    { 'identity': self._id,
-                      'state': state }
-                    )
-
-        self._changed = False
-
+    # Creating a new object
     def __init__(self):
         """Create a completely new actor"""
+        super(Actor, self).__init__()
         self.messages = "You spring into the world, fresh and new!"
-        self._changed = True
-
-    ####
-    # Pickling (serialisation)
-    def __getstate__(self):
-        # Shallow-create a new dictionary based on our current one,
-        # but leave out all the properties that start with _
-        obj = {}
-        for k in self.__dict__.keys():
-            if not k.startswith('_'):
-                obj[k] = self.__dict__[k]
-        return obj
-
-    ####
-    # Property access: make this object look more like a dictionary
-    def __getitem__(self, key):
-        return self.__dict__[key]
-
-    def __setitem__(self, key, value):
-        self.__dict__[key] = value
 
     ####
     # Basic properties of the object
     def loc(self):
         """Return the Location (or Road for monsters) that we're stood on"""
-        if '_loc' not in self.__dict__:
+        if self._loc == None:
             self._loc = load_location(self.loc)
         return self._loc
 
     def held_item(self):
         """Return the item(s) currently held by the actor"""
-        if '_item' not in self.__dict__:
-            self._item = load_item(self.loc)
-        return self._item
+        pass
 
     def equipment(self):
         """Return an iterator over the equipment currently worn by the actor"""
@@ -93,7 +38,7 @@ class Actor(object):
 
         # Start with intrinsics
         if name in self:
-            pow += self[name]
+            pow += Util.default(self[name])
 
         # Equipment held
         pos += self.held_item().power(name)
@@ -112,9 +57,7 @@ class Actor(object):
         self._changed = True
 
     def change_prop(self, name, diff, min=0, max=None):
-        newval = 0
-        if name in self:
-            newval = self[name]
+        newval = Util.default(self[name])
         newval += diff
         newval = max(newval, min)
         if max != None:

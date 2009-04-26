@@ -23,7 +23,7 @@ CREATE TABLE location (
     x integer NOT NULL,
     y integer NOT NULL,
     layer character varying(32) NOT NULL,
-    state text,
+    state bytea,
     override integer
 );
 
@@ -59,7 +59,7 @@ CREATE TABLE player (
     id integer NOT NULL,
     username character varying(32),
     password character varying(32),
-    state text
+    state bytea
 );
 
 
