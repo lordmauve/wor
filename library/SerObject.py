@@ -6,6 +6,7 @@ from Database import DB
 import pickle
 import copy
 import psycopg2
+import Util
 
 ####
 # A serialisable object
@@ -27,6 +28,7 @@ class SerObject(object):
             return None
 
         obj = pickle.loads(row[0])
+        #obj.value_triggers = Util.default(obj['value_triggers'], {})
         obj._id = int(id)
         obj._changed = False
         return obj
@@ -97,6 +99,8 @@ class SerObject(object):
     # Property access. Not directly related to object serialisation,
     # but needed by everything.
     def __getitem__(self, key):
+        """Used to implement [] subscripting, for string-based
+        property access"""
         if key in self.__dict__:
             return self.__dict__[key]
         # I'm not convinced the next two lines are a good idea -HRM
@@ -104,8 +108,52 @@ class SerObject(object):
         #    return self.__dict__['_'+key]
         return None
 
+    # Yes, these next two are identical. I'm not merging them because
+    # I'm nervous about the precise semantics -HRM
     def __setitem__(self, key, value):
-        self.__dict__[key] = value
+        """Used to set a value via [] subscripting, for string-based
+        property access"""
+        if key[0] != '_':
+            # Get the original value of the attribute
+            old = 0
+            if key in self.__dict__:
+                old = self.__dict__[key]
+            # Set the new value of the attribute
+            self.__dict__[key] = value
+            # Call the triggers
+            self.__call_triggers(key, old, value)
+            self._changed = True
+        else:
+            # Set the new value of the attribute
+            self.__dict__[key] = value
+
+    def __setattr__(self, key, value):
+        """Used to set a value via obj.key = value"""
+        if key[0] != '_':
+            # Get the original value of the attribute
+            old = 0
+            if key in self.__dict__:
+                old = self.__dict__[key]
+            # Set the new value of the attribute
+            self.__dict__[key] = value
+            # Call the triggers
+            self.__call_triggers(key, old, value)
+            self._changed = True
+        else:
+            # Set the new value of the attribute
+            self.__dict__[key] = value
+
+    def __call_triggers(self, key, old, new):
+        """Iterate through the triggers, if there are any"""
+        for t in self.value_triggers.get(key, []):
+            t.change(key, oldvalue, value)
+
+    def register_trigger(self, trigger, key):
+        """Called by a Trigger to register it with us as interested in
+        particular value change events"""
+        if key not in self.value_triggers:
+            self.value_triggers[key] = []
+        self.value_triggers[key].append(trigger)
 
     ####
     # Construction
@@ -120,4 +168,5 @@ class SerObject(object):
                     + ' (id, state) VALUES (%(id)s, NULL)',
                     { 'id': self._id })
         print "New SerObject ID =", self._id
+        self.value_triggers = {}
         self._changed = True
