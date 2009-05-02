@@ -233,10 +233,6 @@ for x in range(0, MAX_X):
 
         loc[x][y] = Loc(x, y, cton, d)
 
-# Average out the cratons
-#for c in cratons:
-#    c.average()
-
 # Set a bunch of seed points
 for x in range(0, MAX_X, PRESEED):
     for y in range(0, MAX_X-x, PRESEED):
@@ -250,7 +246,7 @@ for x in range(0, MAX_X, PRESEED):
             rrange = int(math.ceil(MAX_H/10.0))
             loc[x][y].height += randrange(-rrange, rrange+1)
         else:
-            # Bottom third is flattish
+            # Top third is flattish lowlands
             loc[x][y].height = randrange(int(MAX_H/5.0), int(MAX_H/3.0))
 
 # Compute the fractal noise function
@@ -259,8 +255,8 @@ calc_fnoise(loc)
 # Work out which way is downhill
 set_downhill(loc)
 
-# Run downhill for each position until we can't go down any
-# further. Keep track of the quantities
+# Hydrology: Run downhill for each position until we can't go down any
+# further. Keep track of the quantities.
 for x in range(0, MAX_X):
     for y in range(0, MAX_X-x):
         px = x
@@ -274,4 +270,5 @@ for x in range(0, MAX_X):
 
 # Plot the landscape
 plot(lambda x, y: loc[x][y].height, "level", 1.0, -32, 33, 16)
+# Plot the hydro layer
 plot(lambda x, y: loc[x][y].water, "hydro", 0.7, -10001, -10000, 1)
