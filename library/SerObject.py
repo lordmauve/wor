@@ -38,11 +38,16 @@ class SerObject(object):
     def save(self):
         if not self._changed:
             return
+        if self._deleted:
+            cur = DB.cursor()
+            cur.execute('DELETE FROM ' + self._table
+                        + ' WHERE id=%(id)s',
+                        { 'id': self._id })
+            self._changed = False
+            return
 
         state = pickle.dumps(self, -1) # Use the highest pickle
-                                       # protocol we can: must be at
-                                       # least 2, to enable
-                                       # __getnewargs__()
+                                       # protocol we can
 
         sql = 'UPDATE ' + self._table + ' SET state=%(state)s'
                     
@@ -146,7 +151,7 @@ class SerObject(object):
     def __call_triggers(self, key, old, new):
         """Iterate through the triggers, if there are any"""
         for t in self.value_triggers.get(key, []):
-            t.change(key, oldvalue, value)
+            t.change(key, old, new)
 
     def register_trigger(self, trigger, key):
         """Called by a Trigger to register it with us as interested in
@@ -154,6 +159,10 @@ class SerObject(object):
         if key not in self.value_triggers:
             self.value_triggers[key] = []
         self.value_triggers[key].append(trigger)
+
+    def unregister_trigger(self, trigger, key):
+        """Called by a trigger to unregister itself"""
+        self.value_triggers[key].remove(trigger)
 
     ####
     # Construction
@@ -170,3 +179,8 @@ class SerObject(object):
         print "New SerObject ID =", self._id
         self.value_triggers = {}
         self._changed = True
+
+    ####
+    # Destruction
+    def demolish(self):
+        self._deleted = True
