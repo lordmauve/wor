@@ -52,19 +52,6 @@ class Actor(SerObject.SerObject):
 
         return pow
 
-    def set_prop(self, name, value):
-        self[name] = value
-        self._changed = True
-
-    def change_prop(self, name, diff, min=0, max=None):
-        newval = Util.default(self[name])
-        newval += diff
-        newval = max(newval, min)
-        if max != None:
-            newval = min(newval, max)
-        self._changed = True
-        return newval
-
     ####
     # Administration
     def message(self, message):
