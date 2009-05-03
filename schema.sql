@@ -8,6 +8,13 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET escape_string_warning = off;
 
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
+--
+
+COMMENT ON SCHEMA public IS 'Standard public schema';
+
+
 SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
@@ -58,7 +65,7 @@ ALTER SEQUENCE location_id_seq OWNED BY location.id;
 CREATE TABLE player (
     id integer NOT NULL,
     username character varying(32),
-    password character varying(32),
+    "password" character varying(32),
     state bytea
 );
 
@@ -84,6 +91,23 @@ ALTER TABLE public.player_id_seq OWNER TO wor;
 
 ALTER SEQUENCE player_id_seq OWNED BY player.id;
 
+
+--
+-- Name: player_properties; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE player_properties (
+    player_id integer NOT NULL,
+    "key" text NOT NULL,
+    "type" character(1),
+    ivalue integer,
+    fvalue double precision,
+    tvalue text,
+    bvalue bytea
+);
+
+
+ALTER TABLE public.player_properties OWNER TO wor;
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: wor
@@ -121,6 +145,22 @@ ALTER TABLE ONLY location
 
 ALTER TABLE ONLY player
     ADD CONSTRAINT player_id_key UNIQUE (id);
+
+
+--
+-- Name: player_properties_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY player_properties
+    ADD CONSTRAINT player_properties_pkey PRIMARY KEY (player_id, "key");
+
+
+--
+-- Name: player_properties_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: wor
+--
+
+ALTER TABLE ONLY player_properties
+    ADD CONSTRAINT player_properties_player_id_fkey FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE;
 
 
 --

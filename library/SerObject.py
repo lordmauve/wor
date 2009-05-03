@@ -14,7 +14,7 @@ class SerObject(object):
     ####
     # Loading the object by ID from the database
     @staticmethod
-    def load_object(id, table):
+    def load_object(id, table, allprops=False):
         """Get the SerObject with the given id from the given table"""
         try:
             cur = DB.cursor()
@@ -27,15 +27,51 @@ class SerObject(object):
             sys.stderr.write("Database exception:" + dbex + "\n")
             return None
 
+        if row == None:
+            return None
+
         obj = pickle.loads(row[0])
         #obj.value_triggers = Util.default(obj['value_triggers'], {})
+
+        if allprops:
+            # Fetch all properties of the object immediately (rather
+            # than on demand)
+            try:
+                cur.execute('SELECT key, type, ivalue, fvalue, tvalue, bvalue'
+                            + ' FROM ' + table + '_properties'
+                            + ' WHERE ' + table + '_id=%(id)s',
+                            { 'id': id }
+                            )
+                row = cur.fetchone()
+                while row != None:
+                    obj._set_prop_from_row(row)
+                    row = cur.fetchone()
+            except psycopg2.Error, dbex:
+                sys.stderr.write("Database exception:" + dbex + "\n")
+                return None
+        
         obj._id = int(id)
-        obj._changed = False
+        obj._setup()
         return obj
+
+    def _set_prop_from_row(self, row):
+        """Set an object property from a DB row. Does not set the
+        _changed property."""
+        if row[1] == 'i':
+            self.__dict__[row[0]] = row[2]
+        elif row[1] == 'f':
+            self.__dict__[row[0]] = row[3]
+        elif row[1] == 't':
+            self.__dict__[row[0]] = row[4]
+        elif row[1] == 'b':
+            self.__dict__[row[0]] = (row[2] == 1)
+        elif row[1] == 'p':
+            self.__dict__[row[0]] = pickle.loads(row[5])
 
     ####
     # Saving the object to the database
     def save(self):
+        """Save to the database the parts of the object that have changed"""
         if not self._changed:
             return
         if self._deleted:
@@ -46,11 +82,12 @@ class SerObject(object):
             self._changed = False
             return
 
+        # First, save the object itself plus its metadata
         state = pickle.dumps(self, -1) # Use the highest pickle
                                        # protocol we can
 
         sql = 'UPDATE ' + self._table + ' SET state=%(state)s'
-                    
+
         # We find out what additional indices we need to write to the
         # DB, and construct some SQL for them
         idx = self._save_indices()
@@ -65,10 +102,7 @@ class SerObject(object):
 
         # Update the DB
         cur = DB.cursor()
-        print sql
-        print idx
         cur.execute(sql, idx)
-        print "Success"
         
         self._changed = False
 
@@ -179,6 +213,9 @@ class SerObject(object):
         print "New SerObject ID =", self._id
         self.value_triggers = {}
         self._changed = True
+
+    def _setup(self):
+        self._changed = False
 
     ####
     # Destruction

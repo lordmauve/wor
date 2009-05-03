@@ -2,7 +2,7 @@
 
 from Player import Player
 
-p = Player.load_by_name('darksatanic')
+p = Player.load_by_name('darksatanic', allprops=True)
 
 for (k, v) in p.__dict__.items():
     print str(k) + "\t" + str(v)
