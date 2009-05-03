@@ -13,8 +13,18 @@ p = Player.load_by_name(sys.argv[1])
 if p == None:
     print "Player not found"
     sys.exit(1)
+
+# Convert the string parameter from the command line to an appropriate
+# type
+value = sys.argv[3]
+try:
+    p[sys.argv[2]] = int(value)
+except:
+    try:
+        p[sys.argv[2]] = float(value)
+    except:
+        p[sys.argv[2]] = str(value)
     
-p.set_prop(sys.argv[2], sys.argv[3])
 p.save()
 
 DB.commit()
