@@ -11,6 +11,8 @@ import Util
 ####
 # A serialisable object
 class SerObject(object):
+    _picklables = [ 'value_triggers' ]
+    
     ####
     # Loading the object by ID from the database
     @staticmethod
@@ -103,6 +105,56 @@ class SerObject(object):
         # Update the DB
         cur = DB.cursor()
         cur.execute(sql, idx)
+
+        # Secondly, we iterate through the elements of the object that
+        # have changed and save them
+        params = { 'id': self._id }
+            
+        for key in self._changed_props:
+            if key in self._picklables:
+                continue
+            if self.__dict__[key] == None:
+                continue
+            
+            params['key'] = key
+            params['value'] = self.__dict__[key]
+
+            typ = type(self.__dict__[key])
+            if typ is int:
+                params['type'] = 'i'
+                value_field = 'ivalue'
+            elif typ is float:
+                params['type'] = 'f'
+                value_field = 'fvalue'
+            elif typ is str or typ is unicode:
+                params['type'] = 't'
+                value_field = 'tvalue'
+            elif typ is bool:
+                params['type'] = 'b'
+                value_field = 'ivalue'
+            else:
+                params['type'] = 'p'
+                value_field = 'bvalue'
+                params['value'] = psycopg2.Binary(
+                    pickle.dumps(self.__dict__[key], -1)
+                    )
+            
+            cur.execute('SAVEPOINT update1')
+            try:
+                sql = 'INSERT INTO ' + self._table + '_properties'
+                sql += ' (player_id, key, type, ' + value_field + ')'
+                sql += 'VALUES (%(id)s, %(key)s, %(type)s, %(value)s)'
+                cur.execute(sql, params)
+            except psycopg2.Error, ex:
+                cur.execute('ROLLBACK TO SAVEPOINT update1')
+                cur.execute('UPDATE ' + self._table + '_properties'
+                            + ' SET ' + value_field + ' = %(value)s,'
+                            + '     type = %(type)s'
+                            + ' WHERE player_id = %(id)s'
+                            + '   AND key = %(key)s',
+                            params)
+            else:
+                cur.execute('RELEASE SAVEPOINT update1')
         
         self._changed = False
 
@@ -119,7 +171,7 @@ class SerObject(object):
         # but leave out all the properties that start with _
         obj = {}
         for k in self.__dict__.keys():
-            if not k.startswith('_'):
+            if not k.startswith('_') and k in self._picklables:
                 obj[k] = self.__dict__[k]
         return obj
 
@@ -139,13 +191,35 @@ class SerObject(object):
     # but needed by everything.
     def __getitem__(self, key):
         """Used to implement [] subscripting, for string-based
-        property access"""
-        if key in self.__dict__:
-            return self.__dict__[key]
-        # I'm not convinced the next two lines are a good idea -HRM
-        #if '_'+key in self.__dict__:
-        #    return self.__dict__['_'+key]
-        return None
+        property access. Also copes with on-demand loading of
+        properties. Returns None if not found."""
+        if key not in self.__dict__:
+            if not self._demand_load_property(key):
+                self.__dict__[key] = None
+        return self.__dict__[key]
+
+    def __getattr__(self, key):
+        """Does on-demand loading of properties from the DB. Raises an
+        error if not found"""
+        if key not in self.__dict__:
+            if not self._demand_load_property(key):
+                raise AttributeError()
+        return self.__dict__[key]
+
+    def _demand_load_property(self, key):
+        cur = DB.cursor()
+        cur.execute('SELECT key, type, ivalue, fvalue, tvalue, bvalue'
+                    + ' FROM ' + self._table + '_properties'
+                    + ' WHERE ' + self._table + '_id = %(id)s'
+                    + '   AND key = %(key)s',
+                    { 'id': self._id,
+                      'key': key })
+        row = cur.fetchone()
+        if row != None:
+            self._set_prop_from_row(row)
+            return True
+        else:
+            return False
 
     # Yes, these next two are identical. I'm not merging them because
     # I'm nervous about the precise semantics -HRM
@@ -162,6 +236,7 @@ class SerObject(object):
             # Call the triggers
             self.__call_triggers(key, old, value)
             self._changed = True
+            self._changed_props.add(key)
         else:
             # Set the new value of the attribute
             self.__dict__[key] = value
@@ -178,6 +253,7 @@ class SerObject(object):
             # Call the triggers
             self.__call_triggers(key, old, value)
             self._changed = True
+            self._changed_props.add(key)
         else:
             # Set the new value of the attribute
             self.__dict__[key] = value
@@ -211,11 +287,14 @@ class SerObject(object):
                     + ' (id, state) VALUES (%(id)s, NULL)',
                     { 'id': self._id })
         print "New SerObject ID =", self._id
+        self._setup()
         self.value_triggers = {}
-        self._changed = True
 
     def _setup(self):
+        """Called after __init__ or after load()"""
         self._changed = False
+        self._deleted = False
+        self._changed_props = set()
 
     ####
     # Destruction
