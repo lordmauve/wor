@@ -15,14 +15,14 @@ class Player(Actor.Actor):
     ####
     # Load an instance of this object
     @staticmethod
-    def load(pid):
+    def load(pid, allprops=False):
         """Implement caching for loading a player by ID"""
         if pid in Player.cache_by_id:
             return Player.cache_by_id[pid]
-        return Player._load(pid)
+        return Player._load(pid, all)
 
     @staticmethod
-    def load_by_name(name):
+    def load_by_name(name, allprops=False):
         """Additional function to load a player by name instead of by
         ID"""
         if name in Player.cache_by_name:
@@ -34,14 +34,14 @@ class Player(Actor.Actor):
         row = cur.fetchone()
         if row == None:
             return None
-        log.debug("Loading player %s (=%d)" % (name, row[0]))
-        return Player._load(row[0])
+        #log.debug("Loading player %s (=%d)" % (name, row[0]))
+        return Player._load(row[0], allprops)
 
     @staticmethod
-    def _load(pid):
+    def _load(pid, allprops):
         """Internal function used in loading a player -- called by
         both load() and load_by_name()"""
-        player = Player.load_object(pid, Player._table)
+        player = Player.load_object(pid, Player._table, allprops)
         Player.cache_by_id[player._id] = player
         Player.cache_by_name[player.name] = player
         player._on_load()
@@ -55,7 +55,6 @@ class Player(Actor.Actor):
     ####
     # Called on unpickling -- i.e. on load
     def _on_load(self):
-        log.debug("_on_load called for player", self._id)
         self._type = "Player"
 
     ####
