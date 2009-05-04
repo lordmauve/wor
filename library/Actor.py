@@ -3,9 +3,6 @@
 
 import SerObject
 import Util
-import pickle
-import copy
-import psycopg2
 
 class Actor(SerObject.SerObject):
     ####

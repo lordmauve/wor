@@ -10,7 +10,7 @@ class DividerTimedCounter(object):
         self.increment = increment
         self.last = last
 
-    def onload(self):
+    def on_load(self):
         diff = time.time() - self.last
         if diff < 0:
             return

@@ -8,44 +8,36 @@ from SimpleTimedCounter import SimpleTimedCounter
 from Logger import log
 
 class Player(Actor.Actor):
+    # We have our own DB table and caching scheme for Players
     _table = 'player'
     cache_by_id = {}
     cache_by_name = {}
 
     ####
     # Load an instance of this object
-    @staticmethod
-    def load(pid, allprops=False):
-        """Implement caching for loading a player by ID"""
-        if pid in Player.cache_by_id:
-            return Player.cache_by_id[pid]
-        return Player._load(pid, all)
-
-    @staticmethod
-    def load_by_name(name, allprops=False):
+    @classmethod
+    def load_by_name(cls, name, allprops=False):
         """Additional function to load a player by name instead of by
         ID"""
-        if name in Player.cache_by_name:
-            return Player.cache_by_name[name]
+        if name in cls.cache_by_name:
+            return cls.cache_by_name[name]
 
         cur = DB.cursor()
-        cur.execute("SELECT id FROM player WHERE username = %(name)s",
+        cur.execute("SELECT id FROM " + cls._table
+                    + " WHERE username = %(name)s",
                     { 'name': name } )
         row = cur.fetchone()
         if row == None:
             return None
         #log.debug("Loading player %s (=%d)" % (name, row[0]))
-        return Player._load(row[0], allprops)
+        return cls.load(row[0], allprops)
 
-    @staticmethod
-    def _load(pid, allprops):
-        """Internal function used in loading a player -- called by
-        both load() and load_by_name()"""
-        player = Player.load_object(pid, Player._table, allprops)
-        Player.cache_by_id[player._id] = player
-        Player.cache_by_name[player.name] = player
-        player._on_load()
-        return player
+    @classmethod
+    def _cache_object(cls, obj):
+        """Hook to allow classes to define their own caching scheme.
+        Called after an object has been loaded and cached in
+        cls.cache_by_id"""
+        cls.cache_by_name[obj.name] = obj
 
     ####
     # Additional indices to write to the database on save
@@ -53,11 +45,6 @@ class Player(Actor.Actor):
         inds = super(Player, self)._save_indices()
         inds['username'] = self.name
         return inds
-
-    ####
-    # Called on unpickling -- i.e. on load
-    def _on_load(self):
-        self._type = "Player"
 
     ####
     # Create a new player
@@ -70,7 +57,6 @@ class Player(Actor.Actor):
         self.ap = SimpleTimedCounter(self, 120, 360, 240)
         self.hp = 300
         self.maxhp = 300
-        self.onload_list = [ self.ap ]
         self.name = name
 
         print "New ID =", self._id
