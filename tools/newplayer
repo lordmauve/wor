@@ -8,8 +8,6 @@ from Alignment import Alignment
 from Database import DB
 
 p = Player('darksatanic', 'wor', Alignment.WOOD)
-p.set_prop("x", 2)
-p.set_prop("y", 3)
 
 p.save()
 

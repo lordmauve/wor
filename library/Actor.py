@@ -13,14 +13,19 @@ class Actor(SerObject.SerObject):
     def __init__(self):
         """Create a completely new actor"""
         super(Actor, self).__init__()
-        self.messages = "You spring into the world, fresh and new!"
+
+    def _save_indices(self):
+        inds = super(Actor, self)._save_indices()
+        inds['x'] = self.position.x
+        inds['y'] = self.position.y
+        inds['layer'] = self.position.layer
 
     ####
     # Basic properties of the object
     def loc(self):
         """Return the Location (or Road for monsters) that we're stood on"""
         if self._loc == None:
-            self._loc = load_location(self.loc)
+            self._loc = load_location(self.position)
         return self._loc
 
     def held_item(self):
@@ -37,8 +42,7 @@ class Actor(SerObject.SerObject):
         pow = 0
 
         # Start with intrinsics
-        if name in self:
-            pow += Util.default(self[name])
+        pow += Util.default(self[name])
 
         # Equipment held
         pos += self.held_item().power(name)
@@ -73,3 +77,9 @@ class Actor(SerObject.SerObject):
         object"""
         actions = self.actions()
         actions[actid].perform(req)
+
+    ####
+    # Items/inventory/equipment
+    def has(self, itemtype, number=1):
+        count = 0
+        
