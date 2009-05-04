@@ -16,7 +16,7 @@ class SimpleTimedCounter(OnLoad.OnLoad):
         self.increment = increment
         self.last = last
 
-    def _on_load(self):
+    def on_load(self):
         diff = time.time() - self.last
         if diff < 0:
             return

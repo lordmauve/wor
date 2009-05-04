@@ -13,12 +13,15 @@ import Util
 class SerObject(object):
     ####
     # Loading the object by ID from the database
-    @staticmethod
-    def load_object(id, table, allprops=False):
+    @classmethod
+    def load(cls, id, allprops=False):
         """Get the SerObject with the given id from the given table"""
+        if id in cls.cache_by_id:
+            return cls.cache_by_id[pid]
+        
         try:
             cur = DB.cursor()
-            cur.execute('SELECT state FROM ' + table
+            cur.execute('SELECT state FROM ' + cls._table
                         + ' WHERE id=%(id)s',
                         { 'id': id }
                         )
@@ -38,8 +41,8 @@ class SerObject(object):
             # than on demand)
             try:
                 cur.execute('SELECT key, type, ivalue, fvalue, tvalue, bvalue'
-                            + ' FROM ' + table + '_properties'
-                            + ' WHERE ' + table + '_id=%(id)s',
+                            + ' FROM ' + cls._table + '_properties'
+                            + ' WHERE ' + cls._table + '_id=%(id)s',
                             { 'id': id }
                             )
                 row = cur.fetchone()
@@ -52,6 +55,8 @@ class SerObject(object):
         
         obj._id = int(id)
         obj._setup()
+        cls.cache_by_id[obj._id] = obj
+        cls._cache_object(obj)
         return obj
 
     def _set_prop_from_row(self, row):
@@ -69,6 +74,13 @@ class SerObject(object):
             # This code should not ever be executed, as no property is
             # pickled to the properties table
             self.__dict__[row[0]] = pickle.loads(row[5])
+
+    @classmethod
+    def _cache_object(cls, obj):
+        """Hook to allow classes to define their own caching scheme.
+        Called after an object has been loaded and cached in
+        cls.cache_by_id"""
+        pass
 
     ####
     # Saving the object to the database
@@ -198,10 +210,11 @@ class SerObject(object):
     def __getstate__(self):
         """Save this object to a pickled state"""
         # Shallow-create a new dictionary based on our current one,
-        # but leave out all the properties that start with "_". This
-        # relies on self._pickle having been set up first. If it
-        # hasn't, something has gone terrbibly wrong, and we've
-        # probably not been called through self.save().
+        # but leave out all the properties that start with "_", and
+        # the properties that we've already saved to *_properties in
+        # the DB. This relies on self._pickle having been set up
+        # first. If it hasn't, something has gone terribly wrong, and
+        # we've probably not been called through self.save().
         if '_pickle' not in self.__dict__:
             # Panic! (See comment above)
             raise AssertionError()
@@ -221,10 +234,10 @@ class SerObject(object):
             self.__dict__[k] = v
         # Anything (member objects) which wants to be called after
         # load gets called here
-        if '_onload_objects' in self.__dict__:
-            for obj in self['_on_load_objects']:
-                obj._on_load()
-            del(self['_on_load_objects'])
+        if '_on_load_objects' in self.__dict__:
+            for obj in self._on_load_objects:
+                obj.on_load()
+            del(self._on_load_objects)
 
     ####
     # Property access. Not directly related to object serialisation,
