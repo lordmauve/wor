@@ -11,8 +11,6 @@ import Util
 ####
 # A serialisable object
 class SerObject(object):
-    _picklables = [ 'value_triggers' ]
-    
     ####
     # Loading the object by ID from the database
     @staticmethod
@@ -68,6 +66,8 @@ class SerObject(object):
         elif row[1] == 'b':
             self.__dict__[row[0]] = (row[2] == 1)
         elif row[1] == 'p':
+            # This code should not ever be executed, as no property is
+            # pickled to the properties table
             self.__dict__[row[0]] = pickle.loads(row[5])
 
     ####
@@ -84,7 +84,87 @@ class SerObject(object):
             self._changed = False
             return
 
-        # First, save the object itself plus its metadata
+        # The only time pickle() gets called is during save. We set up
+        # for that event by constructing a set of property names that
+        # we should pickle (rather than dump to the database table)
+        self._pickle = set()
+
+        # First, we iterate through the elements of the object that
+        # have changed and save them. Anything which is not an atomic
+        # type is punted for later
+        params = { 'id': self._id }
+
+        cur = DB.cursor()
+        
+        for key in self._changed_props:
+            params['key'] = key
+            params['value'] = self.__dict__[key]
+
+            # Ignore/delete properties which are None
+            if self.__dict__[key] == None:
+                cur.execute('DELETE FROM ' + self._table + '_properties'
+                            + ' WHERE id=%(id)s'
+                            + '   AND key=%(key)s',
+                            params)
+                continue
+
+            # Work out the type (and hence the DB serialisation) of
+            # the object we're looking at
+            typ = type(self.__dict__[key])
+            if typ is int:
+                params['type'] = 'i'
+                value_field = 'ivalue'
+            elif typ is float:
+                params['type'] = 'f'
+                value_field = 'fvalue'
+            elif typ is str or typ is unicode:
+                params['type'] = 't'
+                value_field = 'tvalue'
+            elif typ is bool:
+                params['type'] = 'b'
+                value_field = 'ivalue'
+            else:
+                # It's not an atomic type that we know about, so we're
+                # going to pickle this property into the central
+                # store, not write to the DB
+                self._pickle.add(key)
+                continue
+
+            # At this point, we've got an atomic type we understand
+            # and can put into *_properties, so we do so. The
+            # following code is idiomatic for an insert-or-update in
+            # postgres (as per
+            # http://www.postgresql.org/docs/8.3/static/sql-update.html).
+            cur.execute('SAVEPOINT update1')
+            try:
+                # Try an insert first.
+                sql = 'INSERT INTO ' + self._table + '_properties'
+                sql += ' (player_id, key, type, ' + value_field + ')'
+                sql += 'VALUES (%(id)s, %(key)s, %(type)s, %(value)s)'
+                cur.execute(sql, params)
+            except psycopg2.Error, ex:
+                # If the insert failed (due to a primary key
+                # uniqueness violation), skip back and try an update
+                # instead
+                cur.execute('ROLLBACK TO SAVEPOINT update1')
+                cur.execute('UPDATE ' + self._table + '_properties'
+                            + ' SET ' + value_field + ' = %(value)s,'
+                            + '     type = %(type)s'
+                            + ' WHERE player_id = %(id)s'
+                            + '   AND key = %(key)s',
+                            params)
+            else:
+                # If the insert succeeded, we need to tie off the
+                # savepoint. If it failed, we don't have to do this,
+                # as it was rolled back in the except: section above.
+                cur.execute('RELEASE SAVEPOINT update1')
+
+        # We;ve now saved the atomic types in this object. We now need
+        # to save the complex types. This is done by pickling the
+        # remains of the object, and saving it to the state field of
+        # the * table. (Where * is the object type).  Note that we
+        # rely on having set up the self._pickle container for this to
+        # work.
         state = pickle.dumps(self, -1) # Use the highest pickle
                                        # protocol we can
 
@@ -105,56 +185,6 @@ class SerObject(object):
         # Update the DB
         cur = DB.cursor()
         cur.execute(sql, idx)
-
-        # Secondly, we iterate through the elements of the object that
-        # have changed and save them
-        params = { 'id': self._id }
-            
-        for key in self._changed_props:
-            if key in self._picklables:
-                continue
-            if self.__dict__[key] == None:
-                continue
-            
-            params['key'] = key
-            params['value'] = self.__dict__[key]
-
-            typ = type(self.__dict__[key])
-            if typ is int:
-                params['type'] = 'i'
-                value_field = 'ivalue'
-            elif typ is float:
-                params['type'] = 'f'
-                value_field = 'fvalue'
-            elif typ is str or typ is unicode:
-                params['type'] = 't'
-                value_field = 'tvalue'
-            elif typ is bool:
-                params['type'] = 'b'
-                value_field = 'ivalue'
-            else:
-                params['type'] = 'p'
-                value_field = 'bvalue'
-                params['value'] = psycopg2.Binary(
-                    pickle.dumps(self.__dict__[key], -1)
-                    )
-            
-            cur.execute('SAVEPOINT update1')
-            try:
-                sql = 'INSERT INTO ' + self._table + '_properties'
-                sql += ' (player_id, key, type, ' + value_field + ')'
-                sql += 'VALUES (%(id)s, %(key)s, %(type)s, %(value)s)'
-                cur.execute(sql, params)
-            except psycopg2.Error, ex:
-                cur.execute('ROLLBACK TO SAVEPOINT update1')
-                cur.execute('UPDATE ' + self._table + '_properties'
-                            + ' SET ' + value_field + ' = %(value)s,'
-                            + '     type = %(type)s'
-                            + ' WHERE player_id = %(id)s'
-                            + '   AND key = %(key)s',
-                            params)
-            else:
-                cur.execute('RELEASE SAVEPOINT update1')
         
         self._changed = False
 
@@ -168,11 +198,21 @@ class SerObject(object):
     def __getstate__(self):
         """Save this object to a pickled state"""
         # Shallow-create a new dictionary based on our current one,
-        # but leave out all the properties that start with _
+        # but leave out all the properties that start with "_". This
+        # relies on self._pickle having been set up first. If it
+        # hasn't, something has gone terrbibly wrong, and we've
+        # probably not been called through self.save().
+        if '_pickle' not in self.__dict__:
+            # Panic! (See comment above)
+            raise AssertionError()
+
         obj = {}
-        for k in self.__dict__.keys():
-            if not k.startswith('_') and k in self._picklables:
+        for k in self._pickle:
+            # We only take properties that don't start with "_", and
+            # which weren't stored in the *_properties table
+            if not k.startswith('_'):
                 obj[k] = self.__dict__[k]
+        del(self._pickle)
         return obj
 
     def __setstate__(self, state):
