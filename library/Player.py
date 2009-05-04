@@ -50,7 +50,9 @@ class Player(Actor.Actor):
     ####
     # Additional indices to write to the database on save
     def _save_indices(self):
-        return { 'username': self.name }
+        inds = super(Player, self)._save_indices()
+        inds['username'] = self.name
+        return inds
 
     ####
     # Called on unpickling -- i.e. on load
