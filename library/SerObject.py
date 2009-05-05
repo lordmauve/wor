@@ -135,10 +135,14 @@ class SerObject(object):
             elif typ is bool:
                 params['type'] = 'b'
                 value_field = 'ivalue'
+            elif hasattr(self.__dict__[key], 'save'):
+                # If the object has its own save() method, use that
+                # instead
+                self.__dict__[key].save()
             else:
-                # It's not an atomic type that we know about, so we're
-                # going to pickle this property into the central
-                # store, not write to the DB
+                # It's not an atomic type that we know about, or which
+                # wants to handle itself, so we're going to pickle this
+                # property into the central store, not write to the DB
                 self._pickle.add(key)
                 continue
 
