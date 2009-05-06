@@ -22,10 +22,74 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: item; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE item (
+    id integer NOT NULL,
+    "type" character varying,
+    state bytea
+);
+
+
+ALTER TABLE public.item OWNER TO wor;
+
+--
+-- Name: item_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
+--
+
+CREATE SEQUENCE item_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.item_id_seq OWNER TO wor;
+
+--
+-- Name: item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: wor
+--
+
+ALTER SEQUENCE item_id_seq OWNED BY item.id;
+
+
+--
+-- Name: item_owner; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE item_owner (
+    item_id integer NOT NULL,
+    owner_type character varying NOT NULL,
+    owner_id integer NOT NULL,
+    container character varying NOT NULL
+);
+
+
+ALTER TABLE public.item_owner OWNER TO wor;
+
+--
+-- Name: item_properties; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE item_properties (
+    item_id integer NOT NULL,
+    "key" text NOT NULL,
+    "type" character(1),
+    ivalue integer,
+    fvalue double precision,
+    tvalue text
+);
+
+
+ALTER TABLE public.item_properties OWNER TO wor;
+
+--
 -- Name: location; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
 --
 
-CREATE TABLE location (
+CREATE TABLE "location" (
     id integer NOT NULL,
     x integer NOT NULL,
     y integer NOT NULL,
@@ -35,7 +99,7 @@ CREATE TABLE location (
 );
 
 
-ALTER TABLE public.location OWNER TO wor;
+ALTER TABLE public."location" OWNER TO wor;
 
 --
 -- Name: location_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
@@ -55,7 +119,7 @@ ALTER TABLE public.location_id_seq OWNER TO wor;
 -- Name: location_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: wor
 --
 
-ALTER SEQUENCE location_id_seq OWNED BY location.id;
+ALTER SEQUENCE location_id_seq OWNED BY "location".id;
 
 
 --
@@ -113,7 +177,14 @@ ALTER TABLE public.player_properties OWNER TO wor;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: wor
 --
 
-ALTER TABLE location ALTER COLUMN id SET DEFAULT nextval('location_id_seq'::regclass);
+ALTER TABLE item ALTER COLUMN id SET DEFAULT nextval('item_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: wor
+--
+
+ALTER TABLE "location" ALTER COLUMN id SET DEFAULT nextval('location_id_seq'::regclass);
 
 
 --
@@ -124,10 +195,34 @@ ALTER TABLE player ALTER COLUMN id SET DEFAULT nextval('player_id_seq'::regclass
 
 
 --
+-- Name: item_owner_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY item_owner
+    ADD CONSTRAINT item_owner_pkey PRIMARY KEY (item_id, owner_type, owner_id, container);
+
+
+--
+-- Name: item_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY item
+    ADD CONSTRAINT item_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: item_properties_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY item_properties
+    ADD CONSTRAINT item_properties_pkey PRIMARY KEY (item_id, "key");
+
+
+--
 -- Name: location_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
 --
 
-ALTER TABLE ONLY location
+ALTER TABLE ONLY "location"
     ADD CONSTRAINT location_pkey PRIMARY KEY (id);
 
 
@@ -135,7 +230,7 @@ ALTER TABLE ONLY location
 -- Name: location_x_key; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
 --
 
-ALTER TABLE ONLY location
+ALTER TABLE ONLY "location"
     ADD CONSTRAINT location_x_key UNIQUE (x, y, layer, override);
 
 
@@ -153,6 +248,22 @@ ALTER TABLE ONLY player
 
 ALTER TABLE ONLY player_properties
     ADD CONSTRAINT player_properties_pkey PRIMARY KEY (player_id, "key");
+
+
+--
+-- Name: item_owner_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: wor
+--
+
+ALTER TABLE ONLY item_owner
+    ADD CONSTRAINT item_owner_item_id_fkey FOREIGN KEY (item_id) REFERENCES item(id) ON DELETE CASCADE;
+
+
+--
+-- Name: item_properties_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: wor
+--
+
+ALTER TABLE ONLY item_properties
+    ADD CONSTRAINT item_properties_item_id_fkey FOREIGN KEY (item_id) REFERENCES item(id) ON DELETE CASCADE;
 
 
 --
