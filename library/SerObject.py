@@ -136,9 +136,11 @@ class SerObject(object):
                 params['type'] = 'b'
                 value_field = 'ivalue'
             elif hasattr(self.__dict__[key], 'save'):
-                # If the object has its own save() method, use that
-                # instead
+                # If the object has its own save() method, call that
+                # as well, but still pickle it
                 self.__dict__[key].save()
+                self._pickle.add(key)
+                continue
             else:
                 # It's not an atomic type that we know about, or which
                 # wants to handle itself, so we're going to pickle this
@@ -250,7 +252,7 @@ class SerObject(object):
         """Used to implement [] subscripting, for string-based
         property access. Also copes with on-demand loading of
         properties. Returns None if not found."""
-        if key not in self.__dict__:
+        if key not in self.__dict__ and key[0] != '_':
             if not self._demand_load_property(key):
                 self.__dict__[key] = None
         return self.__dict__[key]
@@ -258,9 +260,9 @@ class SerObject(object):
     def __getattr__(self, key):
         """Does on-demand loading of properties from the DB. Raises an
         error if not found"""
-        if key not in self.__dict__:
+        if key not in self.__dict__ and key[0] != '_':
             if not self._demand_load_property(key):
-                raise AttributeError()
+                raise AttributeError, (key, self.__class__)
         return self.__dict__[key]
 
     def _demand_load_property(self, key):
@@ -357,3 +359,6 @@ class SerObject(object):
     # Destruction
     def demolish(self):
         self._deleted = True
+
+    def type(self):
+        return self.__class__.__name__
