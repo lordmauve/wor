@@ -23,13 +23,18 @@ class Item(SerObject.SerObject):
     # probability of failing on each use.
     break_profile = lambda life: weibull(life, 300.0, 1.0)
 
-    @staticmethod
-    def name_for(player):
-        return "Item"
+    _table = "item"
+    name = "Item"
 
-    @staticmethod
-    def plural_for(player):
-        return name_for(player) + 's'
+    @classmethod
+    def name_for(cls, player):
+        return cls.name
+
+    @classmethod
+    def plural_for(cls, player):
+        if hasattr(cls, plural):
+            return cls.plural
+        return cls.name_for(player) + 's'
 
     ####
     # Add the indices for saving this object
