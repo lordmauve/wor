@@ -6,8 +6,11 @@
 from Player import Player
 from Alignment import Alignment
 from Database import DB
+from ItemLib.Rock import Rock
 
 p = Player('darksatanic', 'wor', Alignment.WOOD)
+rock = Rock()
+p.inventory.add(rock)
 
 p.save()
 
