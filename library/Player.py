@@ -3,6 +3,8 @@
 
 from Database import DB
 import Actor
+from ItemContainer import ItemContainer
+from ItemLib.Punch import Punch
 from SimpleAction import SimpleAction
 from SimpleTimedCounter import SimpleTimedCounter
 from Logger import log
@@ -58,8 +60,9 @@ class Player(Actor.Actor):
         self.hp = 300
         self.maxhp = 300
         self.name = name
-
-        print "New ID =", self._id
+        self.inventory = ItemContainer(self, "inventory")
+        punch = Punch()
+        self.inventory.add(punch)
 
         self._type = "Player"
 
