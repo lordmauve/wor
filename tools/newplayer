@@ -4,6 +4,7 @@
 # Create a new player
 
 from Player import Player
+from Item import Item
 from Alignment import Alignment
 from Database import DB
 from ItemLib.Rock import Rock
@@ -12,6 +13,7 @@ p = Player('darksatanic', 'wor', Alignment.WOOD)
 rock = Rock()
 p.inventory.add(rock)
 
-p.save()
+Player.save_cache()
+Item.save_cache()
 
 DB.commit()

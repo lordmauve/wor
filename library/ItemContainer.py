@@ -2,6 +2,7 @@
 # ItemContainer
 
 from Database import DB
+import psycopg2
 
 class ItemContainer(object):
     """Implements a generic container of items, serialised to the
@@ -25,9 +26,9 @@ class ItemContainer(object):
         params['owner_id'] = self.parent._id
         params['container'] = self.name
 
-        for item in self._changes:
-            params['id'] = item._id
-            if item in self._item_ids:
+        for itemid in self._changes:
+            params['id'] = itemid
+            if itemid in self._item_ids:
                 # The item has been added to this container, so we
                 # need to add it to the database
                 try:
@@ -133,3 +134,8 @@ class ItemContainer(object):
         if itype not in self._item_types:
             self._item_types[itype] = set()
         self._item_types[itype].add(item._id)
+        self._changes.add(item._id)
+
+    # FIXME: Write this function
+    #def remove(self, item):
+    #    self._changes.add(item._id)

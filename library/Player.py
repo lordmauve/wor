@@ -64,7 +64,7 @@ class Player(Actor.Actor):
         punch = Punch()
         self.inventory.add(punch)
 
-        self._type = "Player"
+        self._cache_object(self) # Must be called explicitly in __init__()
 
     ####
     # Movement
