@@ -17,7 +17,7 @@ class SerObject(object):
     def load(cls, id, allprops=False):
         """Get the SerObject with the given id from the given table"""
         if id in cls.cache_by_id:
-            return cls.cache_by_id[pid]
+            return cls.cache_by_id[id]
         
         try:
             cur = DB.cursor()
@@ -40,7 +40,7 @@ class SerObject(object):
             # Fetch all properties of the object immediately (rather
             # than on demand)
             try:
-                cur.execute('SELECT key, type, ivalue, fvalue, tvalue, bvalue'
+                cur.execute('SELECT key, type, ivalue, fvalue, tvalue'
                             + ' FROM ' + cls._table + '_properties'
                             + ' WHERE ' + cls._table + '_id=%(id)s',
                             { 'id': id }
@@ -55,8 +55,6 @@ class SerObject(object):
         
         obj._id = int(id)
         obj._setup()
-        cls.cache_by_id[obj._id] = obj
-        cls._cache_object(obj)
         return obj
 
     def _set_prop_from_row(self, row):
@@ -70,10 +68,8 @@ class SerObject(object):
             self.__dict__[row[0]] = row[4]
         elif row[1] == 'b':
             self.__dict__[row[0]] = (row[2] == 1)
-        elif row[1] == 'p':
-            # This code should not ever be executed, as no property is
-            # pickled to the properties table
-            self.__dict__[row[0]] = pickle.loads(row[5])
+        #elif row[1] == 'p':
+        #    self.__dict__[row[0]] = pickle.loads(row[5])
 
     @classmethod
     def _cache_object(cls, obj):
@@ -107,8 +103,8 @@ class SerObject(object):
         params = { 'id': self._id }
 
         cur = DB.cursor()
-        
-        for key in self._changed_props:
+
+        for key in self.__dict__.iterkeys():
             params['key'] = key
             params['value'] = self.__dict__[key]
 
@@ -146,6 +142,10 @@ class SerObject(object):
                 # wants to handle itself, so we're going to pickle this
                 # property into the central store, not write to the DB
                 self._pickle.add(key)
+                continue
+
+            # If the key wasn't changed, we don't need to do anything
+            if key not in self._changed_props:
                 continue
 
             # At this point, we've got an atomic type we understand
@@ -211,6 +211,11 @@ class SerObject(object):
         additional indexes to the database"""
         return { }
 
+    @classmethod
+    def save_cache(cls):
+        for oid, obj in cls.cache_by_id.iteritems():
+            obj.save()
+
     ####
     # Pickling (serialisation and deserialisation)
     def __getstate__(self):
@@ -267,7 +272,7 @@ class SerObject(object):
 
     def _demand_load_property(self, key):
         cur = DB.cursor()
-        cur.execute('SELECT key, type, ivalue, fvalue, tvalue, bvalue'
+        cur.execute('SELECT key, type, ivalue, fvalue, tvalue'
                     + ' FROM ' + self._table + '_properties'
                     + ' WHERE ' + self._table + '_id = %(id)s'
                     + '   AND key = %(key)s',
@@ -354,6 +359,7 @@ class SerObject(object):
         self._changed = False
         self._deleted = False
         self._changed_props = set()
+        self.__class__.cache_by_id[self._id] = self
 
     ####
     # Destruction
