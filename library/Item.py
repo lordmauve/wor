@@ -1,8 +1,6 @@
+# coding: utf-8
+
 ########
-# An item
-# By default, all items are unique. Some items are "aggregate" and
-# represent a block of otherwise identical things -- e.g. coins -- and
-# can be combined and split (see AggregateItem).
 
 import SerObject
 import Actor
@@ -10,21 +8,27 @@ import Location
 import Util
 
 class Item(SerObject.SerObject):
-    # Failure-rate (aka hazard) functions: return the probability
-    # [0.0, 1.0) that this item will fail, given a lifetime of x
-    @staticmethod
-    def weibull(x, k, l):
-        """Weibull failure function, with position l and shape k.  The
-        mean of this distribution is l*GAMMA(1+1/k), where GAMMA is
-        the gamma function."""
-        return k/l * math.pow(x/l, k-1.0)
+    """An item. By default, all items are unique. Some items are
+    'aggregate' and represent a block of otherwise identical things --
+    e.g. coins -- and can be combined and split (see AggregateItem).
+    """
+    _table = "item"
+    cache_by_id = {}
 
     # Default failure function is a mean life of 300, and equal
     # probability of failing on each use.
     break_profile = lambda life: weibull(life, 300.0, 1.0)
 
-    _table = "item"
     name = "Item"
+    aggregate = False
+
+    # Failure-rate (aka hazard) functions: return the probability
+    # [0.0, 1.0) that this item will fail, given a lifetime of x
+    @staticmethod
+    def weibull(x, k, l):
+        """Weibull failure function, with position l and shape k.  The
+        mean of this distribution is l*Γ(1+1/k)."""
+        return k/l * math.pow(x/l, k-1.0)
 
     @classmethod
     def name_for(cls, player):
@@ -39,10 +43,9 @@ class Item(SerObject.SerObject):
     ####
     # Add the indices for saving this object
     def _save_indices(self):
-        return { 'owner_type': self.owner_type,
-                 'owner': self.owner,
-                 'count': self.count,
-                 'type': self.type }
+        idxs = super(Item, self)._save_indices()
+        idxs['type'] = self.type()
+        return idxs
     
     def owner(self):
         """Return the owner of this object, loading it if necessary"""
