@@ -8,12 +8,12 @@ from Item import Item
 from Alignment import Alignment
 from Database import DB
 from ItemLib.Rock import Rock
+import GameUtil
 
 p = Player('darksatanic', 'wor', Alignment.WOOD)
 rock = Rock()
 p.inventory.add(rock)
 
-Player.save_cache()
-Item.save_cache()
+GameUtil.save()
 
 DB.commit()
