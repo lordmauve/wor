@@ -2,80 +2,79 @@
 # A location
 
 from Database import DB
-import SerObject
+from SerObject import SerObject
 from Logger import log
 
-class Location(SerObject.SerObject):
+class Location(SerObject):
     _table = 'location'
     cache_by_id = {}
     cache_by_pos = {}
 
     ####
-    # Load the location by ID
-    @staticmethod
-    def load(lid):
-        """Implement caching for loading a single location by ID"""
-        if lid in Location.cache_by_id:
-            return Location.cache_by_id[lid]
-        return Location._load(lid)
-
-    @staticmethod
-    def load_by_pos(pos):
-        """Load a location stack by position instead of by ID"""
-        if pos in Location.cache_by_pos:
-            return Location.cache_by_pos[pos]
+    # Load the location
+    @classmethod
+    def load_by_pos(cls, pos, allprops=False):
+        """Load a complete location stack by position"""
+        rpos = repr(pos)
+        if rpos in Location.cache_by_pos:
+            return Location.cache_by_pos[rpos]
 
         cur = DB.cursor()
-        cur.execute('SELECT id FROM location '
+        cur.execute('SELECT id, state FROM location '
                     + 'WHERE x=%(x)s AND y=%(y)s AND layer=%(layer)s '
-                    + 'ORDER BY depth',
+                    + 'ORDER BY overlay',
                     { 'x': pos.x,
                       'y': pos.y,
                       'layer': pos.layer }
                     )
+        row = cur.fetchone()
+        location = None
+        while row != None:
+            # Load the overlay
+            tmploc = cls._load_from_row(row, allprops)
+            # Set up a doubly-linked list
+            tmploc._underneath = location
+            if location != None:
+                location._above = tmploc
+            # Push the underlying location down
+            location = tmploc
+            row = cur.fetchone()
 
-        return Location._load(row[0])
+        return location
 
-    ####
-    # Load the object from a database cursor
-    @staticmethod
-    def _load(lid):
-        loc = Location.load_object(lid, Location._table)
-        return loc
-
-    ####
-    # Save the object
-    def save(self):
-        if not self._changed:
-            return
-
-        state = pickle.dumps(self)
-
-        cur = DB.cursor()
-        cur.execute('UPDATE location SET state=%(state)s'
-                    + ' WHERE id=%(id)s',
-                    { 'id': self._id,
-                      'state': state }
-                    )
-
-        self._changed = False
+    @classmethod
+    def _cache_object(cls, obj):
+        rpos = repr(obj.pos)
+        cls.cache_by_pos[rpos] = obj
 
     def _save_indices(self):
-        return { }
-
-    def __getnewargs__(self):
-        log.debug("__getnewargs__ called for location", self._id)
-        self._type = "Location"
-        return ()
+        inds = super(Location, self)._save_indices()
+        inds['x'] = self.pos.x
+        inds['y'] = self.pos.y
+        inds['layer'] = self.pos.layer
+        inds['overlay'] = self.overlay
+        return inds
 
     ####
     # Create a new location
-    def __init__(self):
+    def __init__(self, pos):
         """Create a completely new location"""
         super(Location, self).__init__()
-        self.pos = Position(0, 0, 0)
+        self.pos = pos
+        self.overlay = 0
         self.set_mapping()
-        self._type = "Location"
+        
+        self._cache_object(self)
+
+    ####
+    # Stack management
+    def deoverride(self):
+        """Unhook this location (overlay) from the stack, and remove
+        it from the database."""
+        self._underneath._above = self._above
+        if self._above != None:
+            self._above._underneath = self._underneath
+        self._deleted = True
 
     ####
     # Basic properties
