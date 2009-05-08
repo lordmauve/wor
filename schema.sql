@@ -8,6 +8,13 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET escape_string_warning = off;
 
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
+--
+
+COMMENT ON SCHEMA public IS 'Standard public schema';
+
+
 SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
@@ -32,6 +39,7 @@ ALTER TABLE public.item OWNER TO wor;
 --
 
 CREATE SEQUENCE item_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -87,7 +95,7 @@ CREATE TABLE "location" (
     y integer NOT NULL,
     layer character varying(32) NOT NULL,
     state bytea,
-    overlay integer
+    "overlay" integer
 );
 
 
@@ -115,6 +123,22 @@ ALTER SEQUENCE location_id_seq OWNED BY "location".id;
 
 
 --
+-- Name: location_properties; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE location_properties (
+    location_id integer NOT NULL,
+    "key" text NOT NULL,
+    "type" character(1),
+    ivalue integer,
+    fvalue double precision,
+    tvalue text
+);
+
+
+ALTER TABLE public.location_properties OWNER TO wor;
+
+--
 -- Name: player; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
 --
 
@@ -133,6 +157,7 @@ ALTER TABLE public.player OWNER TO wor;
 --
 
 CREATE SEQUENCE player_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -158,7 +183,7 @@ CREATE TABLE player_properties (
     "type" character(1),
     ivalue integer,
     fvalue double precision,
-    tvalue text,
+    tvalue text
 );
 
 
@@ -218,6 +243,14 @@ ALTER TABLE ONLY "location"
 
 
 --
+-- Name: location_properties_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY location_properties
+    ADD CONSTRAINT location_properties_pkey PRIMARY KEY (location_id, "key");
+
+
+--
 -- Name: player_id_key; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
 --
 
@@ -247,6 +280,14 @@ ALTER TABLE ONLY item_owner
 
 ALTER TABLE ONLY item_properties
     ADD CONSTRAINT item_properties_item_id_fkey FOREIGN KEY (item_id) REFERENCES item(id) ON DELETE CASCADE;
+
+
+--
+-- Name: location_properties_location_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: wor
+--
+
+ALTER TABLE ONLY location_properties
+    ADD CONSTRAINT location_properties_location_id_fkey FOREIGN KEY (location_id) REFERENCES "location"(id) ON DELETE CASCADE;
 
 
 --
