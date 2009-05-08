@@ -38,7 +38,7 @@ class ItemContainer(object):
                     cur.execute('INSERT INTO item_owner'
                                 + ' (item_id, owner_type, owner_id, container)'
                                 + ' VALUES (%(id)s, %(owner_type)s,'
-                                + '         %(owner_id)s, %(container)s',
+                                + '         %(owner_id)s, %(container)s)',
                                 params)
                 except psycopg2.Error, ex:
                     # If the insert failed, we roll back the savepoint
