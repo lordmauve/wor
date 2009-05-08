@@ -21,7 +21,7 @@ class SerObject(object):
         
         try:
             cur = DB.cursor()
-            cur.execute('SELECT state FROM ' + cls._table
+            cur.execute('SELECT id, state FROM ' + cls._table
                         + ' WHERE id=%(id)s',
                         { 'id': id }
                         )
@@ -33,27 +33,32 @@ class SerObject(object):
         if row == None:
             return None
 
-        obj = pickle.loads(row[0])
+        return cls._load_from_row(row, allprops)
+
+    @classmethod
+    def _load_from_row(cls, row, allprops):
+        obj = pickle.loads(row[1])
         #obj.value_triggers = Util.default(obj['value_triggers'], {})
 
         if allprops:
             # Fetch all properties of the object immediately (rather
             # than on demand)
             try:
+                cur = DB.cursor()
                 cur.execute('SELECT key, type, ivalue, fvalue, tvalue'
                             + ' FROM ' + cls._table + '_properties'
                             + ' WHERE ' + cls._table + '_id=%(id)s',
-                            { 'id': id }
+                            { 'id': row[0] }
                             )
-                row = cur.fetchone()
-                while row != None:
-                    obj._set_prop_from_row(row)
-                    row = cur.fetchone()
+                prop = cur.fetchone()
+                while prop != None:
+                    obj._set_prop_from_row(prop)
+                    prop = cur.fetchone()
             except psycopg2.Error, dbex:
                 sys.stderr.write("Database exception:" + dbex + "\n")
                 return None
         
-        obj._id = int(id)
+        obj._id = int(row[0])
         obj._setup()
         return obj
 
