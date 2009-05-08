@@ -8,13 +8,6 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET escape_string_warning = off;
 
---
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
---
-
-COMMENT ON SCHEMA public IS 'Standard public schema';
-
-
 SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
@@ -39,7 +32,6 @@ ALTER TABLE public.item OWNER TO wor;
 --
 
 CREATE SEQUENCE item_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -95,7 +87,7 @@ CREATE TABLE "location" (
     y integer NOT NULL,
     layer character varying(32) NOT NULL,
     state bytea,
-    override integer
+    overlay integer
 );
 
 
@@ -167,7 +159,6 @@ CREATE TABLE player_properties (
     ivalue integer,
     fvalue double precision,
     tvalue text,
-    bvalue bytea
 );
 
 
@@ -224,14 +215,6 @@ ALTER TABLE ONLY item_properties
 
 ALTER TABLE ONLY "location"
     ADD CONSTRAINT location_pkey PRIMARY KEY (id);
-
-
---
--- Name: location_x_key; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
---
-
-ALTER TABLE ONLY "location"
-    ADD CONSTRAINT location_x_key UNIQUE (x, y, layer, override);
 
 
 --
