@@ -344,7 +344,7 @@ class SerObject(object):
         # Create a new record in the database for this object and get
         # its ID
         cur = DB.cursor()
-        cur.execute('SELECT nextval(\'player_id_seq\');')
+        cur.execute('SELECT nextval(\'' + self._table +'_id_seq\');')
         row = cur.fetchone()
         self._id = row[0]
         cur.execute('INSERT INTO ' + self._table
