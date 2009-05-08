@@ -1,0 +1,10 @@
+#!/usr/bin/python
+
+import sys
+from Item import Item
+
+i = Item.load(int(sys.argv[1]), allprops=True)
+
+print "type\t" + i.type()
+for (k, v) in i.__dict__.items():
+    print str(k) + "\t" + str(v)
