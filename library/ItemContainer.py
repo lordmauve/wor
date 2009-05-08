@@ -1,10 +1,11 @@
 ####
 # ItemContainer
 
-from Database import DB
 import psycopg2
+from Database import DB
+from OnLoad import OnLoad
 
-class ItemContainer(object):
+class ItemContainer(OnLoad):
     """Implements a generic container of items, serialised to the
     object-ownership table. This container supports caching of items,
     and demand-loading."""
@@ -76,6 +77,7 @@ class ItemContainer(object):
 
         self._changes = set()
 
+    def _on_load(self):
         # Now load the contents of the container
         cur = DB.cursor()
         cur.execute('SELECT item_id, type FROM item, item_owner'
