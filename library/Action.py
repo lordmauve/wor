@@ -4,14 +4,14 @@
 # Use e.g. SimpleAction as a base instead.
 
 class Action(object):
-    def __init__(self, parent):
-        self.parent = parent
+	def __init__(self, parent):
+		self.parent = parent
 
-    def valid(self):
-        return True
+	def valid(self):
+		return True
 
-    def display(self):
-        return "Action"
+	def display(self):
+		return "Action"
 
-    def perform(self, req):
-        pass
+	def perform(self, req):
+		pass

@@ -5,79 +5,79 @@ import SerObject
 import Util
 
 class Actor(SerObject.SerObject):
-    ####
-    # Creating a new object
-    def __init__(self):
-        """Create a completely new actor"""
-        super(Actor, self).__init__()
+	####
+	# Creating a new object
+	def __init__(self):
+		"""Create a completely new actor"""
+		super(Actor, self).__init__()
 
-    def _save_indices(self):
-        inds = super(Actor, self)._save_indices()
-        #inds['x'] = self.position.x
-        #inds['y'] = self.position.y
-        #inds['layer'] = self.position.layer
-        return inds
+	def _save_indices(self):
+		inds = super(Actor, self)._save_indices()
+		#inds['x'] = self.position.x
+		#inds['y'] = self.position.y
+		#inds['layer'] = self.position.layer
+		return inds
 
-    ####
-    # Basic properties of the object
-    def loc(self):
-        """Return the Location (or Road for monsters) that we're stood on"""
-        if self._loc == None:
-            self._loc = load_location(self.position)
-        return self._loc
+	####
+	# Basic properties of the object
+	def loc(self):
+		"""Return the Location (or Road for monsters) that we're stood on"""
+		if self._loc == None:
+			self._loc = load_location(self.position)
+		return self._loc
 
-    def held_item(self):
-        """Return the item(s) currently held by the actor"""
-        pass
+	def held_item(self):
+		"""Return the item(s) currently held by the actor"""
+		pass
 
-    def equipment(self):
-        """Return an iterator over the equipment currently worn by the actor"""
-        pass
+	def equipment(self):
+		"""Return an iterator over the equipment currently worn by the actor"""
+		pass
 
-    def power(self, name):
-        """Compute the effective power of a property"""
-        # FIXME: Implement caching of power calculations here
-        pow = 0
+	def power(self, name):
+		"""Compute the effective power of a property"""
+		# FIXME: Implement caching of power calculations here
+		pow = 0
 
-        # Start with intrinsics
-        pow += Util.default(self[name])
+		# Start with intrinsics
+		pow += Util.default(self[name])
 
-        # Equipment held
-        pos += self.held_item().power(name)
+		# Equipment held
+		pos += self.held_item().power(name)
 
-        # Equipment worn
-        for item in self.equipment():
-            pos += item.power(name)
+		# Equipment worn
+		for item in self.equipment():
+			pos += item.power(name)
 
-        # Location
-        pos += self.loc().power(name)
+		# Location
+		pos += self.loc().power(name)
 
-        return pow
+		return pow
 
-    ####
-    # Administration
-    def message(self, message):
-        """Write a message to the actor's message log"""
-        self.messages += message + "\n"
-        if len(self.messages > 1024):
-            self.messages = self.messages[-1024:]
-        self._changed = True
+	####
+	# Administration
+	def message(self, message):
+		"""Write a message to the actor's message log"""
+		self.messages += message + "\n"
+		if len(self.messages > 1024):
+			self.messages = self.messages[-1024:]
+		self._changed = True
 
-    ####
-    # Actions infrastructure: Things the player can do to this actor
-    def actions(self):
-        """Create and return a hash of all possible actions this
-        player might perform"""
-        return {}
+	####
+	# Actions infrastructure: Things the player can do to this actor
+	def actions(self):
+		"""Create and return a hash of all possible actions this
+		player might perform"""
+		return {}
 
-    def perform_action(self, actid, req):
-        """Perform an action as requested. req is a mod_python request
-        object"""
-        actions = self.actions()
-        actions[actid].perform(req)
+	def perform_action(self, actid, req):
+		"""Perform an action as requested. req is a mod_python request
+		object"""
+		actions = self.actions()
+		actions[actid].perform(req)
 
-    ####
-    # Items/inventory/equipment
-    def has(self, itemtype, number=1):
-        count = 0
-        
+	####
+	# Items/inventory/equipment
+	def has(self, itemtype, number=1):
+		count = 0
+		
