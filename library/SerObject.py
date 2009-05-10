@@ -113,10 +113,14 @@ class SerObject(object):
 			params['key'] = key
 			params['value'] = self.__dict__[key]
 
+			# Skip properties which begin with _
+			if key[0] == '_':
+				continue
+
 			# Ignore/delete properties which are None
 			if self.__dict__[key] == None:
 				cur.execute('DELETE FROM ' + self._table + '_properties'
-							+ ' WHERE id=%(id)s'
+							+ ' WHERE ' + self._table + '_id=%(id)s'
 							+ '   AND key=%(key)s',
 							params)
 				continue
@@ -162,7 +166,8 @@ class SerObject(object):
 			try:
 				# Try an insert first.
 				sql = 'INSERT INTO ' + self._table + '_properties'
-				sql += ' (player_id, key, type, ' + value_field + ')'
+				sql += ' (' + self._table + '_id, key, '
+				sql += 'type, ' + value_field + ')'
 				sql += 'VALUES (%(id)s, %(key)s, %(type)s, %(value)s)'
 				cur.execute(sql, params)
 			except psycopg2.Error, ex:
@@ -173,7 +178,7 @@ class SerObject(object):
 				cur.execute('UPDATE ' + self._table + '_properties'
 							+ ' SET ' + value_field + ' = %(value)s,'
 							+ '	 type = %(type)s'
-							+ ' WHERE player_id = %(id)s'
+							+ ' WHERE ' + self._table + '_id = %(id)s'
 							+ '   AND key = %(key)s',
 							params)
 			else:
