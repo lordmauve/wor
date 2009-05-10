@@ -5,9 +5,9 @@ import psycopg2
 import DBAuth
 
 DB = psycopg2.connect(host = DBAuth.host,
-                      database = DBAuth.name,
-                      user = DBAuth.user,
-                      password = DBAuth.passwd)
+					  database = DBAuth.name,
+					  user = DBAuth.user,
+					  password = DBAuth.passwd)
 
 # Put us in serialisation mode: every transaction occurs as if in some
 # definite order w.r.t the other transactions
@@ -20,13 +20,13 @@ DB.cursor().execute("SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL 
 # function should probably be a lambda calling the actual work
 # function with the right parameters.
 def retry_process(process):
-    complete = False
-    while not complete:
-        xact = DB.cursor()
-        try:
-            xact.execute("BEGIN TRANSACTION")
-            process()
-            xact.execute("COMMIT")
-            complete = True
-        except (psycopg2.Error, dbex):
-            xact.execute("ROLLBACK")
+	complete = False
+	while not complete:
+		xact = DB.cursor()
+		try:
+			xact.execute("BEGIN TRANSACTION")
+			process()
+			xact.execute("COMMIT")
+			complete = True
+		except (psycopg2.Error, dbex):
+			xact.execute("ROLLBACK")

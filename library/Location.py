@@ -6,143 +6,167 @@ from SerObject import SerObject
 from Logger import log
 
 class Location(SerObject):
-    _table = 'location'
-    cache_by_id = {}
-    cache_by_pos = {}
+	_table = 'location'
+	cache_by_id = {}
+	cache_by_pos = {}
 
-    ####
-    # Load the location
-    @classmethod
-    def load_by_pos(cls, pos, allprops=False):
-        """Load a complete location stack by position"""
-        rpos = repr(pos)
-        if rpos in Location.cache_by_pos:
-            return Location.cache_by_pos[rpos]
+	####
+	# Load the location
+	@classmethod
+	def load_by_pos(cls, pos, allprops=False):
+		"""Load a complete location stack by position"""
+		rpos = repr(pos)
+		if rpos in Location.cache_by_pos:
+			return Location.cache_by_pos[rpos]
 
-        cur = DB.cursor()
-        cur.execute('SELECT id, state FROM location '
-                    + 'WHERE x=%(x)s AND y=%(y)s AND layer=%(layer)s '
-                    + 'ORDER BY overlay',
-                    { 'x': pos.x,
-                      'y': pos.y,
-                      'layer': pos.layer }
-                    )
-        row = cur.fetchone()
-        location = None
-        while row != None:
-            # Load the overlay
-            tmploc = cls._load_from_row(row, allprops)
-            # Set up a doubly-linked list
-            tmploc._underneath = location
-            if location != None:
-                location._above = tmploc
-            # Push the underlying location down
-            location = tmploc
-            row = cur.fetchone()
+		cur = DB.cursor()
+		cur.execute('SELECT id, state FROM location '
+					+ 'WHERE x=%(x)s AND y=%(y)s AND layer=%(layer)s '
+					+ 'ORDER BY overlay',
+					{ 'x': pos.x,
+					  'y': pos.y,
+					  'layer': pos.layer }
+					)
+		row = cur.fetchone()
+		location = None
+		while row != None:
+			# Load the overlay
+			tmploc = cls._load_from_row(row, allprops)
+			# Set up a doubly-linked list
+			tmploc._underneath = location
+			if location != None:
+				location._above = tmploc
+			# Push the underlying location down
+			location = tmploc
+			row = cur.fetchone()
 
-        return location
+		return location
 
-    @classmethod
-    def _cache_object(cls, obj):
-        rpos = repr(obj.pos)
-        cls.cache_by_pos[rpos] = obj
+	@classmethod
+	def _cache_object(cls, obj):
+		rpos = repr(obj.pos)
+		cls.cache_by_pos[rpos] = obj
 
-    def _save_indices(self):
-        inds = super(Location, self)._save_indices()
-        inds['x'] = self.pos.x
-        inds['y'] = self.pos.y
-        inds['layer'] = self.pos.layer
-        inds['overlay'] = self.overlay
-        return inds
+	def _save_indices(self):
+		inds = super(Location, self)._save_indices()
+		inds['x'] = self.pos.x
+		inds['y'] = self.pos.y
+		inds['layer'] = self.pos.layer
+		inds['overlay'] = self.overlay
+		return inds
 
-    ####
-    # Create a new location
-    def __init__(self, pos):
-        """Create a completely new location"""
-        super(Location, self).__init__()
-        self.pos = pos
-        self.overlay = 0
-        self.set_mapping()
-        
-        self._cache_object(self)
+	####
+	# Create a new location
+	def __init__(self, pos):
+		"""Create a completely new location"""
+		super(Location, self).__init__()
+		self.pos = pos
+		self.overlay = 0
+		self.set_mapping()
+		
+		self._cache_object(self)
 
-    ####
-    # Stack management
-    def deoverride(self):
-        """Unhook this location (overlay) from the stack, and remove
-        it from the database."""
-        self._underneath._above = self._above
-        if self._above != None:
-            self._above._underneath = self._underneath
-        self._deleted = True
+	####
+	# Stack management
+	def deoverride(self):
+		"""Unhook this location (overlay) from the stack, and remove
+		it from the database."""
+		self._underneath._above = self._above
+		if self._above != None:
+			self._above._underneath = self._underneath
+		self._deleted = True
 
-    ####
-    # Basic properties
-    def power(self, name):
-        if name in self:
-            return self[name]
-        
-        return 0
+	####
+	# Property access
 
-    def set_mapping(self):
-        pos = [ self.e, self.ne, self.nw, self.w, self.sw, self.se ]
-        
-        if self.flipped:
-            self.r  = pos[(6+self.rotated) % 6]
-            self.ur = pos[(5+self.rotated) % 6]
-            self.ul = pos[(4+self.rotated) % 6]
-            self.l  = pos[(3+self.rotated) % 6]
-            self.ll = pos[(2+self.rotated) % 6]
-            self.lr = pos[(1+self.rotated) % 6]
-        else:
-            self.r  = pos[(0+self.rotated) % 6]
-            self.ur = pos[(1+self.rotated) % 6]
-            self.ul = pos[(2+self.rotated) % 6]
-            self.l  = pos[(3+self.rotated) % 6]
-            self.ll = pos[(4+self.rotated) % 6]
-            self.lr = pos[(5+self.rotated) % 6]
+	# These reimplement the property access functions in SerObject.py,
+	# by walking down the stack in order until we hit the bottom or
+	# find the property that we asked for.
+	def __getitem__(self, key):
+		if key not in self.__dict__ and key[0] != '_':
+			if not self._demand_load_property(key):
+				if self._underneath != None:
+					self._underneath.__getitem__(key)
+				else:
+					self.__dict__[key] = None
+		return self.__dict__[key]
 
-    def e(self):
-        """Return the hex to the east of this one"""
-        if self.warp_e != None:
-            return load_loc(self.warp_e)
-        pos = self.pos
-        pos.x += 1
-        return load_loc(pos)
+	def __getattr__(self, key):
+		if key not in self.__dict__ and key[0] != '_':
+			if not self._demand_load_property(key):
+				if self._underneath != None:
+					self._underneath.__getitem__(key)
+				else:
+					raise AttributeError, (key, self.__class__)
+		return self.__dict__[key]
 
-    def w(self):
-        if self.warp_w != None:
-            return load_loc(self.warp_w)
-        pos = self.pos
-        pos.x -= 1
-        return load_loc(pos)
+	####
+	# Basic properties
+	def power(self, name):
+		if name in self:
+			return self[name]
+		
+		return 0
 
-    def ne(self):
-        if self.warp_ne != None:
-            return load_loc(self.warp_ne)
-        pos = self.pos
-        pos.y += 1
-        return load_loc(pos)
+	def set_mapping(self):
+		pos = [ self.e, self.ne, self.nw, self.w, self.sw, self.se ]
+		
+		if self.flipped:
+			self.r  = pos[(6+self.rotated) % 6]
+			self.ur = pos[(5+self.rotated) % 6]
+			self.ul = pos[(4+self.rotated) % 6]
+			self.l  = pos[(3+self.rotated) % 6]
+			self.ll = pos[(2+self.rotated) % 6]
+			self.lr = pos[(1+self.rotated) % 6]
+		else:
+			self.r  = pos[(0+self.rotated) % 6]
+			self.ur = pos[(1+self.rotated) % 6]
+			self.ul = pos[(2+self.rotated) % 6]
+			self.l  = pos[(3+self.rotated) % 6]
+			self.ll = pos[(4+self.rotated) % 6]
+			self.lr = pos[(5+self.rotated) % 6]
 
-    def nw(self):
-        if self.warp_nw != None:
-            return load_loc(self.warp_nw)
-        pos = self.pos
-        pos.x -= 1
-        pos.y += 1
-        return load_loc(pos)
+	def e(self):
+		"""Return the hex to the east of this one"""
+		if self.warp_e != None:
+			return load_loc(self.warp_e)
+		pos = self.pos
+		pos.x += 1
+		return load_loc(pos)
 
-    def se(self):
-        if self.warp_se != None:
-            return load_loc(self.warp_se)
-        pos = self.pos
-        pos.x += 1
-        pos.y -= 1
-        return load_loc(pos)
+	def w(self):
+		if self.warp_w != None:
+			return load_loc(self.warp_w)
+		pos = self.pos
+		pos.x -= 1
+		return load_loc(pos)
 
-    def sw(self):
-        if self.warp_se != None:
-            return load_loc(self.warp_se)
-        pos = self.pos
-        pos.y -= 1
-        return load_loc(pos)
+	def ne(self):
+		if self.warp_ne != None:
+			return load_loc(self.warp_ne)
+		pos = self.pos
+		pos.y += 1
+		return load_loc(pos)
+
+	def nw(self):
+		if self.warp_nw != None:
+			return load_loc(self.warp_nw)
+		pos = self.pos
+		pos.x -= 1
+		pos.y += 1
+		return load_loc(pos)
+
+	def se(self):
+		if self.warp_se != None:
+			return load_loc(self.warp_se)
+		pos = self.pos
+		pos.x += 1
+		pos.y -= 1
+		return load_loc(pos)
+
+	def sw(self):
+		if self.warp_se != None:
+			return load_loc(self.warp_se)
+		pos = self.pos
+		pos.y -= 1
+		return load_loc(pos)
