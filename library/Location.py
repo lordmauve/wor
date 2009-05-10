@@ -62,12 +62,30 @@ class Location(SerObject):
 		super(Location, self).__init__()
 		self.pos = pos
 		self.overlay = 0
-		self.set_mapping()
+		self._underneath = None
+		self._above = None
+		#self.set_mapping() # FIXME: See note about this method
 		
 		self._cache_object(self)
 
 	####
 	# Stack management
+	def stack_bottom(self):
+		"""Return the bottom Location of the stack that this Location
+		lives in."""
+		loc = self
+		while loc._underneath != None:
+			loc = loc._underneath
+		return loc
+	
+	def stack_top(self):
+		"""Return the top Location of the stack that this Location
+		lives in."""
+		loc = self
+		while loc._above != None:
+			loc = loc._above
+		return loc
+	
 	def deoverride(self):
 		"""Unhook this location (overlay) from the stack, and remove
 		it from the database."""
@@ -75,6 +93,15 @@ class Location(SerObject):
 		if self._above != None:
 			self._above._underneath = self._underneath
 		self._deleted = True
+
+	def add_overlay(self, loc):
+		"""Add loc to the top of the stack that this Location lives
+		in."""
+		stack_top = self.stack_top()
+		loc.overlay = stack_top.overlay + 1
+		stack_top._above = loc
+		loc._underneath = stack_top
+		loc._above = None
 
 	####
 	# Property access
@@ -86,7 +113,7 @@ class Location(SerObject):
 		if key not in self.__dict__ and key[0] != '_':
 			if not self._demand_load_property(key):
 				if self._underneath != None:
-					self._underneath.__getitem__(key)
+					return self._underneath.__getitem__(key)
 				else:
 					self.__dict__[key] = None
 		return self.__dict__[key]
@@ -95,7 +122,7 @@ class Location(SerObject):
 		if key not in self.__dict__ and key[0] != '_':
 			if not self._demand_load_property(key):
 				if self._underneath != None:
-					self._underneath.__getitem__(key)
+					return self._underneath.__getattr__(key)
 				else:
 					raise AttributeError, (key, self.__class__)
 		return self.__dict__[key]
@@ -110,7 +137,10 @@ class Location(SerObject):
 
 	def set_mapping(self):
 		pos = [ self.e, self.ne, self.nw, self.w, self.sw, self.se ]
-		
+
+		# FIXME: flipped and rotated are *player* properties, not
+		# location. This code should be w.r.t the viewing player
+		# context, not the location.
 		if self.flipped:
 			self.r  = pos[(6+self.rotated) % 6]
 			self.ur = pos[(5+self.rotated) % 6]
