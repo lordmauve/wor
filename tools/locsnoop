@@ -1,0 +1,18 @@
+#!/usr/bin/python
+
+import sys
+from Position import Position
+from Location import Location
+
+pos = Position(int(sys.argv[1]), int(sys.argv[2]), sys.argv[3])
+loc = Location.load_by_pos(pos, allprops=True)
+
+if loc == None:
+	print "Location not found"
+
+while loc != None:
+	print "type\t" + loc.type()
+	for (k, v) in loc.__dict__.items():
+		print str(k) + "\t" + str(v)
+	print "------------------------------"
+	loc = loc._underneath
