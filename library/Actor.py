@@ -3,6 +3,8 @@
 
 import SerObject
 import Util
+import Context
+from Logger import log
 
 class Actor(SerObject.SerObject):
 	####
@@ -53,6 +55,33 @@ class Actor(SerObject.SerObject):
 		pos += self.loc().power(name)
 
 		return pow
+
+	def context_get(self):
+		"""Return a dictionary of properties of this object, given the
+		current authZ context"""
+		auth = Context.authz_actor(self)
+		log.debug("Context authz is " + str(auth))
+		if auth == Context.ADMIN:
+			fields = dir(self)
+		elif auth == Context.OWNER:
+			fields = [ 'ap', 'name', 'hp' ]
+		elif auth == Context.STRANGER_VISIBLE:
+			fields = [ 'name' ]
+		else:
+			fields = [ 'name' ]
+
+		log.debug(fields)
+
+		ret = {}
+		for k in fields:
+			v = self[k]
+			if v != None:
+				if v is object and hasattr(v, 'context_get'): # FIXME: is this right?
+					ret[k] = v.context_get()
+				else:
+					ret[k] = str(v)
+
+		return ret
 
 	####
 	# Administration

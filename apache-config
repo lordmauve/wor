@@ -30,15 +30,8 @@
 		Require valid-user
 
 		SetHandler mod_python
-	</Location>
-	<Location /api/player>
-		PythonHandler hd_player::default_handler
-	</Location>
-	<Location /api/player/act>
-		PythonHandler hd_player::action_handler
-	</Location>
-	<Location /api/player/inventory>
-		PythonHandler hd_player::inventory_handler
+		PythonHandler hd_all::api_handler
+		PythonCleanupHandler hd_all::cleanup_handler
 	</Location>
 
 	LogLevel warn
