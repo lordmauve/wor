@@ -28,5 +28,5 @@ def retry_process(process):
 			process()
 			xact.execute("COMMIT")
 			complete = True
-		except (psycopg2.Error, dbex):
+		except psycopg2.Error, dbex:
 			xact.execute("ROLLBACK")
