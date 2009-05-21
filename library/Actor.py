@@ -60,7 +60,7 @@ class Actor(SerObject.SerObject):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
 		auth = Context.authz_actor(self)
-		log.debug("Context authz is " + str(auth))
+		#log.debug("Context authz is " + str(auth))
 		if auth == Context.ADMIN:
 			fields = dir(self)
 		elif auth == Context.OWNER:
@@ -76,7 +76,7 @@ class Actor(SerObject.SerObject):
 		for k in fields:
 			v = self[k]
 			if v != None:
-				if v is object and hasattr(v, 'context_get'): # FIXME: is this right?
+				if hasattr(v, 'context_get'):
 					ret[k] = v.context_get()
 				else:
 					ret[k] = str(v)

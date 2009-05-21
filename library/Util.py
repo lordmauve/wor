@@ -16,7 +16,7 @@ def render_info(info, req, prefix=''):
 	"""Recursively render the data in info into the request object"""
 	log.debug(str(info))
 	for k, v in info.iteritems():
-		if v is dict:
+		if isinstance(v, dict):
 			render_info(v, req, prefix + k + '.')
 		else:
-			req.write(prefix + k + ':' + v.replace('\n', '\n '))
+			req.write(prefix + k + ':' + str(v).replace('\n', '\n ') + '\n')
