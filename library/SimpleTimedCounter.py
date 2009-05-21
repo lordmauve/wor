@@ -2,9 +2,9 @@
 # Timed counter: something happens to the counter every n seconds
 
 import time
-import OnLoad
+from OnLoad import OnLoad
 
-class SimpleTimedCounter(OnLoad.OnLoad):
+class SimpleTimedCounter(OnLoad):
 	# FIXME: Add "power" property so that we can modify the interval
 	# properly? (Or punt to a different class?)
 	def __init__(self, parent, value, interval, maximum, minimum=0, increment=1, last=time.time()):
@@ -27,3 +27,10 @@ class SimpleTimedCounter(OnLoad.OnLoad):
 
 		self.value += increments * self.increment
 		self.last += increments * self.interval
+
+	def context_get(self):
+		return { 'value': self.value,
+				 'interval': self.interval,
+				 'maximum': self.maximum,
+				 'last': self.last
+				 }
