@@ -4,7 +4,7 @@
 from Database import DB
 import Actor
 from ItemContainer import ItemContainer
-from ItemLib.Punch import Punch
+from Punch import Punch
 from SimpleAction import SimpleAction
 from SimpleTimedCounter import SimpleTimedCounter
 from Logger import log
