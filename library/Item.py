@@ -14,6 +14,7 @@ class Item(SerObject.SerObject):
 	"""
 	_table = "item"
 	cache_by_id = {}
+	class_cache_by_name = {}
 
 	# Default failure function is a mean life of 300, and equal
 	# probability of failing on each use.
@@ -31,14 +32,25 @@ class Item(SerObject.SerObject):
 		return k/l * math.pow(x/l, k-1.0)
 
 	@classmethod
-	def name_for(cls, player):
+	def name_for(cls, player, count=1):
+		if count > 1:
+			if hasattr(cls, plural):
+				return cls.plural
+			else:
+				return cls.name + "s"
 		return cls.name
 
 	@classmethod
-	def plural_for(cls, player):
-		if hasattr(cls, plural):
-			return cls.plural
-		return cls.name_for(player) + 's'
+	def get_class(cls, name):
+		"""Obtain and cache an item class object by name"""
+		if name in cls.class_cache_by_name:
+			return cls.class_cache_by_name[name]
+		# Load the containing module
+		mod = __import__(name, globals(), locals(), [name], -1)
+		# Cache the class from that module -- assumes all classes have
+		# the exact same name as their containing module
+		cls.class_cache_by_name[name] = mod.__dict__[name]
+		return cls.class_cache_by_name[name]
 
 	####
 	# Add the indices for saving this object
