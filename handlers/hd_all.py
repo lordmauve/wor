@@ -11,6 +11,7 @@ from Item import Item
 import Context
 import Logger
 import hd_actor
+import hd_item
 
 def api_handler(req):
 	"""This is the core function for the REST API. All requests pass
@@ -36,7 +37,7 @@ def api_handler(req):
 		return apache.HTTP_INTERNAL_SERVER_ERROR
 	components.pop(0)
 		
-	Logger.log.debug(str(components))
+	Logger.log.debug("Request components: " + str(components))
 	if components[0] == '':
 		apache.redirect(req, 'http://worldofrodney.org/')
 		# Does not return
@@ -44,6 +45,15 @@ def api_handler(req):
 		# Get the list of actors owned by this account
 		# FIXME
 		pass
+	elif components[0] == 'items':
+		# Get information on items: class/name mapping, for example
+		# FIXME: Pass off to item handlers
+		if components[1] == 'names':
+			return retry_process(
+				lambda: hd_item.item_names_handler(
+					req, components[2:]))
+		else:
+			return apache.HTTP_NOT_FOUND
 	else:
 		act_id = check_actor(req)
 		Context.context = Player.load(act_id)
