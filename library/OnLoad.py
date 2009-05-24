@@ -9,7 +9,7 @@ class OnLoad(object):
 	def __setstate__(self, state):
 		for k, v in state.iteritems():
 			self.__dict__[k] = v
-		if 'on_load_parent' in self.__dict__:
-			if '_on_load_objects' not in self.on_load_parent.__dict__:
+		if hasattr(self, 'on_load_parent'):
+			if not hasattr(self.on_load_parent, '_on_load_objects'):
 				self.on_load_parent._on_load_objects = []
 			self.on_load_parent._on_load_objects.append(self)
