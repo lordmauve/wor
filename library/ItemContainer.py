@@ -3,13 +3,17 @@
 
 import psycopg2
 from Database import DB
+from Item import Item
 from OnLoad import OnLoad
+from Logger import log
+import Context
 
 class ItemContainer(OnLoad):
 	"""Implements a generic container of items, serialised to the
 	object-ownership table. This container supports caching of items,
 	and demand-loading."""
 	def __init__(self, parent, name="container"):
+		super(ItemContainer, self).__init__(parent)
 		self.parent = parent
 		self.name = name
 		self._item_ids = set()
@@ -69,25 +73,23 @@ class ItemContainer(OnLoad):
 				state[k] = self.__dict__[k]
 		return state
 
-	def __setstate__(self, state):
-		"""Unpickle this object"""
-		# Set up basic state from the pickled state
-		for k, v in state.iteritems():
-			self.__dict__[k] = v
-
+	def on_load(self):
+		self._item_ids = set()
+		self._item_types = {}
 		self._changes = set()
 
-	def _on_load(self):
 		# Now load the contents of the container
 		cur = DB.cursor()
-		cur.execute('SELECT item_id, type FROM item, item_owner'
+		cur.execute('SELECT item.id, item.type'
+					+ ' FROM item, item_owner'
 					+ ' WHERE item.id = item_owner.item_id'
 					+ '   AND item_owner.owner_type = %(owner_type)s'
 					+ '   AND item_owner.owner_id = %(owner_id)s'
 					+ '   AND item_owner.container = %(container)s',
-					{ 'owner_type': self.parent.type,
+					{ 'owner_type': self.parent.type(),
 					  'owner_id': self.parent._id,
 					  'container': self.name })
+
 		row = cur.fetchone()
 		while row != None:
 			# Update the list by ID
@@ -97,6 +99,20 @@ class ItemContainer(OnLoad):
 				self._item_types[row[1]] = set()
 			self._item_types[row[1]].add(row[0])
 			row = cur.fetchone()
+
+	####
+	# REST API support
+	def context_get_equip(self):
+		"""Retrieve a table of the contents of this object for
+		purposes of the REST API"""
+		ret = []
+		for itype, ilist in self._item_types.iteritems():
+			for itemid in ilist:
+				# FIXME: Get and return count
+				textname = Item.get_class(itype).name_for(Context.context)
+				ret.append((itype, itemid, textname))
+				
+		return ret
 
 	####
 	# Item access

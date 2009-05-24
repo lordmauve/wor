@@ -3,6 +3,7 @@
 # This is the base object for all objects that might end up in the database
 
 from Database import DB
+from Logger import log
 import pickle
 import copy
 import psycopg2
@@ -60,6 +61,15 @@ class SerObject(object):
 		
 		obj._id = int(row[0])
 		obj._setup()
+
+		# Anything (member objects) which wants to be called after
+		# load gets called here
+		log.debug("SerObject at " + str(obj) + " wants " + str(obj._on_load_objects))
+		if '_on_load_objects' in obj.__dict__:
+			for olo in obj._on_load_objects:
+				olo.on_load()
+			del(obj._on_load_objects)
+
 		return obj
 
 	def _set_prop_from_row(self, row):
@@ -253,12 +263,6 @@ class SerObject(object):
 		"""Load an object from a pickled state"""
 		for k, v in state.iteritems():
 			self.__dict__[k] = v
-		# Anything (member objects) which wants to be called after
-		# load gets called here
-		if '_on_load_objects' in self.__dict__:
-			for obj in self._on_load_objects:
-				obj.on_load()
-			del(self._on_load_objects)
 
 	####
 	# Property access. Not directly related to object serialisation,

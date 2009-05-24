@@ -20,3 +20,8 @@ def render_info(info, req, prefix=''):
 			render_info(v, req, prefix + k + '.')
 		else:
 			req.write(prefix + k + ':' + str(v).replace('\n', '\n ') + '\n')
+
+def render_equip(info, req):
+	"""Render a table of data in info into the request object"""
+	for item in info:
+		req.write(item[0] + ":" + str(item[1]) + ":" + item[2] + "\n")
