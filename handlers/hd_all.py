@@ -59,7 +59,7 @@ def api_handler(req):
 				req.write(str(components))
 				return apache.HTTP_NOT_FOUND
 
-			retry_process(
+			return retry_process(
 				lambda: hd_actor.actor_handler(
 					req,
 					target,
@@ -70,7 +70,7 @@ def api_handler(req):
 				target = Context.context.loc()._id
 			elif components[1] == 'neighbourhood':
 				target = Context.context.loc()._id
-				DB.retry_process(
+				retry_process(
 					lambda: hd_location.neighbourhood_handler(
 						req,
 						target, components[2:]))
@@ -81,7 +81,7 @@ def api_handler(req):
 			else:
 				return apache.HTTP_NOT_FOUND
 
-			retry_process(
+			return retry_process(
 				lambda: hd_location.location_handler(
 					req,
 					target,
@@ -93,7 +93,7 @@ def api_handler(req):
 			else:
 				return apache.HTTP_NOT_FOUND
 			
-			retry_process(
+			return retry_process(
 				lambda: hd_item.item_handler(
 					req,
 					target,

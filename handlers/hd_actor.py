@@ -10,7 +10,7 @@ def actor_handler(req, target, components):
 	"""Handle a request for actor information, for the given target ID"""
 	# We must have precisely one component in the request URL
 	if len(components) != 1:
-		raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
+		return apache.HTTP_NOT_FOUND
 
 	req.content_type = "text/plain"
 	actor = Player.load(target)
@@ -26,14 +26,16 @@ def actor_handler(req, target, components):
 		elif req.method == 'POST':
 			# FIXME: Despatch actions here
 			pass
+		else:
+			# If it's not GET or POST, complain
+			return apache.HTTP_METHOD_NOT_ALLOWED
 		
 		return apache.OK
 
 	# Now handle everything else: it's all GETs from here on
 	if req.method != 'GET':
-		# FIXME: Throw a wobbly
-		pass
-		#raise apache.SERVER_RETURN, apache.
+		# If it's not a GET, throw a wobbly
+		return apache.HTTP_METHOD_NOT_ALLOWED
 
 	log.debug("Actor handler: requested " + str(components))
 	if components[0] == 'desc':
@@ -53,6 +55,6 @@ def actor_handler(req, target, components):
 		# FIXME: get the latest actor logs from the DB and return them
 		pass
 	else:
-		raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
+		return apache.HTTP_NOT_FOUND
 
 	return apache.OK
