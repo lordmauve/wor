@@ -42,12 +42,12 @@ def actor_handler(req, target, components):
 		Util.render_info(info, req)
 	elif components[0] == 'inventory':
 		# Inventory
-		info = actor.inventory.context_get()
-		Util.render_info(info, req)
+		info = actor.inventory.context_get_equip()
+		Util.render_equip(info, req)
 	elif components[0] == 'equipment':
 		# Equipment
-		info = actor.equipment.context_get()
-		Util.render_info(info, req)
+		info = actor.equipment.context_get_equip()
+		Util.render_equip(info, req)
 	elif components[0] == 'log':
 		# Actor logs
 		# FIXME: get the latest actor logs from the DB and return them
