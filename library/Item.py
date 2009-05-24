@@ -6,6 +6,9 @@ import SerObject
 import Actor
 import Location
 import Util
+import BaseConfig
+import os
+import os.path
 
 class Item(SerObject.SerObject):
 	"""An item. By default, all items are unique. Some items are
@@ -32,7 +35,7 @@ class Item(SerObject.SerObject):
 		return k/l * math.pow(x/l, k-1.0)
 
 	@classmethod
-	def name_for(cls, player, count=1):
+	def name_for(cls, player=None, count=1):
 		if count > 1:
 			if hasattr(cls, plural):
 				return cls.plural
@@ -51,6 +54,17 @@ class Item(SerObject.SerObject):
 		# the exact same name as their containing module
 		cls.class_cache_by_name[name] = mod.__dict__[name]
 		return cls.class_cache_by_name[name]
+
+	@staticmethod
+	def list_all_classes():
+		"""Obtain a list of all item class names"""
+		# Get all the files in the Item directory
+		cls_list = os.listdir(os.path.join(BaseConfig.base_dir, "content/Item"))
+		# Filter out just the .py files
+		cls_list = filter(lambda x: x.endswith(".py"), cls_list)
+		cls_list = filter(lambda x: x[0] != '_', cls_list)
+		# Remove the trailing .py and return
+		return [ x[:-3] for x in cls_list ]
 
 	####
 	# Add the indices for saving this object
