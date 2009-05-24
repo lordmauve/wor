@@ -12,9 +12,9 @@ function load_basic_player(req)
 			var p = new Player(req.responseText);
 			
 			panel = "<table><tr>";
-			panel += "<td class='header'><b>" + p.username + "</b></td>";
-			panel += "<td class='header'>AP " + p.ap + "/" + p.maxap + "</td>";
-			panel += "<td class='header'>HP " + p.hp + "/" + p.maxhp + "</td>";
+			panel += "<td class='header'><b>" + p['name'] + "</b></td>";
+			panel += "<td class='header'>AP " + p['ap.value'] + "/" + p['ap.maximum'] + "</td>";
+			panel += "<td class='header'>HP " + p['hp'] + "/" + p.maxhp + "</td>";
 			panel += "</tr></table>";
 
 			top_panel.innerHTML = panel;
@@ -33,12 +33,7 @@ function load_player_act(req)
 {
   if(req.readyState == 4)
   {
-    var panel = document.getElementById("player_actions");
-    if(!panel)
-    {
-      document.getElementById("left_panel").innerHTML += "<div id='player_action' class='panel'></div>";
-      panel = document.getElementById("player_action");
-    }
+    var panel = get_side_panel("player_actions");
 
     if(req.status == 200)
       // Content is basically what we need: render it directly
@@ -71,10 +66,10 @@ function act_simple(fuid)
 {
 	// Perform a simple action (i.e. with no parameters, just a button)
 	var act_req = get_ajax_object();
-	var api = "http://" + document.domain + "/api/player/act";
 	act_req.onreadystatechange = function() { act_response(act_req); };
-	act_req.open("POST", api, true, "darksatanic", "wor");
+	act_req.open("POST", api + "/actor/self/action", true, "darksatanic", "wor");
 	act_req.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
+	act_req.setRequestHeader("X-WoR-Actor", "1")
 	act_req.send("action="+fuid);
 }
 
