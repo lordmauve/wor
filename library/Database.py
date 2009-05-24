@@ -25,8 +25,10 @@ def retry_process(process):
 		xact = DB.cursor()
 		try:
 			xact.execute("BEGIN TRANSACTION")
-			process()
+			ret = process()
 			xact.execute("COMMIT")
 			complete = True
 		except psycopg2.Error, dbex:
 			xact.execute("ROLLBACK")
+
+	return ret
