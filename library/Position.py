@@ -7,6 +7,11 @@ class Position:
 		self.y = y
 		self.layer = layer
 
+	def context_get(self):
+		return { 'x': self.x,
+				 'y': self.y,
+				 'layer': self.layer }
+
 	def distance(self, them):
 		"""Compute the Euclidean distance between this position and
 		the position of"them"."""
