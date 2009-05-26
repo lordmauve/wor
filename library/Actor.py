@@ -7,17 +7,23 @@ import Context
 from Logger import log
 
 class Actor(SerObject.SerObject):
+	# We have our own DB table and caching scheme for Actors
+	_table = 'actor'
+	cache_by_id = {}
+
 	####
 	# Creating a new object
-	def __init__(self):
+	def __init__(self, name, position):
 		"""Create a completely new actor"""
 		super(Actor, self).__init__()
+		self.name = name
+		self.position = position
 
 	def _save_indices(self):
 		inds = super(Actor, self)._save_indices()
-		#inds['x'] = self.position.x
-		#inds['y'] = self.position.y
-		#inds['layer'] = self.position.layer
+		inds['x'] = self.position.x
+		inds['y'] = self.position.y
+		inds['layer'] = self.position.layer
 		return inds
 
 	####

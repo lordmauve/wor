@@ -97,8 +97,11 @@ SELECT pg_catalog.setval('actor_id_seq', 4, true);
 --
 
 CREATE TABLE actor (
-    actor_id integer DEFAULT nextval('actor_id_seq'::regclass) NOT NULL,
+    id integer DEFAULT nextval('actor_id_seq'::regclass) NOT NULL,
     name character varying(32),
+	x integer,
+	y integer,
+	layer character varying(32),
     state bytea
 );
 
@@ -198,9 +201,9 @@ ALTER TABLE public.item_properties OWNER TO wor;
 
 CREATE TABLE location (
     id integer NOT NULL,
-    x integer NOT NULL,
-    y integer NOT NULL,
-    layer character varying(32) NOT NULL,
+    x integer,
+    y integer,
+    layer character varying(32),
     state bytea,
     "overlay" integer
 );
@@ -294,7 +297,7 @@ ALTER TABLE ONLY account
 --
 
 ALTER TABLE ONLY actor
-    ADD CONSTRAINT actor_id_key UNIQUE (actor_id);
+    ADD CONSTRAINT actor_id_key UNIQUE (id);
 
 
 --
@@ -310,7 +313,7 @@ ALTER TABLE ONLY actor
 --
 
 ALTER TABLE ONLY actor
-    ADD CONSTRAINT actor_pkey PRIMARY KEY (actor_id);
+    ADD CONSTRAINT actor_pkey PRIMARY KEY (id);
 
 
 --
@@ -374,7 +377,7 @@ ALTER TABLE ONLY account_actor
 --
 
 ALTER TABLE ONLY account_actor
-    ADD CONSTRAINT account_actor_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES actor(actor_id) ON DELETE CASCADE;
+    ADD CONSTRAINT account_actor_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES actor(id) ON DELETE CASCADE;
 
 
 --
@@ -382,7 +385,7 @@ ALTER TABLE ONLY account_actor
 --
 
 ALTER TABLE ONLY actor_properties
-    ADD CONSTRAINT actor_properties_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES actor(actor_id) ON DELETE CASCADE;
+    ADD CONSTRAINT actor_properties_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES actor(id) ON DELETE CASCADE;
 
 
 --
