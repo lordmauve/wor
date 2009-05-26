@@ -1,0 +1,39 @@
+#!/usr/bin/python
+
+"""Add a complete class to a player object. Usage:
+
+addclass <actor> <propertyname> <classname> [class-parameters]
+"""
+
+import sys
+
+from Player import Player
+from Alignment import Alignment
+from Database import DB
+
+def retype(value):
+	"""Converts the string value into an int, float or string"""
+	try:
+		r = int(value)
+	except:
+		try:
+			r = float(value)
+		except:
+			r = str(value)
+	return r
+
+p = Player.load_by_name(sys.argv[1])
+if p == None:
+    print "Player not found"
+    sys.exit(1)
+
+classname = sys.argv[3]
+module = __import__(classname, globals(), locals(), [], -1)
+cls = module.__dict__[classname]
+
+params = [ retype(x) for x in sys.argv[4:] ]
+obj = cls(*params)
+p[sys.argv[2]] = obj
+p.save()
+
+DB.commit()

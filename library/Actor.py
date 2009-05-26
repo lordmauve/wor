@@ -5,6 +5,7 @@ import SerObject
 import Util
 import Context
 from Logger import log
+from Location import Location
 
 class Actor(SerObject.SerObject):
 	# We have our own DB table and caching scheme for Actors
@@ -30,8 +31,8 @@ class Actor(SerObject.SerObject):
 	# Basic properties of the object
 	def loc(self):
 		"""Return the Location (or Road for monsters) that we're stood on"""
-		if self._loc == None:
-			self._loc = load_location(self.position)
+		if not hasattr(self, '_loc'):
+			self._loc = Location.load_by_pos(self.position)
 		return self._loc
 
 	def held_item(self):
