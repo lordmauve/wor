@@ -10,7 +10,7 @@ from Database import DB
 from Rock import Rock
 import GameUtil
 
-p = Player('darksatanic', 'wor', Alignment.WOOD)
+p = Player('darksatanic', Alignment.WOOD)
 rock = Rock()
 p.inventory.add(rock)
 
