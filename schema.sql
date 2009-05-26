@@ -91,9 +91,9 @@ ALTER TABLE public.item_properties OWNER TO wor;
 
 CREATE TABLE "location" (
     id integer NOT NULL,
-    x integer NOT NULL,
-    y integer NOT NULL,
-    layer character varying(32) NOT NULL,
+    x integer,
+    y integer,
+    layer character varying(32),
     state bytea,
     "overlay" integer
 );
