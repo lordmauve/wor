@@ -7,6 +7,18 @@ table.top_level td {
 	border: solid 2px black;
 	padding: 5px;
 }
+table.top_level table td {
+	border: 0px none;
+}
+
+tr.hex_corner {
+	text-align: center
+}
+
+tr.hex_corner td {
+	margin: 0px;
+	padding: 0px;
+}
 
 #top_panel table {
 	width: 100%;
