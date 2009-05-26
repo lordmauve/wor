@@ -22,12 +22,112 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: account_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
+--
+
+CREATE SEQUENCE account_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.account_id_seq OWNER TO wor;
+
+--
+-- Name: account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wor
+--
+
+SELECT pg_catalog.setval('account_id_seq', 5, true);
+
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: account; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE account (
+    account_id integer DEFAULT nextval('account_id_seq'::regclass) NOT NULL,
+    username character varying(32),
+    password character varying(32),
+    realname character varying(64),
+    email character varying(64)
+);
+
+
+ALTER TABLE public.account OWNER TO wor;
+
+--
+-- Name: account_actor; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE account_actor (
+    account_id integer NOT NULL,
+    actor_id integer NOT NULL
+);
+
+
+ALTER TABLE public.account_actor OWNER TO wor;
+
+--
+-- Name: actor_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
+--
+
+CREATE SEQUENCE actor_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.actor_id_seq OWNER TO wor;
+
+--
+-- Name: actor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wor
+--
+
+SELECT pg_catalog.setval('actor_id_seq', 4, true);
+
+
+--
+-- Name: actor; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE actor (
+    actor_id integer DEFAULT nextval('actor_id_seq'::regclass) NOT NULL,
+    name character varying(32),
+    state bytea
+);
+
+
+ALTER TABLE public.actor OWNER TO wor;
+
+--
+-- Name: actor_properties; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE actor_properties (
+    actor_id integer NOT NULL,
+    key text NOT NULL,
+    type character(1),
+    ivalue integer,
+    fvalue double precision,
+    tvalue text
+);
+
+
+ALTER TABLE public.actor_properties OWNER TO wor;
+
+--
 -- Name: item; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
 --
 
 CREATE TABLE item (
     id integer NOT NULL,
-    "type" character varying,
+    type character varying,
     state bytea
 );
 
@@ -56,6 +156,13 @@ ALTER SEQUENCE item_id_seq OWNED BY item.id;
 
 
 --
+-- Name: item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wor
+--
+
+SELECT pg_catalog.setval('item_id_seq', 1, false);
+
+
+--
 -- Name: item_owner; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
 --
 
@@ -75,8 +182,8 @@ ALTER TABLE public.item_owner OWNER TO wor;
 
 CREATE TABLE item_properties (
     item_id integer NOT NULL,
-    "key" text NOT NULL,
-    "type" character(1),
+    key text NOT NULL,
+    type character(1),
     ivalue integer,
     fvalue double precision,
     tvalue text
@@ -89,17 +196,17 @@ ALTER TABLE public.item_properties OWNER TO wor;
 -- Name: location; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
 --
 
-CREATE TABLE "location" (
+CREATE TABLE location (
     id integer NOT NULL,
-    x integer,
-    y integer,
-    layer character varying(32),
+    x integer NOT NULL,
+    y integer NOT NULL,
+    layer character varying(32) NOT NULL,
     state bytea,
     "overlay" integer
 );
 
 
-ALTER TABLE public."location" OWNER TO wor;
+ALTER TABLE public.location OWNER TO wor;
 
 --
 -- Name: location_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
@@ -119,7 +226,14 @@ ALTER TABLE public.location_id_seq OWNER TO wor;
 -- Name: location_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: wor
 --
 
-ALTER SEQUENCE location_id_seq OWNED BY "location".id;
+ALTER SEQUENCE location_id_seq OWNED BY location.id;
+
+
+--
+-- Name: location_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wor
+--
+
+SELECT pg_catalog.setval('location_id_seq', 1, false);
 
 
 --
@@ -128,8 +242,8 @@ ALTER SEQUENCE location_id_seq OWNED BY "location".id;
 
 CREATE TABLE location_properties (
     location_id integer NOT NULL,
-    "key" text NOT NULL,
-    "type" character(1),
+    key text NOT NULL,
+    type character(1),
     ivalue integer,
     fvalue double precision,
     tvalue text
@@ -137,57 +251,6 @@ CREATE TABLE location_properties (
 
 
 ALTER TABLE public.location_properties OWNER TO wor;
-
---
--- Name: player; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
---
-
-CREATE TABLE player (
-    id integer NOT NULL,
-    username character varying(32),
-    "password" character varying(32),
-    state bytea
-);
-
-
-ALTER TABLE public.player OWNER TO wor;
-
---
--- Name: player_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
---
-
-CREATE SEQUENCE player_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MAXVALUE
-    NO MINVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.player_id_seq OWNER TO wor;
-
---
--- Name: player_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: wor
---
-
-ALTER SEQUENCE player_id_seq OWNED BY player.id;
-
-
---
--- Name: player_properties; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
---
-
-CREATE TABLE player_properties (
-    player_id integer NOT NULL,
-    "key" text NOT NULL,
-    "type" character(1),
-    ivalue integer,
-    fvalue double precision,
-    tvalue text
-);
-
-
-ALTER TABLE public.player_properties OWNER TO wor;
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: wor
@@ -200,14 +263,62 @@ ALTER TABLE item ALTER COLUMN id SET DEFAULT nextval('item_id_seq'::regclass);
 -- Name: id; Type: DEFAULT; Schema: public; Owner: wor
 --
 
-ALTER TABLE "location" ALTER COLUMN id SET DEFAULT nextval('location_id_seq'::regclass);
+ALTER TABLE location ALTER COLUMN id SET DEFAULT nextval('location_id_seq'::regclass);
+
+--
+-- Name: account_actor_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY account_actor
+    ADD CONSTRAINT account_actor_pkey PRIMARY KEY (account_id, actor_id);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: wor
+-- Name: account_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
 --
 
-ALTER TABLE player ALTER COLUMN id SET DEFAULT nextval('player_id_seq'::regclass);
+ALTER TABLE ONLY account
+    ADD CONSTRAINT account_pkey PRIMARY KEY (account_id);
+
+
+--
+-- Name: account_username; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY account
+    ADD CONSTRAINT account_username UNIQUE (username);
+
+
+--
+-- Name: actor_id_key; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY actor
+    ADD CONSTRAINT actor_id_key UNIQUE (actor_id);
+
+
+--
+-- Name: actor_name; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY actor
+    ADD CONSTRAINT actor_name UNIQUE (name);
+
+
+--
+-- Name: actor_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY actor
+    ADD CONSTRAINT actor_pkey PRIMARY KEY (actor_id);
+
+
+--
+-- Name: actor_properties_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY actor_properties
+    ADD CONSTRAINT actor_properties_pkey PRIMARY KEY (actor_id, key);
 
 
 --
@@ -231,14 +342,14 @@ ALTER TABLE ONLY item
 --
 
 ALTER TABLE ONLY item_properties
-    ADD CONSTRAINT item_properties_pkey PRIMARY KEY (item_id, "key");
+    ADD CONSTRAINT item_properties_pkey PRIMARY KEY (item_id, key);
 
 
 --
 -- Name: location_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
 --
 
-ALTER TABLE ONLY "location"
+ALTER TABLE ONLY location
     ADD CONSTRAINT location_pkey PRIMARY KEY (id);
 
 
@@ -247,23 +358,31 @@ ALTER TABLE ONLY "location"
 --
 
 ALTER TABLE ONLY location_properties
-    ADD CONSTRAINT location_properties_pkey PRIMARY KEY (location_id, "key");
+    ADD CONSTRAINT location_properties_pkey PRIMARY KEY (location_id, key);
 
 
 --
--- Name: player_id_key; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+-- Name: account_actor_account_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: wor
 --
 
-ALTER TABLE ONLY player
-    ADD CONSTRAINT player_id_key UNIQUE (id);
+ALTER TABLE ONLY account_actor
+    ADD CONSTRAINT account_actor_account_id_fkey FOREIGN KEY (account_id) REFERENCES account(account_id) ON DELETE CASCADE;
 
 
 --
--- Name: player_properties_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+-- Name: account_actor_actor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: wor
 --
 
-ALTER TABLE ONLY player_properties
-    ADD CONSTRAINT player_properties_pkey PRIMARY KEY (player_id, "key");
+ALTER TABLE ONLY account_actor
+    ADD CONSTRAINT account_actor_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES actor(actor_id) ON DELETE CASCADE;
+
+
+--
+-- Name: actor_properties_actor_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: wor
+--
+
+ALTER TABLE ONLY actor_properties
+    ADD CONSTRAINT actor_properties_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES actor(actor_id) ON DELETE CASCADE;
 
 
 --
@@ -287,15 +406,7 @@ ALTER TABLE ONLY item_properties
 --
 
 ALTER TABLE ONLY location_properties
-    ADD CONSTRAINT location_properties_location_id_fkey FOREIGN KEY (location_id) REFERENCES "location"(id) ON DELETE CASCADE;
-
-
---
--- Name: player_properties_player_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: wor
---
-
-ALTER TABLE ONLY player_properties
-    ADD CONSTRAINT player_properties_player_id_fkey FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE;
+    ADD CONSTRAINT location_properties_location_id_fkey FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE;
 
 
 --
