@@ -2,6 +2,13 @@
 
 context = None
 
+# Fake "Player" object to use as an admin context
+class __FakeActor(dict):
+	def __init__(self):
+		self['admin'] = True
+
+ADMIN_CTX = __FakeActor()
+
 # Administrator access
 ADMIN = 0
 # Owner access
