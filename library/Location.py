@@ -4,6 +4,7 @@
 from Database import DB
 from SerObject import SerObject
 from Logger import log
+import copy
 
 class Location(SerObject):
 	_table = 'location'
@@ -159,44 +160,44 @@ class Location(SerObject):
 	def e(self):
 		"""Return the hex to the east of this one"""
 		if self.warp_e != None:
-			return load_loc(self.warp_e)
-		pos = self.pos
+			return load_by_pos(self.warp_e)
+		pos = copy.copy(self.pos)
 		pos.x += 1
-		return load_loc(pos)
+		return self.load_by_pos(pos)
 
 	def w(self):
 		if self.warp_w != None:
-			return load_loc(self.warp_w)
-		pos = self.pos
+			return load_by_pos(self.warp_w)
+		pos = copy.copy(self.pos)
 		pos.x -= 1
-		return load_loc(pos)
+		return self.load_by_pos(pos)
 
 	def ne(self):
 		if self.warp_ne != None:
-			return load_loc(self.warp_ne)
-		pos = self.pos
+			return load_by_pos(self.warp_ne)
+		pos = copy.copy(self.pos)
 		pos.y += 1
-		return load_loc(pos)
+		return self.load_by_pos(pos)
 
 	def nw(self):
 		if self.warp_nw != None:
-			return load_loc(self.warp_nw)
-		pos = self.pos
+			return load_by_pos(self.warp_nw)
+		pos = copy.copy(self.pos)
 		pos.x -= 1
 		pos.y += 1
-		return load_loc(pos)
+		return self.load_by_pos(pos)
 
 	def se(self):
 		if self.warp_se != None:
-			return load_loc(self.warp_se)
-		pos = self.pos
+			return load_by_pos(self.warp_se)
+		pos = copy.copy(self.pos)
 		pos.x += 1
 		pos.y -= 1
-		return load_loc(pos)
+		return self.load_by_pos(pos)
 
 	def sw(self):
 		if self.warp_se != None:
-			return load_loc(self.warp_se)
-		pos = self.pos
+			return load_by_pos(self.warp_se)
+		pos = copy.copy(self.pos)
 		pos.y -= 1
-		return load_loc(pos)
+		return self.load_by_pos(pos)
