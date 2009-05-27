@@ -81,12 +81,16 @@ class Actor(SerObject.SerObject):
 
 		ret = {}
 		for k in fields:
-			v = self[k]
-			if v != None:
-				if hasattr(v, 'context_get'):
-					ret[k] = v.context_get()
-				else:
-					ret[k] = str(v)
+			try:
+				v = self[k]
+			except KeyError:
+				pass
+			else:
+				if v != None:
+					if hasattr(v, 'context_get'):
+						ret[k] = v.context_get()
+					else:
+						ret[k] = str(v)
 
 		return ret
 

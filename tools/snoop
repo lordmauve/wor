@@ -2,8 +2,13 @@
 
 import sys
 from Player import Player
+import Context
+import Util
+
+# We're running in admin context
+Context.context = Context.ADMIN_CTX
 
 p = Player.load_by_name(sys.argv[1], allprops=True)
 
-for (k, v) in p.__dict__.items():
-    print str(k) + "\t" + str(v)
+info = p.context_get()
+Util.render_info(info, sys.stdout, indent=Util.info_key_length(info)+1)
