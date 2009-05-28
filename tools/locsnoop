@@ -3,6 +3,10 @@
 import sys
 from Position import Position
 from Location import Location
+import Util
+import Context
+
+Context.context = Context.ADMIN_CTX
 
 pos = Position(int(sys.argv[1]), int(sys.argv[2]), sys.argv[3])
 loc = Location.load_by_pos(pos, allprops=True)
@@ -11,8 +15,9 @@ if loc == None:
 	print "Location not found"
 
 while loc != None:
-	print "type\t" + loc.type()
-	for (k, v) in loc.__dict__.items():
-		print str(k) + "\t" + str(v)
+	info = loc.context_get()
+	ind = Util.info_key_length(info)+1
+	print ("%-"+str(ind+1)+"s%s") % ("type:", loc.ob_type())
+	Util.render_info(info, sys.stdout, indent=ind)
 	print "------------------------------"
 	loc = loc._underneath

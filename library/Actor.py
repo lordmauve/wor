@@ -1,6 +1,7 @@
 ##########
 # Generic actor: covers players, NPCs, monsters
 
+import types
 import SerObject
 import Util
 import Context
@@ -66,10 +67,17 @@ class Actor(SerObject.SerObject):
 	def context_get(self):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
+		ret = {}
+
 		auth = Context.authz_actor(self)
-		#log.debug("Context authz is " + str(auth))
 		if auth == Context.ADMIN:
 			fields = dir(self)
+			# Filter out anything starting with __
+			fields = filter(lambda x: x[0] != '_' or x[1] != '_', fields)
+			# Filter out methods
+			fields = filter(lambda x: not isinstance(getattr(self, x),
+													 types.MethodType),
+							fields)
 		elif auth == Context.OWNER:
 			fields = [ 'ap', 'name', 'hp' ]
 		elif auth == Context.STRANGER_VISIBLE:
@@ -77,10 +85,10 @@ class Actor(SerObject.SerObject):
 		else:
 			fields = [ 'name' ]
 
-		log.debug(fields)
-
-		ret = {}
 		for k in fields:
+			if k in ( 'cache_by_id' ):
+				continue
+			
 			try:
 				v = self[k]
 			except KeyError:

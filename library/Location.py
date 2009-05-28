@@ -1,10 +1,12 @@
 ##########
 # A location
 
+import copy
 from Database import DB
 from SerObject import SerObject
 from Logger import log
-import copy
+import Context
+import types
 
 class Location(SerObject):
 	_table = 'location'
@@ -127,6 +129,45 @@ class Location(SerObject):
 				else:
 					raise AttributeError, (key, self.__class__)
 		return self.__dict__[key]
+
+	def context_get(self):
+		"""Return a dictionary of properties of this object, given the
+		current authZ context"""
+		ret = { 'type': self.ob_type() }
+
+		auth = Context.authz_location(self)
+		if auth == Context.ADMIN:
+			fields = dir(self)
+			# Filter out anything starting with __
+			fields = filter(lambda x: x[0] != '_' or x[1] != '_', fields)
+			# Filter out methods
+			fields = filter(lambda x: not isinstance(getattr(self, x),
+													 types.MethodType),
+							fields)
+		elif auth == Context.OWNER:
+			fields = [ ]
+		elif auth == Context.STRANGER_VISIBLE:
+			fields = [ ]
+		else:
+			fields = [ ]
+
+		for k in fields:
+			if k in ( '_underneath', '_above', 'cache_by_id', 'cache_by_pos' ):
+				continue
+			
+			try:
+				v = getattr(self, k)
+			except KeyError:
+				pass
+			else:
+				if v != None:
+					if hasattr(v, 'context_get'):
+						ret[k] = v.context_get()
+					else:
+						ret[k] = str(v)
+
+		return ret
+
 
 	####
 	# Basic properties
