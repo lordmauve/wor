@@ -70,7 +70,7 @@ class Item(SerObject.SerObject):
 	# Add the indices for saving this object
 	def _save_indices(self):
 		idxs = super(Item, self)._save_indices()
-		idxs['type'] = self.type()
+		idxs['type'] = self.ob_type()
 		return idxs
 	
 	def owner(self):

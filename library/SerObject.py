@@ -5,6 +5,7 @@
 from Database import DB
 from Logger import log
 import pickle
+import pickletools
 import copy
 import psycopg2
 import Util
@@ -39,7 +40,6 @@ class SerObject(object):
 	@classmethod
 	def _load_from_row(cls, row, allprops):
 		obj = pickle.loads(row[1])
-		#obj.value_triggers = Util.default(obj['value_triggers'], {})
 
 		if allprops:
 			# Fetch all properties of the object immediately (rather
@@ -64,8 +64,7 @@ class SerObject(object):
 
 		# Anything (member objects) which wants to be called after
 		# load gets called here
-		log.debug("SerObject at " + str(obj) + " wants " + str(obj._on_load_objects))
-		if '_on_load_objects' in obj.__dict__:
+		if hasattr(obj, '_on_load_objects'):
 			for olo in obj._on_load_objects:
 				olo.on_load()
 			del(obj._on_load_objects)
@@ -246,7 +245,7 @@ class SerObject(object):
 		# the DB. This relies on self._pickle having been set up
 		# first. If it hasn't, something has gone terribly wrong, and
 		# we've probably not been called through self.save().
-		if '_pickle' not in self.__dict__:
+		if not hasattr(self, '_pickle'):
 			# Panic! (See comment above)
 			raise AssertionError()
 
@@ -255,7 +254,7 @@ class SerObject(object):
 			# We only take properties that don't start with "_", and
 			# which weren't stored in the *_properties table
 			if not k.startswith('_'):
-				obj[k] = self.__dict__[k]
+				obj[k] = getattr(self, k)
 		del(self._pickle)
 		return obj
 
@@ -271,15 +270,17 @@ class SerObject(object):
 		"""Used to implement [] subscripting, for string-based
 		property access. Also copes with on-demand loading of
 		properties. Returns None if not found."""
-		if key not in self.__dict__ and key[0] != '_':
+		if key[0] != '_' and key not in self.__dict__:
 			if not self._demand_load_property(key):
 				self.__dict__[key] = None
 		return self.__dict__[key]
 
 	def __getattr__(self, key):
 		"""Does on-demand loading of properties from the DB. Raises an
-		error if not found"""
-		if key not in self.__dict__ and key[0] != '_':
+		error if not found. This method is only called if the property
+		is not found through the normal search path (this object's
+		__dict__, this class, parent classes)."""
+		if key[0] != '_' and key not in self.__dict__:
 			if not self._demand_load_property(key):
 				raise AttributeError, (key, self.__class__)
 		return self.__dict__[key]
@@ -380,5 +381,5 @@ class SerObject(object):
 	def demolish(self):
 		self._deleted = True
 
-	def type(self):
+	def ob_type(self):
 		return self.__class__.__name__
