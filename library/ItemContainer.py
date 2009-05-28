@@ -27,7 +27,7 @@ class ItemContainer(OnLoad):
 		# Update the database, using our list of changed fields
 		cur = DB.cursor()
 		params = {}
-		params['owner_type'] = self.parent.type()
+		params['owner_type'] = self.parent.ob_type()
 		params['owner_id'] = self.parent._id
 		params['container'] = self.name
 
@@ -86,7 +86,7 @@ class ItemContainer(OnLoad):
 					+ '   AND item_owner.owner_type = %(owner_type)s'
 					+ '   AND item_owner.owner_id = %(owner_id)s'
 					+ '   AND item_owner.container = %(container)s',
-					{ 'owner_type': self.parent.type(),
+					{ 'owner_type': self.parent.ob_type(),
 					  'owner_id': self.parent._id,
 					  'container': self.name })
 
@@ -148,7 +148,7 @@ class ItemContainer(OnLoad):
 
 	def add(self, item):
 		self._item_ids.add(item._id)
-		itype = item.type()
+		itype = item.ob_type()
 		if itype not in self._item_types:
 			self._item_types[itype] = set()
 		self._item_types[itype].add(item._id)
