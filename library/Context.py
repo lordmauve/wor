@@ -43,8 +43,8 @@ def authz_location(loc):
 	if context['admin']:
 		return ADMIN
 
-	if context._id == loc.owner()._id:
-		return OWNER
+	#if context._id == loc.owner()._id:
+	#	return OWNER
 
 	if context.loc().pos.hop_distance(loc.pos) <= context.power('sight'):
 		return STRANGER_VISIBLE
