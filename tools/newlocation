@@ -8,11 +8,11 @@ from Position import Position
 from Database import DB
 import GameUtil
 
-loc = Location(Position(3, 4, 'main'))
+loc = Location(Position(0, 0, 'main'))
 loc.taxi = 1729
 loc.moo = 'Moo'
 
-overlay = Location(Position(3, 4, 'main'))
+overlay = Location(Position(0, 0, 'main'))
 loc.add_overlay(overlay)
 overlay.taxi = 1200
 
