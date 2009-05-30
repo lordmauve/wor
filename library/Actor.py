@@ -38,7 +38,7 @@ class Actor(SerObject.SerObject):
 
 	def held_item(self):
 		"""Return the item(s) currently held by the actor"""
-		pass
+		return None
 
 	def equipment(self):
 		"""Return an iterator over the equipment currently worn by the actor"""
@@ -47,22 +47,24 @@ class Actor(SerObject.SerObject):
 	def power(self, name):
 		"""Compute the effective power of a property"""
 		# FIXME: Implement caching of power calculations here
-		pow = 0
+		powr = 0
 
 		# Start with intrinsics
-		pow += Util.default(self[name])
+		powr += Util.default(self[name])
 
 		# Equipment held
-		pos += self.held_item().power(name)
+		held = self.held_item()
+		if held != None:
+			powr += held.power(name)
 
 		# Equipment worn
-		for item in self.equipment():
-			pos += item.power(name)
+		#for item in self.equipment():
+		#	powr += item.power(name)
 
 		# Location
-		pos += self.loc().power(name)
+		powr += self.loc().power(name)
 
-		return pow
+		return powr
 
 	def context_get(self):
 		"""Return a dictionary of properties of this object, given the
