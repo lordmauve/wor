@@ -172,7 +172,7 @@ class Location(SerObject):
 	####
 	# Basic properties
 	def power(self, name):
-		if name in self:
+		if hasattr(self, name):
 			return self[name]
 		
 		return 0
@@ -200,28 +200,28 @@ class Location(SerObject):
 
 	def e(self):
 		"""Return the hex to the east of this one"""
-		if self.warp_e != None:
+		if hasattr(self, 'warp_e'):
 			return load_by_pos(self.warp_e)
 		pos = copy.copy(self.pos)
 		pos.x += 1
 		return self.load_by_pos(pos)
 
 	def w(self):
-		if self.warp_w != None:
+		if hasattr(self, 'warp_w'):
 			return load_by_pos(self.warp_w)
 		pos = copy.copy(self.pos)
 		pos.x -= 1
 		return self.load_by_pos(pos)
 
 	def ne(self):
-		if self.warp_ne != None:
+		if hasattr(self, 'warp_ne'):
 			return load_by_pos(self.warp_ne)
 		pos = copy.copy(self.pos)
 		pos.y += 1
 		return self.load_by_pos(pos)
 
 	def nw(self):
-		if self.warp_nw != None:
+		if hasattr(self, 'warp_nw'):
 			return load_by_pos(self.warp_nw)
 		pos = copy.copy(self.pos)
 		pos.x -= 1
@@ -229,7 +229,7 @@ class Location(SerObject):
 		return self.load_by_pos(pos)
 
 	def se(self):
-		if self.warp_se != None:
+		if hasattr(self, 'warp_se'):
 			return load_by_pos(self.warp_se)
 		pos = copy.copy(self.pos)
 		pos.x += 1
@@ -237,7 +237,7 @@ class Location(SerObject):
 		return self.load_by_pos(pos)
 
 	def sw(self):
-		if self.warp_se != None:
+		if hasattr(self, 'warp_sw'):
 			return load_by_pos(self.warp_se)
 		pos = copy.copy(self.pos)
 		pos.y -= 1
