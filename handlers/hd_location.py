@@ -1,42 +1,57 @@
 #######
 # Handlers for location requests
 
+import sys
+import os
 from mod_python import apache
 from Database import DB, retry_process
 from Player import Player
+from Location import Location
 from Logger import log
-import sys
-import os
+import Util
 
-public_properties = [
-    '_id'
-    ]
+def location_handler(req, loc, components):
+	"""Handle a request for information on a single location"""
+	if len(components) != 1:
+		return apache.HTTP_NOT_FOUND
 
-def neighbourhood_handler(req):
-    # FIXME: Need to initialise the environment here (clear/check
-    # caches, etc) and at the top of *every* handler. Possibly in a
-    # separate handler method imposed for everything?
+	if req.method != 'GET':
+		return apache.HTTP_METHOD_NOT_ALLOWED
 
-    # FIXME: Also need to wrap all this up in a retry_process.
+	req.content_type = "text/plain"
+	here = Location.load(loc)
 
-    req.content_type = "text/plain"
-    
-    player = Player.load_by_name(req.user)
+	if components[0] == 'desc':
+		info = here.context_get()
+		Util.render_info(info, req)
+	elif components[0] == 'actions':
+		# Return possible location-based actions
+		pass
+	else:
+		return apache.HTTP_NOT_FOUND
 
-    log.debug("Neighbourhood handler")
+	return apache.OK
 
-    if player == None:
-        req.write("Null player")
-        return apache.HTTP_INTERNAL_SERVER_ERROR
+def neighbourhood_handler(req, loc, components):
+	"""Handle a request for the neighbourhood of this location"""
+	if len(components) != 1:
+		return apache.HTTP_NOT_FOUND
 
-    log.debug("Player", player._id)
+	if req.method != 'GET':
+		return apache.HTTP_METHOD_NOT_ALLOWED
+	
+	req.content_type = "text/plain"
+	here = Location.load(loc)
 
-    if req.method == "GET":
-        here = player.loc()
-        for loc in (here.r(), here.ur(), here.ul(),
-                    here.l(), here.ll(), here.lr()):
-            for k in public_properties:
-                if k in loc.__dict__:
-                    req.write(k + ":" + str(loc[k]) + "\n")
+	# FIXME: When r() and friends are fixed, use them instead
+	#for l in (here, here.r(), here.ur(), here.ul(), here.l(),
+	#			here.ll(), here.lr()):
+	for l in (here, here.e(), here.ne(), here.nw(), here.w(),
+				here.sw(), here.se()):
+		if l == None:
+			continue
+		info = l.context_get()
+		Util.render_info(info, req)
+		req.write('-')
 
-    return apache.OK
+	return apache.OK
