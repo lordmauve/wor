@@ -12,6 +12,7 @@ import Context
 import Logger
 import hd_actor
 import hd_item
+import hd_location
 
 def api_handler(req):
 	"""This is the core function for the REST API. All requests pass
@@ -57,6 +58,8 @@ def api_handler(req):
 	else:
 		act_id = check_actor(req)
 		Context.context = Player.load(act_id)
+		if Context.context == None:
+			return apache.HTTP_FORBIDDEN
 		
 		if components[0] == 'actor':
 			if components[1] == 'self':
