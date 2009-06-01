@@ -43,15 +43,12 @@ def neighbourhood_handler(req, loc, components):
 	req.content_type = "text/plain"
 	here = Location.load(loc)
 
-	# FIXME: When r() and friends are fixed, use them instead
-	#for l in (here, here.r(), here.ur(), here.ul(), here.l(),
-	#			here.ll(), here.lr()):
-	for l in (here, here.e(), here.ne(), here.nw(), here.w(),
-				here.sw(), here.se()):
+	for l in (here, here.r(), here.ur(), here.ul(), here.l(),
+				here.ll(), here.lr()):
 		if l == None:
 			continue
 		info = l.context_get()
 		Util.render_info(info, req)
-		req.write('-')
+		req.write('-\n')
 
 	return apache.OK
