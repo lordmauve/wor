@@ -177,26 +177,6 @@ class Location(SerObject):
 		
 		return 0
 
-	def set_mapping(self):
-		pos = [ self.e, self.ne, self.nw, self.w, self.sw, self.se ]
-
-		# FIXME: flipped and rotated are *player* properties, not
-		# location. This code should be w.r.t the viewing player
-		# context, not the location.
-		if self.flipped:
-			self.r  = pos[(6+self.rotated) % 6]
-			self.ur = pos[(5+self.rotated) % 6]
-			self.ul = pos[(4+self.rotated) % 6]
-			self.l  = pos[(3+self.rotated) % 6]
-			self.ll = pos[(2+self.rotated) % 6]
-			self.lr = pos[(1+self.rotated) % 6]
-		else:
-			self.r  = pos[(0+self.rotated) % 6]
-			self.ur = pos[(1+self.rotated) % 6]
-			self.ul = pos[(2+self.rotated) % 6]
-			self.l  = pos[(3+self.rotated) % 6]
-			self.ll = pos[(4+self.rotated) % 6]
-			self.lr = pos[(5+self.rotated) % 6]
 
 	def e(self):
 		"""Return the hex to the east of this one"""
@@ -242,3 +222,61 @@ class Location(SerObject):
 		pos = copy.copy(self.pos)
 		pos.y -= 1
 		return self.load_by_pos(pos)
+
+	"""Table used for obtaining directions algorithmically"""
+	directions = [ e, ne, nw, w, sw, se ]
+
+
+	def r(self, who=None):
+		"""Return the hex to the right of this one, according to the
+		given player"""
+		if who == None: who = Context.context
+		if who.power('flipped'):
+			return self.directions[(6+who.power('rotated')) % 6](self)
+		else:
+			return self.directions[(0+who.power('rotated')) % 6](self)
+
+	def ur(self, who=None):
+		"""Return the hex to the upper right of this one, according to the
+		given player"""
+		if who == None: who = Context.context
+		if who.power('flipped'):
+			return self.directions[(5+who.power('rotated')) % 6](self)
+		else:
+			return self.directions[(1+who.power('rotated')) % 6](self)
+
+	def ul(self, who=None):
+		"""Return the hex to the upper left of this one, according to the
+		given player"""
+		if who == None: who = Context.context
+		if who.power('flipped'):
+			return self.directions[(4+who.power('rotated')) % 6](self)
+		else:
+			return self.directions[(2+who.power('rotated')) % 6](self)
+
+	def l(self, who=None):
+		"""Return the hex to the left of this one, according to the
+		given player"""
+		if who == None: who = Context.context
+		if who.power('flipped'):
+			return self.directions[(3+who.power('rotated')) % 6](self)
+		else:
+			return self.directions[(3+who.power('rotated')) % 6](self)
+
+	def ll(self, who=None):
+		"""Return the hex to the lower left of this one, according to the
+		given player"""
+		if who == None: who = Context.context
+		if who.power('flipped'):
+			return self.directions[(2+who.power('rotated')) % 6](self)
+		else:
+			return self.directions[(4+who.power('rotated')) % 6](self)
+
+	def lr(self, who=None):
+		"""Return the hex to the lower right of this one, according to the
+		given player"""
+		if who == None: who = Context.context
+		if who.power('flipped'):
+			return self.directions[(1+who.power('rotated')) % 6](self)
+		else:
+			return self.directions[(5+who.power('rotated')) % 6](self)
