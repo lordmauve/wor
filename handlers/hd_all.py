@@ -29,13 +29,15 @@ def api_handler(req):
 	if components[0] != '':
 		# The request didn't even have a leading slash -- something's
 		# screwy
+		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
 		req.write("No leading slash on request for URL '"+req.uri+"'")
-		return apache.HTTP_INTERNAL_SERVER_ERROR
+		return apache.OK
 	
 	components.pop(0)
 	if components[0] != 'api':
+		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
 		req.write("Incorrect path prefix on request for URL '"+req.uri+"'")
-		return apache.HTTP_INTERNAL_SERVER_ERROR
+		return apache.OK
 	components.pop(0)
 		
 	Logger.log.debug("Request components: " + str(components))
@@ -59,7 +61,9 @@ def api_handler(req):
 		act_id = check_actor(req)
 		Context.context = Player.load(act_id)
 		if Context.context == None:
-			return apache.HTTP_FORBIDDEN
+			req.status = apache.HTTP_FORBIDDEN
+			req.write("No context found for actor id " + str(act_id))
+			return apache.OK
 		
 		if components[0] == 'actor':
 			if components[1] == 'self':
@@ -68,9 +72,10 @@ def api_handler(req):
 			elif components[1].isdigit():
 				target = int(components[1])
 			else:
+				req.status = apache.HTTP_NOT_FOUND
 				req.write("Actor: actor not found")
 				req.write(str(components))
-				return apache.HTTP_NOT_FOUND
+				return apache.OK
 
 			return retry_process(
 				lambda: hd_actor.actor_handler(
@@ -92,7 +97,9 @@ def api_handler(req):
 			elif components[1].isdigit():
 				target = int(components[1])
 			else:
-				return apache.HTTP_NOT_FOUND
+				req.status = apache.HTTP_NOT_FOUND
+				req.write("Location: location not found")
+				return apache.OK
 
 			return retry_process(
 				lambda: hd_location.location_handler(
@@ -104,7 +111,9 @@ def api_handler(req):
 			if components[1].isdigit():
 				target = int(components[1])
 			else:
-				return apache.HTTP_NOT_FOUND
+				req.status = apache.HTTP_NOT_FOUND
+				req.write("Item: item not found")
+				return apache.OK
 			
 			return retry_process(
 				lambda: hd_item.item_handler(
