@@ -106,6 +106,22 @@ class Location(SerObject):
 		loc._underneath = stack_top
 		loc._above = None
 
+	def stack_layers(self):
+		"""Generator function to iterate through the stack from the
+		bottom upwards"""
+		loc = self.stack_bottom()
+		while loc != None:
+			yield loc
+			loc = loc._above
+
+	def stack_layers_rev(self):
+		"""Generator function to iterate through the stack from the
+		top down"""
+		loc = self.stack_top()
+		while loc != None:
+			yield loc
+			loc = loc._underneath
+
 	####
 	# Property access
 
