@@ -160,10 +160,13 @@ class Location(SerObject):
 			fields = filter(lambda x: not isinstance(getattr(self, x),
 													 types.MethodType),
 							fields)
+			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
 		elif auth == Context.OWNER:
 			fields = [ ]
+			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
 		elif auth == Context.STRANGER_VISIBLE:
 			fields = [ ]
+			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
 		else:
 			fields = [ ]
 
@@ -296,3 +299,24 @@ class Location(SerObject):
 			return self.directions[(1+who.power('rotated')) % 6](self)
 		else:
 			return self.directions[(5+who.power('rotated')) % 6](self)
+
+	# Actions
+	def external_actions(self, acts, player):
+		"""Add to acts a list of actions that we could perform"""
+		pass
+
+	# Who's here?
+	def actor_ids(self):
+		"""Return a list of the actor IDs on this location"""
+		ret = []
+		
+		cur = DB.cursor()
+		cur.execute("SELECT id FROM actor"
+					+ " WHERE x=%(x)s AND y=%(y)s AND layer=%(layer)s",
+					self.pos.__dict__)
+		row = cur.fetchone()
+		while row != None:
+			ret.append(row[0])
+			row = cur.fetchone()
+			
+		return ret
