@@ -46,8 +46,24 @@ def api_handler(req):
 		# Does not return
 	elif components[0] == 'actors':
 		# Get the list of actors owned by this account
-		# FIXME
-		pass
+		req.content_type = "text/plain"
+
+		cur = DB.cursor()
+		cur.execute("SELECT actor.id, actor.name"
+					+ " FROM actor, account_actor, account"
+					+ " WHERE actor.id = account_actor.actor_id"
+					+ "   AND account_actor.account_id = account.account_id"
+					+ "   AND account.username = %(username)s",
+					{ 'username': account })
+		row = cur.fetchone()
+		while row != None:
+			req.write("id:%d\n" % row[0])
+			req.write("name:%s\n" % row[1])
+			req.write("-\n")
+			row = cur.fetchone()
+
+		return apache.OK
+			
 	elif components[0] == 'items':
 		# Get information on items: class/name mapping, for example
 		# FIXME: Pass off to item handlers
