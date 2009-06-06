@@ -101,3 +101,7 @@ class Item(SerObject.SerObject):
 			return True
 
 		return False
+
+	def external_actions(self, acts, player):
+		# FIXME: Build system goes here
+		pass

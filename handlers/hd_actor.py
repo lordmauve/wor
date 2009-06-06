@@ -19,10 +19,12 @@ def actor_handler(req, target, components):
 	if components[0] == 'actions':
 		if req.method == 'GET':
 			# List of actions
-			acts = actor.actions()
-			for (id, act) in acts.items():
-				if act.valid():
-					req.write(act.display())
+			acts = actor.get_actions()
+			for id, act in acts.iteritems():
+				info = act.context_get()
+				Util.render_info(info, req)
+				req.write("-\n")
+
 		elif req.method == 'POST':
 			# FIXME: Despatch actions here
 			pass
