@@ -2,15 +2,15 @@
 # Player Character
 
 from Database import DB
-import Actor
+from Actor import Actor
 from ItemContainer import ItemContainer
 from Punch import Punch
-from SimpleAction import SimpleAction
+from Action import Action
 from SimpleTimedCounter import SimpleTimedCounter
 from Position import Position
 from Logger import log
 
-class Player(Actor.Actor):
+class Player(Actor):
 	# Additional caching over and above the cache by ID for actors
 	cache_by_name = {}
 
@@ -80,13 +80,41 @@ class Player(Actor.Actor):
 
 	####
 	# Actions
-	def actions(self):
+	def get_actions(self):
 		"""Create and return a hash of all possible actions this
 		player might perform"""
 		acts = {}
-		acts["say_boo"] = SimpleAction(self, "say_boo", cap="Say Boo", action=self.say_boo)
+		# What can we do of ourselves?
+		uid = Action.make_id(self, "say_boo")
+		acts[uid] = Action(uid, caption="Say Boo",
+						   action=lambda: self.say_boo(),
+						   group="player")
+
+		# What can we do to the item we're holding?
+		item = self.held_item()
+		if item != None:
+			item.external_actions(acts, self)
+		
+		# What can we do to the items we're wearing?
+		# FIXME: Fill in here
+		
+		# What can we do to the current location?
+		self.loc().external_actions(acts, self)
+		
+		# What can we do to actors here?
+		for actid in self.loc().actor_ids():
+			actor = Actor.load(actid)
+			actor.external_actions(acts, self)
+
+		# What can we do to actors nearby?
+		# FIXME: Fill in here
+
+		# Filter out the invalid actions
+		for k in acts.keys():
+			if not acts[k].valid():
+				del acts[k]
 		
 		return acts
 
-	def say_boo(self, parent):
+	def say_boo(self):
 		log.info("Boo!")

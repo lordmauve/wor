@@ -7,6 +7,7 @@ import Util
 import Context
 from Logger import log
 from Location import Location
+from Action import Action
 
 class Actor(SerObject.SerObject):
 	# We have our own DB table and caching scheme for Actors
@@ -115,19 +116,25 @@ class Actor(SerObject.SerObject):
 
 	####
 	# Actions infrastructure: Things the player can do to this actor
-	def actions(self):
-		"""Create and return a hash of all possible actions this
-		player might perform"""
-		return {}
+	def external_actions(self, acts, player):
+		"""Create and return a hash of all possible actions the
+		given player might perform on this actor"""
 
-	def perform_action(self, actid, req):
-		"""Perform an action as requested. req is a mod_python request
-		object"""
+		# They could attack us...
+		if self != player:
+			uid = Action.make_id(self, "attack")
+			item = player.held_item()
+			acts[uid] = Action(
+				uid, caption="Attack", ap=1, group="outsider",
+				action=lambda: player.attack(self)
+				)
+
+	def perform_action(self, actid):
+		"""Perform an action as requested."""
 		actions = self.actions()
-		actions[actid].perform(req)
+		actions[actid].perform()
 
 	####
 	# Items/inventory/equipment
 	def has(self, itemtype, number=1):
 		count = 0
-		
