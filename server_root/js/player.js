@@ -8,8 +8,9 @@ function load_basic_player(req)
 		var top_panel = document.getElementById("top_panel");
 		if(req.status == 200)
 		{
-			// Success! Create a Player object
-			var p = new Player(req.responseText);
+			// Success! Create a Player
+			var ps = parse_input(req.responseText);
+			var p = ps[0];
 			
 			panel = "<table><tr>";
 			panel += "<td class='header'><b>" + p['name'] + "</b></td>";
@@ -36,29 +37,63 @@ function load_player_act(req)
     var panel = get_side_panel("player_actions");
 
     if(req.status == 200)
-      // Content is basically what we need: render it directly
-      panel.innerHTML += req.responseText;
+    {
+      // Get the array of action objects
+	  actions = parse_input(req.responseText);
+      panel.innerHTML = "";
+      for(var aid in actions)
+      {
+		  act = actions[aid];
+		  panel.innerHTML += act['html'];
+      }
+    }
     else
+    {
       // Error here: No 200 response
-      panel.innerHTML += "Error loading actions.\n<div>" + req.responseText + "</div>";
+      panel.innerHTML = "Error loading actions.\n<div>" + req.responseText + "</div>";
+    }
   }
 }
 
-function Player(str)
+// Parse a standard key/value input stream, and return an array of the
+// objects read
+
+function parse_input(str)
 {
-  var lines = str.split("\n");
-  for(var n in lines)
-  {
-    var line = lines[n];
-    var kv = line.split(":", 2);
-    this[kv[0]] = kv[1];
-  }
-  
-  // Set up other things here, from properties with known internal
-  // structure that we want to unpack.
-}
+	var result = new Array();
+	var accumulator = new Object();
 
-Player.prototype.fn = function() { };
+    var lines = str.split("\n");
+    for(var n in lines)
+    {
+		var line = lines[n];
+		var kv = new Array();
+		if(line[0] == ' ')
+		{
+			accumulator[kv[0]] += "\n" + line;
+		}
+		else if(line == '-')
+		{
+			result.push(accumulator);
+			accumulator = new Object();
+			hasdata = false;
+		}
+		else if(line == '')
+		{ }
+		else
+		{
+			kv = line.split(":", 2);
+			accumulator[kv[0]] = kv[1];
+			hasdata = true;
+		}
+    }
+
+    if(hasdata)
+	{
+		result.push(accumulator);
+	}
+	return result;
+}
 
 ////////////////////
 // Action handling

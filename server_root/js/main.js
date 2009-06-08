@@ -12,21 +12,28 @@ function load_game()
 function update_player_details()
 {
   var player_req = get_ajax_object();
+  var account = document.getElementById("account").value
+  var password = document.getElementById("password").value
+  var actid = document.getElementById("actorid").value
 
   player_req.onreadystatechange = function() { load_basic_player(player_req); };
   player_req.open("GET", api + "/actor/self/desc", true,
-		  "darksatanic", "wor");
-  player_req.setRequestHeader("X-WoR-Actor", "1")
+		  account, password);
+  player_req.setRequestHeader("X-WoR-Actor", actid);
   player_req.send("");
 }
 
 function update_player_actions()
 {
   var player_act_req = get_ajax_object();
+  var account = document.getElementById("account").value
+  var password = document.getElementById("password").value
+  var actid = document.getElementById("actorid").value
+
   player_act_req.onreadystatechange = function() { load_player_act(player_act_req); };
   player_act_req.open("GET", api + "/actor/self/actions", true,
-		      "darksatanic", "wor");
-  player_act_req.setRequestHeader("X-WoR-Actor", "1")
+		      account, password);
+  player_act_req.setRequestHeader("X-WoR-Actor", actid)
   player_act_req.send("");
 }
 
