@@ -117,7 +117,6 @@ class Actor(SerObject.SerObject):
 		# They could attack us...
 		if self != player:
 			uid = Action.make_id(self, "attack")
-			item = player.held_item()
 			acts[uid] = Action(
 				uid, caption="Attack", ap=1, group="outsider",
 				action=lambda: player.attack(self)
