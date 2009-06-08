@@ -1,5 +1,7 @@
 """Context for requests."""
 
+import types
+
 context = None
 
 # Fake "Player" object to use as an admin context
