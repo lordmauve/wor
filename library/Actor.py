@@ -74,13 +74,7 @@ class Actor(SerObject.SerObject):
 
 		auth = Context.authz_actor(self)
 		if auth == Context.ADMIN:
-			fields = dir(self)
-			# Filter out anything starting with __
-			fields = filter(lambda x: x[0] != '_' or x[1] != '_', fields)
-			# Filter out methods
-			fields = filter(lambda x: not isinstance(getattr(self, x),
-													 types.MethodType),
-							fields)
+			fields = Context.all_fields(self)
 		elif auth == Context.OWNER:
 			fields = [ 'ap', 'name', 'hp' ]
 		elif auth == Context.STRANGER_VISIBLE:

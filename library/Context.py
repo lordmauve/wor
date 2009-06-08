@@ -56,3 +56,14 @@ def authz_item(item):
 		return ADMIN
 
 	return STRANGER_INVISIBLE
+
+def all_fields(obj):
+	"""Return all "interesting" properties of this object."""
+	fields = dir(obj)
+	# Filter out anything starting with __
+	fields = filter(lambda x: x[0] != '_' or x[1] != '_', fields)
+	# Filter out methods
+	fields = filter(lambda x: not isinstance(getattr(obj, x),
+											 types.MethodType),
+					fields)
+	return fields

@@ -153,13 +153,7 @@ class Location(SerObject):
 
 		auth = Context.authz_location(self)
 		if auth == Context.ADMIN:
-			fields = dir(self)
-			# Filter out anything starting with __
-			fields = filter(lambda x: x[0] != '_' or x[1] != '_', fields)
-			# Filter out methods
-			fields = filter(lambda x: not isinstance(getattr(self, x),
-													 types.MethodType),
-							fields)
+			fields = Context.all_fields(self)
 			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
 		elif auth == Context.OWNER:
 			fields = [ ]
