@@ -29,6 +29,10 @@ class Actor(SerObject.SerObject):
 		inds['layer'] = self.position.layer
 		return inds
 
+	@classmethod
+	def flush_cache(cls):
+		cls.cache_by_id = {}
+
 	####
 	# Basic properties of the object
 	def loc(self):
@@ -110,22 +114,24 @@ class Actor(SerObject.SerObject):
 
 	####
 	# Actions infrastructure: Things the player can do to this actor
-	def external_actions(self, acts, player):
+	def external_actions(self, acts, player, name=None):
 		"""Create and return a hash of all possible actions the
 		given player might perform on this actor"""
 
+		if name == None:
+			requested = [ "attack" ]
+		else:
+			requested = [ name ]
+
 		# They could attack us...
-		if self != player:
+		if ("attack" in requested
+			and self != player):
+			
 			uid = Action.make_id(self, "attack")
 			acts[uid] = Action(
 				uid, caption="Attack", ap=1, group="outsider",
 				action=lambda: player.attack(self)
 				)
-
-	def perform_action(self, actid):
-		"""Perform an action as requested."""
-		actions = self.actions()
-		actions[actid].perform()
 
 	####
 	# Items/inventory/equipment

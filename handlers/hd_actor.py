@@ -26,8 +26,9 @@ def actor_handler(req, target, components):
 				req.write("-\n")
 
 		elif req.method == 'POST':
-			# FIXME: Despatch actions here
-			pass
+			data = Util.parse_input(req)
+			if 'action' in data:
+				actor.perform_action(data['action'], data)
 		else:
 			# If it's not GET or POST, complain
 			return apache.HTTP_METHOD_NOT_ALLOWED

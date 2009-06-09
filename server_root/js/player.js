@@ -97,15 +97,34 @@ function parse_input(str)
 
 ////////////////////
 // Action handling
-function act_simple(fuid)
+function post_action()
 {
+	var fuid = arguments[0];
+	var account = document.getElementById("account").value
+	var password = document.getElementById("password").value
+	var actid = document.getElementById("actorid").value
+
 	// Perform a simple action (i.e. with no parameters, just a button)
 	var act_req = get_ajax_object();
 	act_req.onreadystatechange = function() { act_response(act_req); };
-	act_req.open("POST", api + "/actor/self/action", true, "darksatanic", "wor");
+	act_req.open("POST", api + "/actor/self/actions", true, account, password);
 	act_req.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
-	act_req.setRequestHeader("X-WoR-Actor", "1")
-	act_req.send("action="+fuid);
+	act_req.setRequestHeader("X-WoR-Actor", actid)
+
+	return_data = "action:" + fuid + "\r\n";
+	for(var i in arguments)
+	{
+		if(i == 0) { continue; }
+		data = arguments[i];
+		elt = document.getElementById(data);
+		if(elt)
+		{
+			return_data += data + ":" + elt.value + "\r\n";
+		}
+	}
+	act_req.setRequestHeader("Content-Length", return_data.length)
+
+	act_req.send(return_data);
 }
 
 // FIXME: Add an act_complex which takes a list of form fields and
