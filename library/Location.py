@@ -295,7 +295,7 @@ class Location(SerObject):
 			return self.directions[(5+who.power('rotated')) % 6](self)
 
 	# Actions
-	def external_actions(self, acts, player):
+	def external_actions(self, acts, player, name=None):
 		"""Add to acts a list of actions that we could perform"""
 		pass
 

@@ -3,19 +3,15 @@
 
 class Action(object):
 	def __init__(self, uid, caption="Use", ap=1,
-				 action=lambda: None, group="none", html=None):
+				 action=lambda d: None,
+				 group="none", html=None):
 		self.uid = uid
 		self.caption = caption
 		self.ap = ap
+		self.action = action
 		self.group = group
 		if html == None:
 			self.html = self.make_button(caption, uid, ap)
-
-	def valid(self):
-		"""Return whether this action is valid in this context: check
-		player's capabilities, and any other state needed to make this
-		decision."""
-		return True
 
 	def context_get(self):
 		ret = {}
@@ -27,11 +23,8 @@ class Action(object):
 
 		return ret
 
-	def perform(self, target):
-		if not self.valid():
-			return False
-
-		return self.action()
+	def perform(self, data):
+		return self.action(data)
 
 	@staticmethod
 	def make_id(object, act):
@@ -39,7 +32,7 @@ class Action(object):
 
 	@staticmethod
 	def make_button(caption, uid, ap=1):
-		return ("<button onclick='act_simple(\"%(uid)s\")'>"
+		return ("<button onclick='post_action(\"%(uid)s\")'>"
 				+ "%(caption)s (%(ap)d AP)</button>") % {
 			'uid': uid,
 			'caption': caption,
