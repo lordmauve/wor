@@ -8,6 +8,7 @@ from Database import DB, retry_process
 from Player import Player
 from Location import Location
 from Item import Item
+from Actor import Actor
 import Context
 import Logger
 import hd_actor
@@ -167,7 +168,7 @@ def check_actor(req, fail=True):
 def cleanup_handler(req):
 	"""Called at the end of every request. In this case, simply
 	flushes all the caches."""
-	Player.flush_cache()
-	Location.flush_cache()
-	Item.flush_cache()
+	Actor.flush_cache()
+	#Location.flush_cache()
+	#Item.flush_cache()
 	return apache.OK
