@@ -1,6 +1,8 @@
 """Context for requests."""
 
 import types
+import time
+import os
 
 context = None
 
@@ -69,3 +71,15 @@ def all_fields(obj):
 											 types.MethodType),
 					fields)
 	return fields
+
+
+####
+# Context for a request: unique ID for logging, and timestamp in UTC
+request_time = 0
+request_id = "-"
+request_sequence = -1
+
+def set_request_id():
+	request_time = time.time()
+	request_sequence += 1
+	request_id = str(os.getpid()) + "." + str(request_sequence)

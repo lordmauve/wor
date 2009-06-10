@@ -40,7 +40,10 @@ def api_handler(req):
 		req.write("Incorrect path prefix on request for URL '"+req.uri+"'")
 		return apache.OK
 	components.pop(0)
-		
+
+	# We need to set up the logging/request context here
+	Context.set_request_id()
+
 	Logger.log.debug("Request components: " + str(components))
 	if components[0] == '':
 		apache.redirect(req, 'http://worldofrodney.org/')
