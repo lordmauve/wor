@@ -80,6 +80,11 @@ request_id = "-"
 request_sequence = -1
 
 def set_request_id():
+	# Bring the module's variables into this function's namespace
+	global request_time
+	global request_id
+	global request_sequence
+	
 	request_time = time.time()
-	request_sequence += 1
+	request_sequence = request_sequence + 1
 	request_id = str(os.getpid()) + "." + str(request_sequence)
