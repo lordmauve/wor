@@ -3,6 +3,8 @@ all requests, and despatch those requests to appropriate other
 handlers further down the URL tree."""
 
 from mod_python import apache
+import traceback
+import sys
 
 from Database import DB, retry_process
 from Player import Player
@@ -23,126 +25,151 @@ def api_handler(req):
 
 	When we reach this function, we have already checked
 	authentication, so this is partly an authorisation handler."""
-	req.get_basic_auth_pw() # Get the username as well
-	account = req.user
-	
-	components = req.uri.split('/')
-	if components[0] != '':
-		# The request didn't even have a leading slash -- something's
-		# screwy
-		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
-		req.write("No leading slash on request for URL '"+req.uri+"'")
-		return apache.OK
-	
-	components.pop(0)
-	if components[0] != 'api':
-		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
-		req.write("Incorrect path prefix on request for URL '"+req.uri+"'")
-		return apache.OK
-	components.pop(0)
 
-	# We need to set up the logging/request context here
-	Context.set_request_id()
+	# Wrap everything up in an exception handler
+	try:
+		req.get_basic_auth_pw() # Get the username as well
+		account = req.user
 
-	Logger.log.debug("Request components: " + str(components))
-	if components[0] == '':
-		apache.redirect(req, 'http://worldofrodney.org/')
-		# Does not return
-	elif components[0] == 'actors':
-		# Get the list of actors owned by this account
-		req.content_type = "text/plain"
-
-		cur = DB.cursor()
-		cur.execute("SELECT actor.id, actor.name"
-					+ " FROM actor, account_actor, account"
-					+ " WHERE actor.id = account_actor.actor_id"
-					+ "   AND account_actor.account_id = account.account_id"
-					+ "   AND account.username = %(username)s",
-					{ 'username': account })
-		row = cur.fetchone()
-		while row != None:
-			req.write("id:%d\n" % row[0])
-			req.write("name:%s\n" % row[1])
-			req.write("-\n")
-			row = cur.fetchone()
-
-		return apache.OK
-			
-	elif components[0] == 'items':
-		# Get information on items: class/name mapping, for example
-		# FIXME: Pass off to item handlers
-		if components[1] == 'names':
-			return retry_process(
-				lambda: hd_item.item_names_handler(
-					req, components[2:]))
-		else:
-			return apache.HTTP_NOT_FOUND
-	else:
-		act_id = check_actor(req)
-		Context.context = Player.load(act_id)
-		if Context.context == None:
-			req.status = apache.HTTP_FORBIDDEN
-			req.write("No context found for actor id " + str(act_id))
+		components = req.uri.split('/')
+		if components[0] != '':
+			# The request didn't even have a leading slash -- something's
+			# screwy
+			req.status = apache.HTTP_INTERNAL_SERVER_ERROR
+			req.write("No leading slash on request for URL '"+req.uri+"'")
 			return apache.OK
-		
-		if components[0] == 'actor':
-			if components[1] == 'self':
-				# We're using self: id is actor
-				target = act_id
-			elif components[1].isdigit():
-				target = int(components[1])
-			else:
-				req.status = apache.HTTP_NOT_FOUND
-				req.write("Actor: actor not found")
-				req.write(str(components))
-				return apache.OK
 
-			return retry_process(
-				lambda: hd_actor.actor_handler(
-					req,
-					target,
-					components[2:]))
-			
-		elif components[0] == 'location':
-			if components[1] == 'here':
-				target = Context.context.loc()._id
-			elif components[1] == 'neighbourhood':
-				target = Context.context.loc()._id
-				retry_process(
-					lambda: hd_location.neighbourhood_handler(
-						req,
-						target, components[2:]))
-				
-				return apache.OK
-			elif components[1].isdigit():
-				target = int(components[1])
-			else:
-				req.status = apache.HTTP_NOT_FOUND
-				req.write("Location: location not found")
-				return apache.OK
+		components.pop(0)
+		if components[0] != 'api':
+			req.status = apache.HTTP_INTERNAL_SERVER_ERROR
+			req.write("Incorrect path prefix on request for URL '"+req.uri+"'")
+			return apache.OK
+		components.pop(0)
 
-			return retry_process(
-				lambda: hd_location.location_handler(
-					req,
-					target,
-					components[2:]))
-			
-		elif components[0] == 'item':
-			if components[1].isdigit():
-				target = int(components[1])
+		# We need to set up the logging/request context here
+		Context.set_request_id()
+
+		Logger.log.debug("Request components: " + str(components))
+		if components[0] == '':
+			apache.redirect(req, 'http://worldofrodney.org/')
+			# Does not return
+		elif components[0] == 'actors':
+			# Get the list of actors owned by this account
+			req.content_type = "text/plain"
+
+			cur = DB.cursor()
+			cur.execute("SELECT actor.id, actor.name"
+						+ " FROM actor, account_actor, account"
+						+ " WHERE actor.id = account_actor.actor_id"
+						+ "   AND account_actor.account_id = account.account_id"
+						+ "   AND account.username = %(username)s",
+						{ 'username': account })
+			row = cur.fetchone()
+			while row != None:
+				req.write("id:%d\n" % row[0])
+				req.write("name:%s\n" % row[1])
+				req.write("-\n")
+				row = cur.fetchone()
+
+			return apache.OK
+
+		elif components[0] == 'items':
+			# Get information on items: class/name mapping, for example
+			# FIXME: Pass off to item handlers
+			if components[1] == 'names':
+				return retry_process(
+					lambda: hd_item.item_names_handler(
+						req, components[2:]))
 			else:
-				req.status = apache.HTTP_NOT_FOUND
-				req.write("Item: item not found")
-				return apache.OK
-			
-			return retry_process(
-				lambda: hd_item.item_handler(
-					req,
-					target,
-					components[2:]))
+				return apache.HTTP_NOT_FOUND
 		else:
-			# It's not one of our expected URIs
-			return apache.HTTP_NOT_FOUND
+			act_id = check_actor(req)
+			Context.context = Player.load(act_id)
+			if Context.context == None:
+				req.status = apache.HTTP_FORBIDDEN
+				req.write("No context found for actor id " + str(act_id))
+				return apache.OK
+
+			if components[0] == 'actor':
+				if components[1] == 'self':
+					# We're using self: id is actor
+					target = act_id
+				elif components[1].isdigit():
+					target = int(components[1])
+				else:
+					req.status = apache.HTTP_NOT_FOUND
+					req.write("Actor: actor not found")
+					req.write(str(components))
+					return apache.OK
+
+				return retry_process(
+					lambda: hd_actor.actor_handler(
+						req,
+						target,
+						components[2:]))
+
+			elif components[0] == 'location':
+				if components[1] == 'here':
+					target = Context.context.loc()._id
+				elif components[1] == 'neighbourhood':
+					target = Context.context.loc()._id
+					retry_process(
+						lambda: hd_location.neighbourhood_handler(
+							req,
+							target, components[2:]))
+
+					return apache.OK
+				elif components[1].isdigit():
+					target = int(components[1])
+				else:
+					req.status = apache.HTTP_NOT_FOUND
+					req.write("Location: location not found")
+					return apache.OK
+
+				return retry_process(
+					lambda: hd_location.location_handler(
+						req,
+						target,
+						components[2:]))
+
+			elif components[0] == 'item':
+				if components[1].isdigit():
+					target = int(components[1])
+				else:
+					req.status = apache.HTTP_NOT_FOUND
+					req.write("Item: item not found")
+					return apache.OK
+
+				return retry_process(
+					lambda: hd_item.item_handler(
+						req,
+						target,
+						components[2:]))
+			else:
+				# It's not one of our expected URIs
+				return apache.HTTP_NOT_FOUND
+	except apache.SERVER_RETURN, ex:
+		# Catch and re-raise apache/mod_python exceptions here
+		raise ex
+	except Exception, ex:
+		# Catch any other exception
+
+		# Set up a simple Infernal Server Error response 
+		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
+		req.write("There was an infernal server error. Please report this (with reference %s) to the admins.\n" % (Context.request_id))
+		req.write("Aargh?\n")
+
+		# Get the details of the last exception
+		exlist = sys.exc_info()
+		# Get a list of text lines (possibly with embedded \n)
+		# describing the full backtrace
+		exdata = traceback.format_exception(exlist[0], exlist[1], exlist[2])
+		# Write those lines to the exception log
+		head = Logger.header % { 'stamp': Context.request_time, 'req': Context.request_id }
+		Logger.exception_log.error(head + ''.join(exdata))
+
+		# Return the Infernal Server Error
+		return apache.OK
 
 	return apache.OK
 
