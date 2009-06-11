@@ -8,18 +8,7 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET escape_string_warning = off;
 
---
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
---
-
-COMMENT ON SCHEMA public IS 'Standard public schema';
-
-
 SET search_path = public, pg_catalog;
-
-SET default_tablespace = '';
-
-SET default_with_oids = false;
 
 --
 -- Name: account_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
@@ -33,13 +22,6 @@ CREATE SEQUENCE account_id_seq
 
 
 ALTER TABLE public.account_id_seq OWNER TO wor;
-
---
--- Name: account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wor
---
-
-SELECT pg_catalog.setval('account_id_seq', 5, true);
-
 
 SET default_tablespace = '';
 
@@ -86,27 +68,55 @@ CREATE SEQUENCE actor_id_seq
 ALTER TABLE public.actor_id_seq OWNER TO wor;
 
 --
--- Name: actor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wor
---
-
-SELECT pg_catalog.setval('actor_id_seq', 4, true);
-
-
---
 -- Name: actor; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
 --
 
 CREATE TABLE actor (
     id integer DEFAULT nextval('actor_id_seq'::regclass) NOT NULL,
     name character varying(32),
-	x integer,
-	y integer,
-	layer character varying(32),
+    x integer,
+    y integer,
+    layer character varying(32),
     state bytea
 );
 
 
 ALTER TABLE public.actor OWNER TO wor;
+
+--
+-- Name: actor_message; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE actor_message (
+    id integer NOT NULL,
+    stamp numeric(20,6),
+    actor_id integer,
+    msg_type text,
+    message text
+);
+
+
+ALTER TABLE public.actor_message OWNER TO wor;
+
+--
+-- Name: actor_message_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
+--
+
+CREATE SEQUENCE actor_message_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.actor_message_id_seq OWNER TO wor;
+
+--
+-- Name: actor_message_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: wor
+--
+
+ALTER SEQUENCE actor_message_id_seq OWNED BY actor_message.id;
+
 
 --
 -- Name: actor_properties; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
@@ -142,7 +152,6 @@ ALTER TABLE public.item OWNER TO wor;
 --
 
 CREATE SEQUENCE item_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -156,13 +165,6 @@ ALTER TABLE public.item_id_seq OWNER TO wor;
 --
 
 ALTER SEQUENCE item_id_seq OWNED BY item.id;
-
-
---
--- Name: item_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wor
---
-
-SELECT pg_catalog.setval('item_id_seq', 1, false);
 
 
 --
@@ -216,7 +218,6 @@ ALTER TABLE public.location OWNER TO wor;
 --
 
 CREATE SEQUENCE location_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -230,13 +231,6 @@ ALTER TABLE public.location_id_seq OWNER TO wor;
 --
 
 ALTER SEQUENCE location_id_seq OWNED BY location.id;
-
-
---
--- Name: location_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wor
---
-
-SELECT pg_catalog.setval('location_id_seq', 1, false);
 
 
 --
@@ -259,6 +253,13 @@ ALTER TABLE public.location_properties OWNER TO wor;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: wor
 --
 
+ALTER TABLE actor_message ALTER COLUMN id SET DEFAULT nextval('actor_message_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: wor
+--
+
 ALTER TABLE item ALTER COLUMN id SET DEFAULT nextval('item_id_seq'::regclass);
 
 
@@ -267,6 +268,7 @@ ALTER TABLE item ALTER COLUMN id SET DEFAULT nextval('item_id_seq'::regclass);
 --
 
 ALTER TABLE location ALTER COLUMN id SET DEFAULT nextval('location_id_seq'::regclass);
+
 
 --
 -- Name: account_actor_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
@@ -298,6 +300,14 @@ ALTER TABLE ONLY account
 
 ALTER TABLE ONLY actor
     ADD CONSTRAINT actor_id_key UNIQUE (id);
+
+
+--
+-- Name: actor_message_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY actor_message
+    ADD CONSTRAINT actor_message_pkey PRIMARY KEY (id);
 
 
 --
