@@ -13,6 +13,8 @@ DB = psycopg2.connect(host = DBAuth.host,
 # definite order w.r.t the other transactions
 DB.cursor().execute("SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE")
 
+from Logger import log, exception_log
+
 # We may get an objection from the database at any point (i.e. if some
 # other transaction get in the way), so we have to be prepared to
 # re-execute a transaction. This function handles that process for us.
@@ -23,12 +25,17 @@ def retry_process(process):
 	complete = False
 	while not complete:
 		xact = DB.cursor()
-		try:
-			xact.execute("BEGIN TRANSACTION")
-			ret = process()
-			xact.execute("COMMIT")
-			complete = True
-		except psycopg2.Error, dbex:
-			xact.execute("ROLLBACK")
+
+		xact.execute("BEGIN TRANSACTION")
+		ret = process()
+		xact.execute("COMMIT")
+		complete = True
+		# FIXME: This doesn't actually throw any exceptions if there's
+		# a collision. Instead, the second process to get to the
+		# locked record hangs until the first process commits. When
+		# the first process commits (or rolls back), the second
+		# process may _attempt_ to update. This needs more think --
+		# possibly explicit locking. Talk to gdb/rph about what we can
+		# do?
 
 	return ret
