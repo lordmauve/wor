@@ -12,6 +12,7 @@ from SimpleTimedCounter import SimpleTimedCounter
 from Position import Position
 from Logger import log
 import Util
+import Context
 
 class Player(Actor):
 	# Additional caching over and above the cache by ID for actors
@@ -148,7 +149,8 @@ class Player(Actor):
 		full one."""
 		actions = self.get_actions(action_id)
 		if action_id in actions:
-			self.last_action = time.time()
+			self.last_action = Context.request_time
+			log.debug("Last action at " + str(self.last_action))
 			actions[action_id].perform(data)
 
 	def say_boo(self):
