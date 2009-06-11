@@ -29,6 +29,14 @@ def render_equip(info, req):
 	for item in info:
 		req.write(item[0] + ":" + str(item[1]) + ":" + item[2] + "\n")
 
+def render_messages(info, req):
+	"""Render a table of messages into the request object"""
+	# FIXME: Merge this function and the previous one into a single
+	# render_table() function
+	for msg in info:
+		text = msg[2].replace('\n', '\n ')
+		req.write(str(msg[0]) + ":" + msg[1] + ":" + text + "\n")
+
 def info_key_length(info):
 	"""Get the maximum key length of the given info dictionary"""
 	length = 0
