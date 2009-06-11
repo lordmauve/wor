@@ -1,6 +1,8 @@
 ########
 # Player Character
 
+import time
+
 from Database import DB
 from Actor import Actor
 from ItemContainer import ItemContainer
@@ -105,6 +107,14 @@ class Player(Actor):
 							   action=lambda d: self.say_boo(),
 							   group="player")
 
+		#get_inventory = "Get some inventory"
+		#
+		#uid = Action.make_id(self, "hold")
+		#acts[uid] = Action(uid, caption="Change",
+		#				   action=lambda d: False,
+		#				   group="player",
+		#				   html=get_inventory)
+
 		# What can we do to the item we're holding?
 		item = self.held_item()
 		if item != None and Util.match_id(action_id, self):
@@ -134,7 +144,12 @@ class Player(Actor):
 		full one."""
 		actions = self.get_actions(action_id)
 		if action_id in actions:
+			self.last_action = time.time()
 			actions[action_id].perform(data)
 
 	def say_boo(self):
+		"""Test action"""
 		log.info("Boo!")
+		self.message("You say 'Boo!'")
+		self.message(self.name + ": Boo!", "sound")
+		self.ap.value -= 1
