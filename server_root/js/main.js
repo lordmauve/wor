@@ -7,6 +7,7 @@ function load_game()
 {
 	update_player_details();
 	update_player_actions();
+	update_messages();
 }
 
 function update_player_details()
@@ -106,6 +107,59 @@ function parse_input(str)
     if(hasdata)
 	{
 		result.push(accumulator);
+	}
+	return result;
+}
+
+function parse_input_table(str, cols)
+{
+	var result = new Array();
+
+	var lines = str.split("\n");
+	var row = new Array();
+	for(var i in lines)
+	{
+		var line = lines[i];
+		if(line[0] == ' ')
+		{
+			row[cols-1] += line + "\n";
+		}
+		else if(line == '')
+		{ }
+		else
+		{
+			if(row.length > 0)
+				result.push(row);
+
+			// JavaScript's split() method isn't actually sane when
+			// given a limit. It splits the whole string, then returns
+			// only the first n elements, discarding the remainder.
+
+			// Therefore, we split an unlimited number of elements
+			// here, and then splice the ones on the end back
+			// together.
+
+			row = line.split(':');
+			last_elt = row.slice(cols-1).join(':');
+			row.splice(cols-1,row.length,last_elt);
+		}
+	}
+
+	if(row.length > 0)
+	{
+		result.push(row);
+	}
+	return result;
+}
+
+function format_date_time(when)
+{
+	var result = "";
+
+	with(when)
+	{
+		result += getFullYear() + "-" + getMonth() + "-" + getDate();
+		result += " " + getHours() + ":" + getMinutes() + ":" + getSeconds();
 	}
 	return result;
 }

@@ -102,6 +102,7 @@ function act_response(req)
 			// FIXME: Or, for now, just trigger a full set of updates
 			update_player_details();
 			update_player_actions();
+			update_messages();
 		}
 		else
 		{
