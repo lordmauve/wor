@@ -2,12 +2,15 @@
 # Generic actor: covers players, NPCs, monsters
 
 import types
+import time
+
 import SerObject
 import Util
 import Context
 from Logger import log
 from Location import Location
 from Action import Action
+from Database import DB
 
 class Actor(SerObject.SerObject):
 	# We have our own DB table and caching scheme for Actors
@@ -37,13 +40,13 @@ class Actor(SerObject.SerObject):
 	# Basic properties of the object
 	def loc(self):
 		"""Return the Location (or Road for monsters) that we're stood on"""
-		if not hasattr(self, '_loc'):
-			self._loc = Location.load_by_pos(self.position)
-		return self._loc
+		return None
 
 	def held_item(self):
 		"""Return the item(s) currently held by the actor"""
-		return None
+		if self['holding'] == None:
+			return None
+		return Item.load(self.holding)
 
 	def equipment(self):
 		"""Return an iterator over the equipment currently worn by the actor"""
@@ -105,12 +108,44 @@ class Actor(SerObject.SerObject):
 
 	####
 	# Administration
-	def message(self, message):
+	def message(self, message, msg_type='message'):
 		"""Write a message to the actor's message log"""
-		self.messages += message + "\n"
-		if len(self.messages > 1024):
-			self.messages = self.messages[-1024:]
-		self._changed = True
+		cur = DB.cursor()
+		cur.execute("INSERT INTO actor_message"
+					+ " (stamp, actor_id, msg_type, message)"
+					+ " VALUES (TIMESTAMP 'EPOCH' + %(stamp)s * INTERVAL '1 second', "
+					+ "         %(id)s, %(msg_type)s, %(message)s)",
+					{ 'stamp': time.time(),
+					  'id': self._id,
+					  'msg_type': msg_type,
+					  'message': message })
+
+	def get_messages(self, since):
+		"""Get messages from this actor's message log"""
+		log.debug("Requested messages since " + str(since))
+		cur = DB.cursor()
+		cur.execute("SELECT EXTRACT(EPOCH FROM stamp) AS ustamp, "
+					+ "     msg_type, message"
+					+ " FROM actor_message"
+					+ " WHERE EXTRACT(EPOCH FROM stamp) >= %(since)s"
+					+ "   AND actor_id = %(id)s"
+					+ " ORDER BY stamp DESC"
+					+ " LIMIT %(limit)s",
+					{ 'since': since,
+					  'id': self._id,
+					  'limit': 1024 })
+		# The alternative to the time comparison above is:
+		# stamp >= (TIMESTAMP 'epoch' + %(since)s * INTERVAL '1 second');
+		# That has to be the top most-icky way of turning a UNIX
+		# timestamp into a timestamp object that I've ever seen.
+
+		result = []
+		row = cur.fetchone()
+		while row != None:
+			log.debug("Row = " + str(row))
+			result.append(row)
+			row = cur.fetchone()
+		return result
 
 	####
 	# Actions infrastructure: Things the player can do to this actor
