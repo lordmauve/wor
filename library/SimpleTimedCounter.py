@@ -25,7 +25,8 @@ class SimpleTimedCounter(OnLoad):
 		if increments <= 0:
 			return
 
-		self.value += increments * self.increment
+		if self.value < self.maximum:
+			self.value += max(self.maximum, increments * self.increment)
 		self.last += increments * self.interval
 
 	def context_get(self):
