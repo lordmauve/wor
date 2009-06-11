@@ -2,7 +2,11 @@
 
 import Context
 import Util
+import GameUtil
+from Location import Location
 from Player import Player
+from Actor import Actor
+from Item import Item
 from Logger import log
 from mod_python import apache
 
@@ -29,6 +33,12 @@ def actor_handler(req, target, components):
 			data = Util.parse_input(req)
 			if 'action' in data:
 				actor.perform_action(data['action'], data)
+
+			# Save any game state that might have changed
+			GameUtil.save()
+			Actor.flush_cache()
+			#Location.flush_cache()
+			#Item.flush_cache()
 		else:
 			# If it's not GET or POST, complain
 			return apache.HTTP_METHOD_NOT_ALLOWED

@@ -31,7 +31,6 @@
 
 		SetHandler mod_python
 		PythonHandler hd_all::api_handler
-		PythonCleanupHandler hd_all::cleanup_handler
 	</Location>
 
 	LogLevel warn

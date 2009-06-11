@@ -11,6 +11,7 @@ from Player import Player
 from Location import Location
 from Item import Item
 from Actor import Actor
+import GameUtil
 import Context
 import Logger
 import hd_actor
@@ -157,7 +158,6 @@ def api_handler(req):
 		# Set up a simple Infernal Server Error response 
 		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
 		req.write("There was an infernal server error. Please report this (with reference %s) to the admins.\n" % (Context.request_id))
-		req.write("Aargh?\n")
 
 		# Get the details of the last exception
 		exlist = sys.exc_info()
@@ -194,11 +194,3 @@ def check_actor(req, fail=True):
 		raise apache.SERVER_RETURN, apache.HTTP_FORBIDDEN
 
 	return int(actor)
-
-def cleanup_handler(req):
-	"""Called at the end of every request. In this case, simply
-	flushes all the caches."""
-	Actor.flush_cache()
-	#Location.flush_cache()
-	#Item.flush_cache()
-	return apache.OK
