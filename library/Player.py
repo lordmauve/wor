@@ -92,6 +92,10 @@ class Player(Actor):
 		"""Create and return a hash of all possible actions this
 		player might perform"""
 		acts = {}
+		if self.ap.value <= 0:
+			# No actions are possible at negative AP
+			return acts
+		
 		if fuid == None:
 			action_id = None
 			name = None
