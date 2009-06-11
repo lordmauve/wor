@@ -70,3 +70,42 @@ function get_side_panel(panel_id)
 	}
 	return panel;
 }
+
+function parse_input(str)
+{
+	// Parse a standard key/value input stream, and return an array of the
+	// objects read
+	var result = new Array();
+	var accumulator = new Object();
+
+    var lines = str.split("\n");
+    for(var n in lines)
+    {
+		var line = lines[n];
+		var kv = new Array();
+		if(line[0] == ' ')
+		{
+			accumulator[kv[0]] += "\n" + line;
+		}
+		else if(line == '-')
+		{
+			result.push(accumulator);
+			accumulator = new Object();
+			hasdata = false;
+		}
+		else if(line == '')
+		{ }
+		else
+		{
+			kv = line.split(":", 2);
+			accumulator[kv[0]] = kv[1];
+			hasdata = true;
+		}
+    }
+
+    if(hasdata)
+	{
+		result.push(accumulator);
+	}
+	return result;
+}

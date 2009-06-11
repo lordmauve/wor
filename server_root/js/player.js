@@ -29,7 +29,7 @@ function load_basic_player(req)
 }
 
 ////////////
-// Player-specific actions
+// Actions
 function load_player_act(req)
 {
   if(req.readyState == 4)
@@ -53,46 +53,6 @@ function load_player_act(req)
       panel.innerHTML = "Error loading actions.\n<div>" + req.responseText + "</div>";
     }
   }
-}
-
-// Parse a standard key/value input stream, and return an array of the
-// objects read
-
-function parse_input(str)
-{
-	var result = new Array();
-	var accumulator = new Object();
-
-    var lines = str.split("\n");
-    for(var n in lines)
-    {
-		var line = lines[n];
-		var kv = new Array();
-		if(line[0] == ' ')
-		{
-			accumulator[kv[0]] += "\n" + line;
-		}
-		else if(line == '-')
-		{
-			result.push(accumulator);
-			accumulator = new Object();
-			hasdata = false;
-		}
-		else if(line == '')
-		{ }
-		else
-		{
-			kv = line.split(":", 2);
-			accumulator[kv[0]] = kv[1];
-			hasdata = true;
-		}
-    }
-
-    if(hasdata)
-	{
-		result.push(accumulator);
-	}
-	return result;
 }
 
 ////////////////////
