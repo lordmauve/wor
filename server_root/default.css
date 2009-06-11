@@ -36,3 +36,28 @@ tr.hex_corner td {
 	border: 2px solid black;
 	padding: 5px;
 }
+
+div.message {
+	border: 3px solid #aaa;
+	background-color: #ccc;
+	padding: 0px;
+	margin: 3px;
+	border-radius: 12px;
+	-moz-border-radius: 12px;
+}
+
+div.msg_type_rodney {
+	border-color: #f00;
+	background-color: fcc;
+}
+
+div.msg_type_sound {
+	border-color: #ff0;
+	background-color: ffc;
+}
+
+span.timestamp {
+	font-style: italic;
+	font-size: 65%;
+	display: block;
+}
