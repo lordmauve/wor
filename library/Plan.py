@@ -1,5 +1,7 @@
 """Plan: A plan for constructing stuff from other stuff"""
 
+from Logger import log
+
 plans = []
 
 def makeable_plans(who, item):
@@ -7,12 +9,13 @@ def makeable_plans(who, item):
 	from item."""
 	rv = []
 	for p in plans:
-		if item not in p.materials:
+		if (item.ob_type() not in p.materials
+			and item.ob_type() not in p.catalyst):
 			continue
-		if item not in p.catalyst:
+		if not p.can_be_made(who, 1):
 			continue
-		if p.can_be_made(who, 1):
-			rv.append(p)
+		rv.append(p)
+	log.debug(str(rv))
 	return rv
 
 def visible_plans(who):
@@ -27,11 +30,12 @@ def visible_plans(who):
 	return rv
 
 class Plan(object):
-	def __init__(self, materials, makes, ap, ap10=None,
+	def __init__(self, name, materials, makes, ap, ap10=None,
 				 align=None, catalyst={},
 				 precondition=lambda p, a, q: True,
 				 success=lambda p, a, q: True,
 				 postcondition=lambda p, a, q: True):
+		self.name = name
 		self.materials = materials
 		self.makes = makes
 		self.ap = ap
