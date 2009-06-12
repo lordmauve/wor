@@ -9,6 +9,13 @@ import Util
 import BaseConfig
 import os
 import os.path
+from Plan import Plan, makeable_plans
+from ActionMake import ActionMake
+from Logger import log
+
+# We must do this to run the code that defines all possible plans.
+# Can't be done in Plan, for circular reference reasons.
+import Plans
 
 class Item(SerObject.SerObject):
 	"""An item. By default, all items are unique. Some items are
@@ -49,7 +56,7 @@ class Item(SerObject.SerObject):
 		if name in cls.class_cache_by_name:
 			return cls.class_cache_by_name[name]
 		# Load the containing module
-		mod = __import__(name, globals(), locals(), [name], -1)
+		mod = __import__("Items."+name, globals(), locals(), [name], -1)
 		# Cache the class from that module -- assumes all classes have
 		# the exact same name as their containing module
 		cls.class_cache_by_name[name] = mod.__dict__[name]
@@ -59,7 +66,7 @@ class Item(SerObject.SerObject):
 	def list_all_classes():
 		"""Obtain a list of all item class names"""
 		# Get all the files in the Item directory
-		cls_list = os.listdir(os.path.join(BaseConfig.base_dir, "content/Item"))
+		cls_list = os.listdir(os.path.join(BaseConfig.base_dir, "content/Items"))
 		# Filter out just the .py files
 		cls_list = filter(lambda x: x.endswith(".py"), cls_list)
 		cls_list = filter(lambda x: x[0] != '_', cls_list)
@@ -77,11 +84,11 @@ class Item(SerObject.SerObject):
 		"""Return the owner of this object, loading it if necessary"""
 		if self._owner == None:
 			if self.owner_type == 'Actor':
-				self._owner = Actor.load(self.owner)
+				self._owner = Actor.load(self.owner_id)
 			elif self.owner_type == 'Location':
-				self._owner = Location.load(self.owner)
+				self._owner = Location.load(self.owner_id)
 			elif self.owner_type == 'Item':
-				self._owner = Item.load(self.owner)
+				self._owner = Item.load(self.owner_id)
 			else:
 				pass
 		return self._owner
@@ -102,6 +109,11 @@ class Item(SerObject.SerObject):
 
 		return False
 
-	def external_actions(self, acts, player):
-		# FIXME: Build system goes here
-		pass
+	def external_actions(self, acts, player, name=None):
+		# Build system
+		plans = makeable_plans(player, self)
+		log.debug("IEA " + str(plans))
+		for p in plans:
+			log.debug("Item.external_actions: "+p.name)
+			act = ActionMake(player, self, p)
+			acts[act.uid] = act
