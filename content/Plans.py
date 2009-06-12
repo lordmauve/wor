@@ -1,10 +1,11 @@
 from Plan import Plan, plans
-from Align import Align
+from Alignment import Alignment
 
-plans.add(Plan(
-	materials = { 'Punch': 1 },
-	makes = { 'Haymaker': 1 },
-	ap = 1,
-	ap10 = 8,
-	align = Align.FIRE
+plans.append(Plan(
+	name		= "haymaker",
+	materials	= { 'Punch': 1 },
+	makes		= { 'Haymaker': 1 },
+	ap			= 1,
+	ap10		= 8,
+	align		= Alignment.FIRE
 	))
