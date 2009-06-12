@@ -40,7 +40,7 @@ tr.hex_corner td {
 div.message {
 	border: 3px solid #aaa;
 	background-color: #ccc;
-	padding: 0px;
+	padding: 0px 6px;
 	margin: 3px;
 	border-radius: 12px;
 	-moz-border-radius: 12px;
