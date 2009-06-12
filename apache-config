@@ -15,7 +15,7 @@
 
 	PythonAutoReload On
 	PythonOption wor.root_path /home/hrm/develop/wor
-	PythonPath "sys.path + ['/home/hrm/develop/wor/library', '/home/hrm/develop/wor/handlers', '/home/hrm/develop/wor/content', '/home/hrm/develop/wor/content/Item']"
+	PythonPath "sys.path + ['/home/hrm/develop/wor/library', '/home/hrm/develop/wor/handlers', '/home/hrm/develop/wor/content']"
 
 	# Now map the REST API to a suitable set of paths:
 	<Location /api>

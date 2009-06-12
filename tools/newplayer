@@ -7,7 +7,7 @@ from Player import Player
 from Item import Item
 from Alignment import Alignment
 from Database import DB
-from Rock import Rock
+from Items.Rock import Rock
 import GameUtil
 
 p = Player('darksatanic', Alignment.WOOD)

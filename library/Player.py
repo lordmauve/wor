@@ -6,7 +6,7 @@ import time
 from Database import DB
 from Actor import Actor
 from ItemContainer import ItemContainer
-from Punch import Punch
+from Items.Punch import Punch
 from Action import Action
 from SimpleTimedCounter import SimpleTimedCounter
 from Position import Position

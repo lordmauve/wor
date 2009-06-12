@@ -1,1 +1,1 @@
-export PYTHONPATH=$PWD/library:$PWD/content/Item
+export PYTHONPATH=$PWD/library:$PWD/content
