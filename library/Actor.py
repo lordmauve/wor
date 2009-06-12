@@ -7,6 +7,7 @@ import time
 import SerObject
 import Util
 import Context
+from Item import Item
 from Logger import log
 from Location import Location
 from Action import Action
@@ -166,3 +167,5 @@ class Actor(SerObject.SerObject):
 	# Items/inventory/equipment
 	def has(self, itemtype, number=1):
 		count = 0
+		# FIXME: This is incomplete
+		return True

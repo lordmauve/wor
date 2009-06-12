@@ -4,14 +4,15 @@
 class Action(object):
 	def __init__(self, uid, caption="Use", ap=1,
 				 action=lambda d: None,
-				 group="none", html=None):
+				 group="none", html=None, parameters=[]):
 		self.uid = uid
 		self.caption = caption
 		self.ap = ap
 		self.action = action
 		self.group = group
+		self.parameters = parameters
 		if html == None:
-			self.html = self.make_button(caption, uid, ap)
+			self.html = self.make_button(caption, uid, ap, parameters)
 
 	def context_get(self):
 		ret = {}
@@ -20,6 +21,7 @@ class Action(object):
 		ret['uid'] = self.uid
 		ret['caption'] = self.caption
 		ret['group'] = self.group
+		ret['parameters'] = ' '.join((self.uid + "_" + x for x in self.parameters))
 
 		return ret
 
@@ -31,10 +33,15 @@ class Action(object):
 		return "%s.%d.%s" % (object.ob_type(), object._id, act)
 
 	@staticmethod
-	def make_button(caption, uid, ap=1):
-		return ("<button onclick='post_action(\"%(uid)s\")'>"
+	def make_button(caption, uid, ap=1, parameters=[]):
+		action_params = '"' + uid + '"'
+		for it in parameters:
+			action_params += ', "' + uid + '_' + it + '"'
+			
+		return ("<button onclick='post_action(%(params)s)'>"
 				+ "%(caption)s (%(ap)d AP)</button>") % {
 			'uid': uid,
 			'caption': caption,
-			'ap': ap
+			'ap': ap,
+			'params': action_params
 			}
