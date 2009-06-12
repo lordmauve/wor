@@ -152,14 +152,28 @@ function parse_input_table(str, cols)
 	return result;
 }
 
+function lpad(str, padding, len)
+{
+	str = new String(str);
+	if(padding.length == 0)
+		return str;
+	while(str.length < len)
+		str = padding.concat(str);
+	return str;
+}
+
 function format_date_time(when)
 {
 	var result = "";
 
 	with(when)
 	{
-		result += getFullYear() + "-" + getMonth() + "-" + getDate();
-		result += " " + getHours() + ":" + getMinutes() + ":" + getSeconds();
+		result += getFullYear() + "-";
+		result += lpad(getMonth(), "0", 2) + "-";
+		result += lpad(getDate(), "0", 2) + " ";
+		result += lpad(getHours(), "0", 2) + ":";
+		result += lpad(getMinutes(), "0", 2) + ":";
+		result += lpad(getSeconds(), "0", 2);
 	}
 	return result;
 }
