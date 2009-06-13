@@ -44,7 +44,9 @@ function load_player_act(req)
       for(var aid in actions)
       {
 		  act = actions[aid];
-		  panel.innerHTML += act['html'];
+			if(panel.innerHTML != "")
+				panel.innerHTML += "<hr/>"
+			panel.innerHTML += act['html'];
       }
     }
     else
