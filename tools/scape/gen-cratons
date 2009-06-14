@@ -1,0 +1,46 @@
+#!/usr/bin/python
+
+import sys
+from random import randrange, random, seed
+import getopt
+
+SCALE=10
+NCRATONS=30
+
+def usage():
+	print """Usage: gen-cratons [options]
+Options:
+\t-s, --scale=<n>\t\tScale to generate (2^n+1 hexes per side) (10)
+\t-n, --number=<n>\t\tNumber of cratons to create (30)
+
+Constructs a randomised set of craton centres within a triangle of the
+given scale."""
+
+try:
+	optlist, args = getopt.getopt(sys.argv[1:], 'h?s:n:', ['help', 'scale=', 'number='])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+for o, a in optlist:
+	if o in ('-h', '--help', '-?'):
+		usage()
+		sys.exit(0)
+	elif o in ('-s', '--scale'):
+		SCALE=int(a)
+	elif o in ('-n', '--number'):
+		NCRATONS=int(a)
+	else:
+		usage()
+		sys.exit(1)
+
+MAX_X=(1<<SCALE)+1
+
+print MAX_X
+while NCRATONS > 0:
+	x = randrange(0, MAX_X)
+	y = randrange(0, MAX_X)
+	if x+y < MAX_X:
+		print x, y, 1.0+random()*3.0
+		NCRATONS -= 1
