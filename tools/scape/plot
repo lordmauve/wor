@@ -1,0 +1,62 @@
+#!/usr/bin/python
+
+import sys
+import getopt
+
+SCALE=10
+NCRATONS=30
+
+def usage():
+	print """Usage: plot [options] --file <name> [file-options]
+Options:
+\t-o, --output=<file>\tOutput file
+\t-f, --file=<name>\tPlot data from <name>
+
+File Options:
+\t-0, --zero\t\tZero value in data is zero in output;
+\t\t\t\t  scale maximum to fit
+\t-e, --even\t\tZero value in data is centre in output;
+\t\t\t\t  scale data to fit
+
+\t-t, --threshold=<v>\tValues below <v> are plotted as a
+\t\t\t\t  different colour
+\t-c, --threshold-colour=<r>,<g>,<b>
+\t\t\t\tColour to plot threshold values as
+
+\t-r, --red\t\tPlot this file on the red channel
+\t-g, --green\t\tPlot this file on the green channel
+\t-b, --blue\t\tPlot this file on the blue channel
+
+Plots one or more input files.
+"""
+
+try:
+	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:rgb', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'red', 'green', 'blue'])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+files = []
+
+for o, a in optlist:
+	if o in ('-h', '--help', '-?'):
+		usage()
+		sys.exit(0)
+	elif o in ('-s', '--scale'):
+		SCALE=int(a)
+	elif o in ('-n', '--number'):
+		NCRATONS=int(a)
+	else:
+		usage()
+		sys.exit(1)
+
+MAX_X=(1<<SCALE)+1
+
+print MAX_X
+while NCRATONS > 0:
+	x = randrange(0, MAX_X)
+	y = randrange(0, MAX_X)
+	if x+y < MAX_X:
+		print x, y, 1.0+random()*3.0
+		NCRATONS -= 1

@@ -1,0 +1,87 @@
+#!/usr/bin/python
+
+import sys
+from random import randrange, random, seed
+import getopt
+
+FLIP=False
+SCALE=10
+MAX_X=(1<<SCALE)+1
+
+def usage():
+	print """Usage: loc-cratons [options] [craton-options] -i <craton-file>
+\t[[craton-options] -i <craton-file> ... ]
+Options:
+\t-s, --scale=<n>\t\tUse scale of <n> (10)
+Craton-Options:
+\t-f, --flip\t\tTransform input by flipping about hypotenuse
+\t-o, --offset=<x>,<y>\tTranslate input file (after flipping)
+
+Takes a set of craton files (transforming them as appropriate) and
+generates a file giving the cragginess for each point, based on the
+cragginess of the nearest craton."""
+
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?fi:o:', ['help', 'flip', 'input=', 'offset='])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+fopts = {}
+files = []
+
+for o, a in optlist:
+	if o in ('-h', '--help', '-?'):
+		usage()
+		sys.exit(0)
+	elif o in ('-f', '--flip'):
+		fopts['flip']=True
+	elif o in ('-o', '--offset'):
+		fopts['ox'], fopts['oy'] = [ int(v) for v in a.split(',') ]
+	elif o in ('-i', '--input'):
+		fopts['file'] = a
+		files.append(fopts)
+		fopts = {}
+	else:
+		usage()
+		sys.exit(1)
+
+if len(args) > 0:
+	usage()
+	sys.exit(1)
+
+cratons = []
+
+for f in files:
+	cfile = open(f['file'], 'r')
+	size = cfile.next()
+	size = int(size)
+	for line in cfile:
+		x, y, craggy = line.split()
+		x = int(x)
+		y = int(y)
+		craggy = float(craggy)
+		if 'flip' in f and f['flip']:
+			x = int(size/2)-x
+			y = int(size/2)-y
+		if 'ox' in f and 'oy' in f:
+			x += f['ox']
+			y += f['oy']
+		cratons.append([x, y, craggy])
+
+print MAX_X
+
+for x in range(0, MAX_X):
+	for y in range(0, MAX_X-x):
+		closest = None
+		close_d = 1e8
+		for c in cratons:
+			dx = c[0]-x
+			dy = c[1]-y
+			d = dx*dx + dy*dy
+			if d < close_d:
+				close_d = d
+				closest = c
+		print closest[2],
+	print

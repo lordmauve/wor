@@ -1,0 +1,52 @@
+#!/usr/bin/python
+
+import sys
+from random import randrange, random, seed
+import getopt
+
+SCALE=10
+PRESEED_SCALE=6
+MAX_H=512
+
+def usage():
+	print """Usage: gen-scaffold [options]
+Options:
+\t-s, --scale=<n>\t\tScale to generate (2^n+1 hexes per side) (10)
+\t-k, --skip=<n>\t\tDistance (scale) between sample points (6)
+
+Generates a set of fixed points to guide the construction of a fractal
+landscape."""
+
+try:
+	optlist, args = getopt.getopt(sys.argv[1:], 'h?s:k:', ['help', 'scale=', 'skip='])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+for o, a in optlist:
+	if o in ('-h', '--help', '-?'):
+		usage()
+		sys.exit(0)
+	elif o in ('-s', '--scale'):
+		SCALE=int(a)
+	elif o in ('-k', '--skip'):
+		PRESEED_SCALE=int(a)
+	else:
+		usage()
+		sys.exit(1)
+
+MAX_X=(1<<SCALE)+1
+PRESEED=1<<PRESEED_SCALE
+
+print MAX_X, PRESEED
+for x in range(0, MAX_X, PRESEED):
+	for y in range(0, MAX_X-x, PRESEED):
+		if y <= MAX_X/4:
+			print -int(MAX_H/100.0),
+		#elif MAX_X/4 < y <= MAX_X/2:
+		#	ypos = y-MAX_X/4
+		else:
+			print randrange(int(MAX_H/10.0), int(MAX_H/3.0)),
+
+	print 
