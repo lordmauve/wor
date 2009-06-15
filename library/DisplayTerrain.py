@@ -2,16 +2,34 @@ import Image, ImageDraw
 import os
 import Location
 
+#Used for drawing terrains.  The general idea is that if you have tavern-on-path-on-jungle, we should make three separate images, and combine them as necessary.
+#All images are saved as .png files, but the original file for each terrain may be any format.  Just know that only .PNG and .GIF files really support transparency, so any JPEGs are guaranteed to not be transparent below them, at least.
+#The "final" version of any image is a .png file, on the off chance we have leftover transparency.  (...but maybe we should assume opacity and do JPEG?)
+
+#file-naming scheme:
+#border_<border type>_<direction>.png is the complete image for a border type.  The directions are F (forward slash), B (back slash), L (left), and R (right).  Never displayed, but frequently used for compositing.
+#terrain_<filename minus extension>_<direction>.png is the complete image for exactly one terrain type, split into five parts (UL, UR, M, LL, LR).  It may be transparent, either partially or completely.  Never displayed, but used for compositing.
+#location_<terrain1>_<terrain2>_<terrainN>_<direction>.png is the complete (composited) image for that location.  It should be opaque, but there's no technical problem if it's partially transparent.  Never displayed, but used for compositing.
+#render_T1_<terrain1>_<terrainN>_T2_<terrain1>_<terrainN>_B_<border>_<F or B>.png is the final, rendered corner image.  T1 is the top terrain stack, T2 is the bottom stack, B is the border type, and F or B stands for Forward Slash or Back Slash, depending on the angle of the diagonal line.
+#render_T_<terrain1>_<terrainN>_B1_<left border>_B2_<right border>.png is the final, rendered body image. T is the terrain stack, B1 is the left border, B2 is the right border.
+
 #Pulled out of my ass.  Consider it pseudocode.
 def get_location_piece(stack,part):
-	file_name="location"
+	#file format: location_t1.t2.tN_part.png
+	file_name="location_"
+	is_first=True
 	for loc in stack:
-		file_name+='_'+loc.terrain
-	file_name+='.png'
+		if loc.terrain != None:
+			if not is_first:
+				is_first=false
+			else:
+				file_name+='.'
+			file_name+=loc.terrain.split('.')[0]
+	file_name+='_'+part+'.png'
 	if not os.path.isfile(file_name):
 		terrain=Image.new((1,1),"RGBA")
 		for loc in stack:
-			terr=Image.open(get_terrain_piece(loc.terrain))
+			terr=Image.open(get_terrain_piece(loc.terrain,part))
 			if terr.mode!="RGBA":
 				terr=terr.convert("RGBA")
 			if terrain.size==(1,1):
@@ -24,34 +42,40 @@ def get_location_piece(stack,part):
 				terrain=Image.composite(terr,terrain,terr)
 	return file_name
 
-#more ass-pulling.
-def render_neighborhood(neigh):
+#more ass-pulling.  Does not actually render the neighborhood, but rather ensures that all of the filenames that we send down to the browser have actual images to back them up.
+#graph of locations, by index in the neighbor-list:
+# 3 2
+#4 0 1
+# 5 6
+def pre_render_neighborhood(neigh):
 	return None
 
-def get_terrain_piece(type,part):
-	file_name="terrain_"+type+"_"+part+".png"
+def get_terrain_piece(terrain_file,part):
+	terrain_code=terrain_file.split('.')[0]
+	file_name="terrain_"+terrain_code+"_"+part+".png"
 	if (not os.path.isfile(file_name)):
-		split_terrain(type)
+		split_terrain(terrain_file)
 
 	return file_name
 	
-def split_terrain(name):
-	if (name!=''):
-		im=Image.open(name+'.png')
+def split_terrain(terrain_file):
+	if (name!='' && name!=None):
+		im=Image.open(terrain_file)
+		terrain_code=terrain_file.split('.')[0]
 		center_x=int(im.size[0]/2)
 		top_fold=int(im.size[1]/4)
 		bottom_fold=int(im.size[1]*.75)
 		
 		UL=im.crop((0,0,center_x,top_fold))
-		UL.save("terrain_"+name+"_UL.png")
+		UL.save("terrain_"+terrain_code+"_UL.png")
 		UR=im.crop((center_x,0,im.size[0],top_fold))
-		UR.save("terrain_"+name+"_UR.png")
+		UR.save("terrain_"+terrain_code+"_UR.png")
 		middle=im.crop((0,top_fold,im.size[0],bottom_fold))
-		middle.save("terrain_"+name+"_M.png")
+		middle.save("terrain_"+terrain_code+"_M.png")
 		LL=im.crop((0,bottom_fold,center_x,im.size[1]))
-		LL.save("terrain_"+name+"_LL.png")
+		LL.save("terrain_"+terrain_code+"_LL.png")
 		LR=im.crop((center_x,bottom_fold,im.size[0],im.size[1]))
-		LR.save("terrain_"+name+"_LR.png")
+		LR.save("terrain_"+terrain_code+"_LR.png")
 	# Blank string==boring, transparent image, suitable for edge hexes that have nothing beyond them.  Generate it if it doesn't exist yet.
 	else:
 		im=Image.new("LA",(1,1))
@@ -63,13 +87,26 @@ def split_terrain(name):
 		im.save("terrain__LL.png")
 		im.save("terrain__LR.png")
 
-def render_hex_corner(top_terr_name, bottom_terr_name, is_forward_slash, border_type):
-	file_name="corner_"+top_terr_name+'_'+bottom_terr_name+'_'+(is_forward_slash and "F" or "B")+'_'+border_type+'.png'
+def render_hex_corner(top_terr_file, bottom_terr_file, is_forward_slash, border_file):
+	top_code=top_terr_file.split('.')[0]
+	bottom_code=bottom_terr_file.split('.')[0]
+	border_code=border_file.split('.')[0]
+	
+	if is_forward_slash:
+		corner_type = "F"
+		upper_type = "UL"
+		lower_type = "LR"
+	else:
+		corner_type = "B"
+		upper_type = "UR"
+		lower_type = "LL"
+
+	file_name="corner_T1."+top_code+'.T2.'+bottom_code+'.B.'+border_code+'_'+corner_type+'.png'
 	if (not os.path.isfile(file_name)):
-		top_terr=Image.open(get_terrain_piece(top_terr_name,is_forward_slash and "UL" or "UR"))
+		top_terr=Image.open(get_terrain_piece(top_code,upper_type))
 		if top_terr.mode!='RGBA':
 			top_terr=top_terr.convert('RGBA')
-		bottom_terr=Image.open(get_terrain_piece(bottom_terr_name,is_forward_slash and "LR" or "LL"))
+		bottom_terr=Image.open(get_terrain_piece(bottom_code,lower_type))
 		if bottom_terr.mode!='RGBA':
 			bottom_terr=bottom_terr.convert('RGBA')
 		if (top_terr.size!=bottom_terr.size):
@@ -86,7 +123,7 @@ def render_hex_corner(top_terr_name, bottom_terr_name, is_forward_slash, border_
 		corner=Image.composite(top_terr,bottom_terr,mask)
 		
 		#border image must have transparency, 'cause I'm lazy.
-		border=Image.open(get_border(border_type,(is_forward_slash and "F" or "B")))
+		border=Image.open(get_border(border_code,corner_type))
 		if border.mode!='RGBA':
 			border=border.convert('RGBA')
 		if (corner.size!=border.size):
@@ -101,25 +138,26 @@ def render_hex_corner(top_terr_name, bottom_terr_name, is_forward_slash, border_
 
 	return file_name
 
-def get_border(name, part):
-	file_name="border_"+name+"_"+part+".png"
+def get_border(border_file, part):
+	border_code=border_file.split('.')[0]
+	file_name="border_"+border_code+"_"+part+".png"
 	if (not os.path.isfile(file_name)):
 		#if you create one angle-thing, we can make the other by flipping it.  I don't like rotation in images.
-		if (part=="F" and os.path.isfile("border_"+name+"_B.png") or part=="B" and os.path.isfile("border_"+name+"_F.png")):
+		if (part=="F" and os.path.isfile("border_"+border_code+"_B.png") or part=="B" and os.path.isfile("border_"+border_code+"_F.png")):
 			other_part = part=="F" and "B" or "F"
-			im=Image.open("border_"+name+"_"+other_part+".png")
+			im=Image.open("border_"+border_code+"_"+other_part+".png")
 			im=im.transpose(Image.FLIP_LEFT_RIGHT)
 			im.save(file_name)
 		#But if you really, really want it.... yes, we can do horrible, horrible things to your image.
 		else:
-			split_border(name)
+			split_border(border_file)
 	return file_name
 			
 #assumption: your border image runs vertically, smack dab in the middle of the image.		
-def split_border(name):
-	im=Image.open(name+'.png')
+def split_border(border_file):
+	border_code=border_file.split('.')[0]
+	im=Image.open(border_file)
 	#yes, it's more effort to maintain left & right separately.  But maybe you have a really fancy border that you don't want to be perfectly symmetrical?
-	#(also: I am lazy.  There's an ImageChops function that wraps on translation.)
 	left=im.copy();
 	right=left.copy()
 	left=im.transform(im.size,Image.AFFINE,(1,0,im.size[0]/2,0,1,0),Image.NEAREST)  #Don't need bicubic, we want to shift by an integer number of pixels.  Whether it's an integer or not.
@@ -128,23 +166,26 @@ def split_border(name):
 	lDraw.rectangle((int(left.size[0]/2),0,left.size[0],left.size[1]),fill=(0,0,0,0))
 	rDraw=ImageDraw.Draw(right)
 	rDraw.rectangle((0,0,int(left.size[0]/2),left.size[1]),fill=(0,0,0,0))
-	left.save('border_'+name+'_L.png')
-	right.save('border_'+name+'_R.png')
+	left.save('border_'+border_code+'_L.png')
+	right.save('border_'+border_code+'_R.png')
 	
 	#Only create the slashes if they don't already exist, because I don't like rotations if they can be avoided.
-	if (not os.path.isfile('border_'+name+'_F.png') and not os.path.isfile('border_'+name+'_B.png')):
+	if (not os.path.isfile('border_'+border_code+'_F.png') and not os.path.isfile('border_'+border_code+'_B.png')):
 		slash=im.rotate(-60,Image.BILINEAR)
 		slash=slash.crop((int(slash.size[0]/2 - slash.size[1]*(3**.5)/4),int(slash.size[1]*.25),int(slash.size[0]/2 + slash.size[1]*(3**.5)/4),int(slash.size[1]*.75)))
-		slash.save('border_'+name+'_F.png')
+		slash.save('border_'+border_code+'_F.png')
 		slash=slash.transpose(Image.FLIP_LEFT_RIGHT)
-		slash.save('border_'+name+'_B.png')
+		slash.save('border_'+border_code+'_B.png')
 
-def render_hex_body(terr_name, border_left_name, border_right_name):
-	file_name="middle_"+terr_name+"_"+border_left_name+"_"+border_right_name+".png"
+def render_hex_body(terr_file, border_left_file, border_right_file):
+	terr_code=terr_file.split('.')[0]
+	left_code=border_left_file.split('.')[0]
+	right_code=border_right_file.split('.')[0]
+	file_name="middle_T."+terr_name+".B1."+left_code+".B2."+right_code+".png"
 	if (not os.path.isfile(file_name)):
-		terr=Image.open(get_terrain_piece(terr_name,"M"))
-		left=Image.open(get_border(border_left_name,'L'))
-		right=Image.open(get_border(border_right_name,'R'))
+		terr=Image.open(get_terrain_piece(terr_file,"M"))
+		left=Image.open(get_border(border_left_file,'L'))
+		right=Image.open(get_border(border_right_file,'R'))
 		largest=None
 		images=[terr,left,right]
 		for i in images:
