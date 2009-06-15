@@ -2,9 +2,11 @@
 
 import sys
 import getopt
+import Image
+import ImageDraw
 
 SCALE=10
-NCRATONS=30
+PXSZ=2
 
 def usage():
 	print """Usage: plot [options] --file <name> [file-options]
@@ -23,40 +25,106 @@ File Options:
 \t-c, --threshold-colour=<r>,<g>,<b>
 \t\t\t\tColour to plot threshold values as
 
-\t-r, --red\t\tPlot this file on the red channel
-\t-g, --green\t\tPlot this file on the green channel
-\t-b, --blue\t\tPlot this file on the blue channel
+\t-m, --mask=<r>,<g>,<b>\tPlot this file using the colour mask
 
 Plots one or more input files.
 """
 
 try:
-	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:rgb', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'red', 'green', 'blue'])
+	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:m:', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'mask='])
 except getopt.GetoptError, err:
 	print str(err)
 	usage()
 	sys.exit(1)
 
+output = "plot.png"
 files = []
+fdata = { 'mask': (255.0/256.0,255.0/256.0,255.0/256.0) }
 
 for o, a in optlist:
 	if o in ('-h', '--help', '-?'):
 		usage()
 		sys.exit(0)
-	elif o in ('-s', '--scale'):
-		SCALE=int(a)
-	elif o in ('-n', '--number'):
-		NCRATONS=int(a)
+	elif o in ('-o', '--output'):
+		output = a
+	elif o in ('-f', '--file'):
+		if len(fdata) > 1:
+			files.append(fdata)
+			fdata = { 'mask': (255.0/256.0,255.0/256.0,255.0/256.0) }
+		fdata['name'] = a
+	elif o in ('-0', '--zero'):
+		fdata['zero'] = True
+	elif o in ('-e', '--even'):
+		fdata['even'] = True
+	elif o in ('-t', '--threshold'):
+		fdata['threshold'] = float(a)
+	elif o in ('-c', '--threshold-colour'):
+		fdata['colour'] = a.split(',')
+	elif o in ('-m', '--mask'):
+		fdata['mask'] = (float(x)/256.0 for x in a.split(','))
 	else:
 		usage()
 		sys.exit(1)
 
-MAX_X=(1<<SCALE)+1
+if len(fdata) > 0:
+	files.append(fdata)
 
-print MAX_X
-while NCRATONS > 0:
-	x = randrange(0, MAX_X)
-	y = randrange(0, MAX_X)
-	if x+y < MAX_X:
-		print x, y, 1.0+random()*3.0
-		NCRATONS -= 1
+# First, loop through all of the files, get coordinate ranges for all
+# inputs
+for f in files:
+	minv = 1e6
+	maxv = -1e6
+	data = open(f['name'], 'r')
+	params = data.next()
+	for line in data:
+		elts = line.split()
+		for e in elts:
+			minv = min(minv, float(e))
+			maxv = max(maxv, float(e))
+	data.close()
+	
+	if 'zero' in f and f['zero']:
+		minv = 0
+	if 'even' in f and f['even']:
+		maxv = max(-minv, maxv)
+		minv = -maxv
+
+	f['min'] = minv
+	f['max'] = maxv
+	rng = float(maxv-minv)
+	f['scale'] = lambda x: (x-minv) / rng
+	print f['name'], "min =", f['min'], "max =", f['max']
+
+# Now go back and loop through them all again, and actually plot stuff
+img = Image.new("RGBA", (2048, 2048))
+draw = ImageDraw.Draw(img)
+
+for f in files:
+	f['data'] = open(f['name'], 'r')
+	params = f['data'].next()
+
+x = 0
+try:
+	while True:
+		lines = []
+		for f in files:
+			lines.append(f['data'].next().split())
+		y = 0
+		for data_slice in zip(*lines):
+			rgb = [0.0, 0.0, 0.0]
+			for v, f in zip(data_slice, files):
+				scaled = f['scale'](float(v)) * 255.0
+				rgb[0] += scaled * f['mask'][0]
+				rgb[1] += scaled * f['mask'][1]
+				rgb[2] += scaled * f['mask'][2]
+			tx = x*PXSZ + y*PXSZ/2
+			ty = y*PXSZ
+			rgb = (int(rgb[0]), int(rgb[1]), int(rgb[2]))
+			draw.rectangle((tx, ty, tx+PXSZ, ty+PXSZ), outline=rgb, fill=rgb)
+			y += 1
+		x += 1
+except StopIteration:
+	pass
+
+del draw
+img.save(output)
