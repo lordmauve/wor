@@ -3,6 +3,7 @@
 import sys
 from random import randrange, random, seed
 import getopt
+import math
 
 FLIP=False
 SCALE=10
@@ -89,7 +90,7 @@ def load_to_array(array, f):
 		y = 0
 		for e in elts:
 			tx, ty = transform_coords(x, y, f)
-			if 0 <= tx <= MAX_X and 0 <= ty <= MAX_X-y:
+			if 0 <= tx <= MAX_X and 0 <= ty <= MAX_X-x:
 				array[tx][ty] = e
 			y += stride
 		x += stride
@@ -180,7 +181,7 @@ while stride > 0:
 				sys.stderr.write("Count is zero: WTF? %d %d %d %d %d %d %d\n" % (stride, x, y, xbit, ybit, maxx, maxy))
 
 			height[x][y] = tot / count
-			
+
 			rrange = stride * CRAGGINESS * cragginess[x][y]
 
 			height[x][y] += randrange(-math.floor(rrange),
@@ -192,4 +193,6 @@ while stride > 0:
 print MAX_X
 for x in range(0, MAX_X):
 	for y in range(0, MAX_X-x):
-		print height[x][y]
+		print height[x][y],
+	print
+
