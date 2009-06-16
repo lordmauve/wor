@@ -7,7 +7,7 @@ import math
 
 SCALE=10
 PRESEED_SCALE=6
-MAX_H=512
+MAX_H=128
 
 def usage():
 	print """Usage: gen-scaffold [options]
@@ -44,7 +44,7 @@ print MAX_X, PRESEED
 for x in range(0, MAX_X, PRESEED):
 	for y in range(0, MAX_X-x, PRESEED):
 		if y <= MAX_X/4:
-			print 0,
+			print -3,
 		elif MAX_X/4 < y <= MAX_X*3/2:
 			shift = 1.0-math.fabs((y-MAX_X/2)/(MAX_X/4))
 			print randrange(0, int(MAX_H/3.0))+int((MAX_H*2.0/3.0)*shift),
