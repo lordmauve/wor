@@ -7,23 +7,25 @@ import math
 
 FLIP=False
 SCALE=10
-CRAGGINESS=3.0
+SUBSET=1
 
 def usage():
 	print """Usage: loc-fractal [options] { [patch-options] -c <craton-file> -k <scaffold-file> | -H <height-file> }
 Options:
 \t-s, --scale=<n>\t\tUse scale of <n> (10)
+\t-b, --blend\t\tBlend more smoothly
 Patch-Options:
 \t-f, --flip\t\tTransform input by flipping about hypotenuse
 \t-o, --offset=<x>,<y>\tTranslate input file (after flipping)"""
 
 try:
-	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?fo:s:c:k:H:', ['help', 'scale=', 'flip', 'offset=', 'craton=', 'scaffold=', 'height='])
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?fo:s:c:k:H:b', ['help', 'scale=', 'flip', 'offset=', 'craton=', 'scaffold=', 'height=', 'blend'])
 except getopt.GetoptError, err:
 	print str(err)
 	usage()
 	sys.exit(1)
 
+blend = False
 fopts = { 'ox': 0, 'oy': 0 }
 cfiles = []
 sfiles = []
@@ -35,6 +37,8 @@ for o, a in optlist:
 		sys.exit(0)
 	elif o in ('-s', '--scale'):
 		SCALE = int(a)
+	elif o in ('-b', '--blend'):
+		blend = True
 	elif o in ('-f', '--flip'):
 		fopts['flip'] = True
 	elif o in ('-o', '--offset'):
@@ -56,6 +60,7 @@ for o, a in optlist:
 		sys.exit(1)
 
 MAX_X=(1<<SCALE)+1
+CRAGGINESS = 128.0 / (1<<SCALE)
 
 if len(args) > 0:
 	usage()
@@ -80,8 +85,9 @@ def load_to_array(array, f):
 	size = int(bits[0])
 	# ... and stride
 	stride = 1
-	if len(bits) > 2:
+	if len(bits) > 1:
 		stride = int(bits[1])
+	sys.stderr.write(f['file'] + " stride = " + str(stride) + "\n")
 
 	# Loop through the file and read its parameters
 	x = 0
@@ -95,6 +101,8 @@ def load_to_array(array, f):
 			y += stride
 		x += stride
 	ifile.close()
+
+sys.stderr.write("Reading files\n")
 
 # Load the cragginess files
 for f in cfiles:
@@ -112,13 +120,13 @@ for f in hfiles:
 for x in range(0, MAX_X):
 	for y in range(0, MAX_X-x):
 		if height[x][y] != None:
-			height[x][y] = int(height[x][y])
+			height[x][y] = int(float(height[x][y]))
 		if cragginess[x][y] != None:
 			cragginess[x][y] = float(cragginess[x][y])
 
 # Now do the midpoint division algorithm
 stride = 1 << SCALE
-while stride > 0:
+while stride >= SUBSET:
 	sys.stderr.write("Stride %d\n" % (stride))
 	xbit = True
 	for x in range(0, MAX_X, stride):
@@ -129,6 +137,7 @@ while stride > 0:
 			ybit = not ybit
 			if height[x][y] != None:
 				continue
+			#sys.stderr.write( "Calculating " + str(x) + ", " + str(y) + "\n")
 			tot = 0.0
 			count = 0.0
 			if xbit:
@@ -136,44 +145,56 @@ while stride > 0:
 					if y - stride >= 0 and (y-stride) + (x+stride) <= MAX_X:
 						count += 2
 						tot += 2* height[x+stride][y-stride]
+						#sys.stderr.write( "  ++ %d, %d = %d\n" % (x+stride, y-stride, height[x+stride][y-stride]))
 					if x - stride >= 0 and (y+stride) + (x-stride) <= MAX_X:
 						count += 2
 						tot += 2* height[x-stride][y+stride]
-					if x - stride >= 0 and y - stride >= 0:
+						#sys.stderr.write( "  ++ %d, %d = %d\n" % (x-stride, y+stride, height[x-stride][y+stride]))
+					if blend and x - stride >= 0 and y - stride >= 0:
 						count += 1
 						tot += height[x-stride][y-stride]
-					if (y+stride) + (x+stride) <= MAX_X:
+						#sys.stderr.write( "   + %d, %d = %d\n" % (x-stride, y-stride, height[x-stride][y-stride]))
+					if blend and (y+stride) + (x+stride) <= MAX_X:
 						count += 1
 						tot += height[x+stride][y+stride]
+						#sys.stderr.write( "   + %d, %d = %d\n" % (x+stride, y+stride, height[x+stride][y+stride]))
 				else:
 					if x - stride >= 0:
 						count += 2
 						tot += 2* height[x-stride][y]
+						#sys.stderr.write( "  ++ %d, %d = %d\n" % (x-stride, y, height[x-stride][y]))
 					if y + (x+stride) <= MAX_X:
 						count += 2
 						tot += 2* height[x+stride][y]
-					if ( (y+2*stride) + (x-stride) <= MAX_X
+						#sys.stderr.write( "  ++ %d, %d = %d\n" % (x+stride, y, height[x+stride][y]))
+					if blend and ( (y+2*stride) + (x-stride) <= MAX_X
 						 and x - stride >= 0):
 						count += 1
 						tot += height[x-stride][y+2*stride]
-					if y - 2*stride >= 0:
+						#sys.stderr.write( "   + %d, %d = %d\n" % (x-stride, y+2*stride, height[x-stride][y+2*stride]))
+					if blend and y - 2*stride >= 0:
 						count += 1
 						tot += height[x+stride][y-2*stride]
+						#sys.stderr.write( "   + %d, %d = %d\n" % (x+stride, y-2*stride, height[x+stride][y-2*stride]))
 			else:
 				if ybit:
 					if y - stride >= 0:
 						count += 2
 						tot += 2* height[x][y-stride]
+						#sys.stderr.write( "  ++ %d, %d = %d\n" % (x, y-stride, height[x][y-stride]))
 					if y + stride <= maxy:
 						count += 2
 						tot += 2* height[x][y+stride]
-					if x - 2*stride >= 0:
+						#sys.stderr.write( "  ++ %d, %d = %d\n" % (x, y+stride, height[x][y+stride]))
+					if blend and x - 2*stride >= 0:
 						count += 1
 						tot += height[x-2*stride][y+stride]
-					if ( (y-stride) + (x+2*stride) <= MAX_X
+						#sys.stderr.write( "   + %d, %d = %d\n" % (x-2*stride, y+stride, height[x-2*stride][y+stride]))
+					if blend and ( (y-stride) + (x+2*stride) <= MAX_X
 						 and y - stride >= 0):
 						count += 1
 						tot += height[x+2*stride][y-stride]
+						#sys.stderr.write( "   + %d, %d = %d\n" % (x+2*stride, y-stride, height[x+2*stride][y-stride]))
 				else:
 					sys.stderr.write("xbit and ybit are both false: WTF?\n")
 
@@ -181,18 +202,22 @@ while stride > 0:
 				sys.stderr.write("Count is zero: WTF? %d %d %d %d %d %d %d\n" % (stride, x, y, xbit, ybit, maxx, maxy))
 
 			height[x][y] = tot / count
+			#sys.stderr.write("  mean = " + str(height[x][y]) + "\n")
 
-			rrange = stride * CRAGGINESS * cragginess[x][y]
+			rrange = stride * cragginess[x][y] * CRAGGINESS
+			#sys.stderr.write("  range = " + str(rrange) + "\n")
 
-			height[x][y] += randrange(-math.floor(rrange),
-									  math.floor(rrange)+1)
+			offset = randrange(-math.ceil(rrange),
+							   math.ceil(rrange)+1)
+			#sys.stderr.write("  offset = " + str(offset) + "\n")
+			height[x][y] += offset
 
 	stride >>= 1
 
+sys.stderr.write("Writing file\n")
 
 print MAX_X
-for x in range(0, MAX_X):
-	for y in range(0, MAX_X-x):
+for x in range(0, MAX_X, SUBSET):
+	for y in range(0, MAX_X-x, SUBSET):
 		print height[x][y],
 	print
-
