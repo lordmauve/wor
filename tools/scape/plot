@@ -104,7 +104,6 @@ for f in files:
 	rng = float(maxv-minv)
 	f['scale'] = lambda x: (x-minv) / rng
 	print f['name'], "min =", f['min'], "max =", f['max']
-	print "  scaled: ", f['scale'](minv), f['scale'](maxv)
 
 # Now go back and loop through them all again, and actually plot stuff
 img = Image.new("RGBA", (MAX_X*PXSZ, MAX_X*PXSZ))
@@ -125,12 +124,13 @@ try:
 			rgb = [0.0, 0.0, 0.0]
 			
 			for v, f in zip(data_slice, files):
+				v = float(v)
 				if 'threshold' in f and v < f['threshold']:
 					rgb[0] += f['colour'][0]
 					rgb[1] += f['colour'][1]
 					rgb[2] += f['colour'][2]
 				else:
-					scaled = f['scale'](float(v)) * 255.0
+					scaled = f['scale'](v) * 255.0
 					rgb[0] += scaled * f['mask'][0]
 					rgb[1] += scaled * f['mask'][1]
 					rgb[2] += scaled * f['mask'][2]
