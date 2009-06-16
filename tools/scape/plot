@@ -13,6 +13,8 @@ def usage():
 Options:
 \t-o, --output=<file>\tOutput file
 \t-f, --file=<name>\tPlot data from <name>
+\t-s, --scale=<s>\t\tUse a scale of <s>
+\t-p, --pixels=<n>\t\tDraw blocks <n> pixels wide
 
 File Options:
 \t-0, --zero\t\tZero value in data is zero in output;
@@ -31,7 +33,7 @@ Plots one or more input files.
 """
 
 try:
-	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:m:', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'mask='])
+	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:m:s:p:', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'mask=', 'scale=', 'pixels='])
 except getopt.GetoptError, err:
 	print str(err)
 	usage()
@@ -64,12 +66,18 @@ for o, a in optlist:
 		fdata['colour'] = a.split(',')
 	elif o in ('-m', '--mask'):
 		fdata['mask'] = (float(x)/256.0 for x in a.split(','))
+	elif o in ('-s', '--scale'):
+		SCALE = int(a)
+	elif o in ('-p', '--pixels'):
+		PXSZ = int(a)
 	else:
 		usage()
 		sys.exit(1)
 
 if len(fdata) > 0:
 	files.append(fdata)
+
+MAX_X = (1<<SCALE)+1
 
 # First, loop through all of the files, get coordinate ranges for all
 # inputs
@@ -96,9 +104,10 @@ for f in files:
 	rng = float(maxv-minv)
 	f['scale'] = lambda x: (x-minv) / rng
 	print f['name'], "min =", f['min'], "max =", f['max']
+	print "  scaled: ", f['scale'](minv), f['scale'](maxv)
 
 # Now go back and loop through them all again, and actually plot stuff
-img = Image.new("RGBA", (2048, 2048))
+img = Image.new("RGBA", (MAX_X*PXSZ, MAX_X*PXSZ))
 draw = ImageDraw.Draw(img)
 
 for f in files:
@@ -130,7 +139,7 @@ try:
 				
 			tx = x*PXSZ + y*PXSZ/2
 			ty = y*PXSZ
-			draw.rectangle((tx, ty, tx+PXSZ, ty+PXSZ), outline=rgb, fill=rgb)
+			draw.rectangle((tx, ty, tx+PXSZ-1, ty+PXSZ-1), outline=rgb, fill=rgb)
 			y += 1
 		x += 1
 except StopIteration:
