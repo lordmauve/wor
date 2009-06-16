@@ -39,7 +39,9 @@ except getopt.GetoptError, err:
 
 output = "plot.png"
 files = []
-fdata = { 'mask': (255.0/256.0,255.0/256.0,255.0/256.0) }
+fdata_base = { 'mask': (255.0/256.0,255.0/256.0,255.0/256.0),
+			   'colour': (0.0, 0.0, 255.0) }
+fdata = dict(fdata_base)
 
 for o, a in optlist:
 	if o in ('-h', '--help', '-?'):
@@ -48,9 +50,9 @@ for o, a in optlist:
 	elif o in ('-o', '--output'):
 		output = a
 	elif o in ('-f', '--file'):
-		if len(fdata) > 1:
+		if len(fdata) > len(fdata_base):
 			files.append(fdata)
-			fdata = { 'mask': (255.0/256.0,255.0/256.0,255.0/256.0) }
+			fdata = dict(fdata_base)
 		fdata['name'] = a
 	elif o in ('-0', '--zero'):
 		fdata['zero'] = True
@@ -112,14 +114,22 @@ try:
 		y = 0
 		for data_slice in zip(*lines):
 			rgb = [0.0, 0.0, 0.0]
+			
 			for v, f in zip(data_slice, files):
-				scaled = f['scale'](float(v)) * 255.0
-				rgb[0] += scaled * f['mask'][0]
-				rgb[1] += scaled * f['mask'][1]
-				rgb[2] += scaled * f['mask'][2]
+				if 'threshold' in f and v < f['threshold']:
+					rgb[0] += f['colour'][0]
+					rgb[1] += f['colour'][1]
+					rgb[2] += f['colour'][2]
+				else:
+					scaled = f['scale'](float(v)) * 255.0
+					rgb[0] += scaled * f['mask'][0]
+					rgb[1] += scaled * f['mask'][1]
+					rgb[2] += scaled * f['mask'][2]
+
+			rgb = (int(rgb[0]), int(rgb[1]), int(rgb[2]))
+				
 			tx = x*PXSZ + y*PXSZ/2
 			ty = y*PXSZ
-			rgb = (int(rgb[0]), int(rgb[1]), int(rgb[2]))
 			draw.rectangle((tx, ty, tx+PXSZ, ty+PXSZ), outline=rgb, fill=rgb)
 			y += 1
 		x += 1
