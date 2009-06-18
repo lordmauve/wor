@@ -3,18 +3,49 @@
 ######
 # Create a new location
 
+import sys
+import getopt
+
 from Location import Location
 from Position import Position
 from Database import DB
 import GameUtil
 
-loc = Location(Position(0, 0, 'main'))
-loc.taxi = 1729
-loc.moo = 'Moo'
+def usage():
+#	print """Usage: newlocation <x> <y> <layer> <class> [<class-options>]
+#Create a new location, of the given class, with the constructor given
+#"""
+	print """Usage: newlocation <x> <y> <layer>
+Create a new location.
+"""
 
-overlay = Location(Position(0, 0, 'main'))
-loc.add_overlay(overlay)
-overlay.taxi = 1200
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?i:', ['help'])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+aid = None
+
+for o, a in optlist:
+	if o in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	else:
+		usage()
+		sys.exit(0)
+
+#if len(args) < 4:
+if len(args) != 3:
+	usage()
+	sys.exit(1)
+
+loc = Location(Position(int(args[0]), int(args[1]), args[2]))
+
+#overlay = Location(Position(0, 0, 'main'))
+#loc.add_overlay(overlay)
+#overlay.taxi = 1200
 
 GameUtil.save()
 

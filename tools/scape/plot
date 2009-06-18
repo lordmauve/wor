@@ -4,6 +4,7 @@ import sys
 import getopt
 import Image
 import ImageDraw
+import math
 
 SCALE=10
 PXSZ=2
@@ -28,12 +29,13 @@ File Options:
 \t\t\t\tColour to plot threshold values as
 
 \t-m, --mask=<r>,<g>,<b>\tPlot this file using the colour mask
+\t-l, --log\t\tTransform input data using a log function
 
 Plots one or more input files.
 """
 
 try:
-	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:m:s:p:', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'mask=', 'scale=', 'pixels='])
+	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:m:s:p:l', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'mask=', 'scale=', 'pixels=', 'log'])
 except getopt.GetoptError, err:
 	print str(err)
 	usage()
@@ -65,11 +67,13 @@ for o, a in optlist:
 	elif o in ('-c', '--threshold-colour'):
 		fdata['colour'] = a.split(',')
 	elif o in ('-m', '--mask'):
-		fdata['mask'] = (float(x)/256.0 for x in a.split(','))
+		fdata['mask'] = [float(x)/256.0 for x in a.split(',')]
 	elif o in ('-s', '--scale'):
 		SCALE = int(a)
 	elif o in ('-p', '--pixels'):
 		PXSZ = int(a)
+	elif o in ('-l', '--log'):
+		fdata['log'] = True
 	else:
 		usage()
 		sys.exit(1)
@@ -89,8 +93,11 @@ for f in files:
 	for line in data:
 		elts = line.split()
 		for e in elts:
-			minv = min(minv, float(e))
-			maxv = max(maxv, float(e))
+			e = float(e)
+			if 'log' in f and f['log']:
+				e = math.log(e)
+			minv = min(minv, e)
+			maxv = max(maxv, e)
 	data.close()
 	
 	if 'zero' in f and f['zero']:
@@ -102,7 +109,7 @@ for f in files:
 	f['min'] = minv
 	f['max'] = maxv
 	rng = float(maxv-minv)
-	f['scale'] = lambda x: (x-minv) / rng
+	f['scale'] = lambda x: (x-f['min']) / float(f['max']-f['min'])
 	print f['name'], "min =", f['min'], "max =", f['max']
 
 # Now go back and loop through them all again, and actually plot stuff
@@ -112,6 +119,7 @@ draw = ImageDraw.Draw(img)
 for f in files:
 	f['data'] = open(f['name'], 'r')
 	params = f['data'].next()
+	print "Scaled", f['scale'](f['min']), f['scale'](f['max'])
 
 x = 0
 try:
@@ -130,6 +138,8 @@ try:
 					rgb[1] += f['colour'][1]
 					rgb[2] += f['colour'][2]
 				else:
+					if 'log' in f and f['log']:
+						v = math.log(v)
 					scaled = f['scale'](v) * 255.0
 					rgb[0] += scaled * f['mask'][0]
 					rgb[1] += scaled * f['mask'][1]
