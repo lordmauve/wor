@@ -3,6 +3,9 @@
 ######
 # Create a new player
 
+import sys
+import getopt
+
 from Player import Player
 from Item import Item
 from Alignment import Alignment
@@ -10,7 +13,43 @@ from Database import DB
 from Items.Rock import Rock
 import GameUtil
 
-p = Player('darksatanic', Alignment.WOOD)
+def usage():
+	print """Usage: newplayer [options] <playername>
+Options:
+\t-a, --align=<align>\t\tAlignment. Values can be:
+\t\t\t\t\t\tw\twood
+\t\t\t\t\t\te\tearth
+\t\t\t\t\t\tf\tfire
+\t\t\t\t\t\tt\twater
+\t\t\t\t\t\tm\tmetal
+"""
+
+align_map = { 'w': Alignment.WOOD,
+			  'e': Alignment.EARTH,
+			  'f': Alignment.FIRE,
+			  't': Alignment.WATER,
+			  'm': Alignment.METAL }
+
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?a:', ['help', 'align='])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+align = align_map['w']
+
+for o, a in optlist:
+	if o in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	elif o in ('-a', '--align'):
+		align = align_map[a]
+	else:
+		usage()
+		sys.exit(0)
+
+p = Player(args[0], align)
 rock = Rock()
 p.inventory.add(rock)
 

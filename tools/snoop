@@ -1,14 +1,55 @@
 #!/usr/bin/python
 
 import sys
+import getopt
 from Player import Player
+from Actor import Actor
 import Context
 import Util
+
+def usage():
+	print """Usage: snoop { <playername> | -i <playerid> }
+Options:
+\t-i, --id=<id>\t\tDisplay actor number <id>
+"""
+
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?i:', ['help', 'id='])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+aid = None
+
+for o, a in optlist:
+	if o in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	elif o in ('-i', '--id'):
+		aid = int(a)
+	else:
+		usage()
+		sys.exit(0)
+
+if len(args) > 1:
+	usage()
+	sys.exit(1)
 
 # We're running in admin context
 Context.context = Context.ADMIN_CTX
 
-p = Player.load_by_name(sys.argv[1], allprops=True)
+if len(args) == 1:
+	p = Player.load_by_name(args[0], allprops=True)
+elif aid != None:
+	p = Actor.load(aid, allprops=True)
+else:
+	usage()
+	sys.exit(1)
+
+if p == None:
+	print "Player not found"
+	sys.exit(1)
 
 info = p.context_get()
 Util.render_info(info, sys.stdout, indent=Util.info_key_length(info)+1)

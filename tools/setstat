@@ -4,27 +4,79 @@
 # Modify a property of a player
 
 import sys
+import getopt
 
 from Player import Player
 from Alignment import Alignment
 from Database import DB
 
-p = Player.load_by_name(sys.argv[1])
+def usage():
+	print """Usage: setstat [options] { <playername> | -i <actorid> } <propertyname> <value>
+Options:
+\t-i, --id=<n>\t\tUse actor id <n>
+\t-n, --int\t\tForce value to integer
+\t-f, --float\t\tForce value to float
+\t-s, --string\t\tForce value to string
+"""
+
+def retype(value):
+	"""Converts the string value into an int, float or string"""
+	try:
+		r = int(value)
+	except:
+		try:
+			r = float(value)
+		except:
+			r = str(value)
+	return r
+
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?i:nfs', ['help', 'id=', 'int', 'float', 'string'])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+aid = None
+typ = None
+
+for o, a in optlist:
+	if o in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	elif o in ('-i', '--id'):
+		aid = int(a)
+	elif o in ('-n', '--int'):
+		typ = int
+	elif o in ('-f', '--float'):
+		typ = float
+	elif o in ('-s', '--string'):
+		typ = str
+	else:
+		usage()
+		sys.exit(0)
+
+if len(args) < 2 or len(args) > 3:
+	usage()
+	sys.exit(2)
+
+if aid != None:
+	p = Actor.load(aid)
+else:
+	p = Player.load_by_name(args.pop(0))
+
 if p == None:
     print "Player not found"
-    sys.exit(1)
+    sys.exit(3)
 
 # Convert the string parameter from the command line to an appropriate
 # type
-value = sys.argv[3]
-try:
-    p[sys.argv[2]] = int(value)
-except:
-    try:
-        p[sys.argv[2]] = float(value)
-    except:
-        p[sys.argv[2]] = str(value)
+if typ == None:
+	value = retype(args[1])
+else:
+	value = typ(args[1])
+
+p[args[0]] = value
     
 p.save()
-
 DB.commit()
