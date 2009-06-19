@@ -11,8 +11,9 @@ class Action(object):
 		self.action = action
 		self.group = group
 		self.parameters = parameters
+		self.html = html
 		if html == None:
-			self.html = self.make_button(caption, uid, ap, parameters)
+			self.html = self.make_button_for()
 
 	def context_get(self):
 		ret = {}
@@ -34,14 +35,29 @@ class Action(object):
 
 	@staticmethod
 	def make_button(caption, uid, ap=1, parameters=[]):
+		"""Make a button, with appropriate caption and JavaScript to
+		despatch the request."""
 		action_params = '"' + uid + '"'
 		for it in parameters:
 			action_params += ', "' + uid + '_' + it + '"'
+		aptext = ""
+		if ap == 0:
+			aptext = " (%d AP)" % ap
 			
 		return ("<button onclick='post_action(%(params)s)'>"
-				+ "%(caption)s (%(ap)d AP)</button>") % {
+				+ "%(caption)s%(aptext)s</button>") % {
 			'uid': uid,
 			'caption': caption,
-			'ap': ap,
+			'aptext': aptext,
 			'params': action_params
 			}
+
+	def make_button_for(self, caption=None, ap=None, parameters=None):
+		"""Make a button for this Action object."""
+		if caption == None:
+			caption = self.caption
+		if ap == None:
+			ap = self.ap
+		if parameters == None:
+			parameters = self.parameters
+		return self.make_button(caption, self.uid, ap, parameters)
