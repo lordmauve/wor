@@ -32,29 +32,29 @@ function load_basic_player(req)
 // Actions
 function load_player_act(req)
 {
-  if(req.readyState == 4)
-  {
-    var panel = get_side_panel("player_actions");
+	if(req.readyState == 4)
+	{
+		var panel = get_side_panel("player_actions");
 
-    if(req.status == 200)
-    {
-      // Get the array of action objects
-	  actions = parse_input(req.responseText);
-      panel.innerHTML = "";
-      for(var aid in actions)
-      {
-		  act = actions[aid];
-			if(panel.innerHTML != "")
-				panel.innerHTML += "<hr/>"
-			panel.innerHTML += act['html'];
-      }
-    }
-    else
-    {
-      // Error here: No 200 response
-      panel.innerHTML = "Error loading actions.\n<div>" + req.responseText + "</div>";
-    }
-  }
+		if(req.status == 200)
+		{
+			// Get the array of action objects
+			actions = parse_input(req.responseText);
+			panel.innerHTML = "";
+			for(var aid in actions)
+			{
+				act = actions[aid];
+				if(panel.innerHTML != "")
+					panel.innerHTML += "<hr/>"
+				panel.innerHTML += act['html'];
+			}
+		}
+		else
+		{
+			// Error here: No 200 response
+			panel.innerHTML = "Error loading actions.\n<div>" + req.responseText + "</div>";
+		}
+	}
 }
 
 ////////////////////
