@@ -1,7 +1,7 @@
 """Game-level (e.g. high level) utilities"""
 
-from Item import Item
 from Actor import Actor
+from Item import Item
 from Location import Location
 
 def save():
