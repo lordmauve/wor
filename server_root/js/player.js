@@ -30,29 +30,54 @@ function load_basic_player(req)
 
 ////////////
 // Actions
+var inventory_action = "";
+var inventory_parameter = "";
+
 function load_player_act(req)
 {
 	if(req.readyState == 4)
 	{
-		var panel = get_side_panel("player_actions");
+		var actions_panel = get_side_panel("player_actions");
 
 		if(req.status == 200)
 		{
 			// Get the array of action objects
 			actions = parse_input(req.responseText);
-			panel.innerHTML = "";
+			actions_panel.innerHTML = "";
+			var inventory_found = false;
 			for(var aid in actions)
 			{
 				act = actions[aid];
-				if(panel.innerHTML != "")
-					panel.innerHTML += "<hr/>"
-				panel.innerHTML += act['html'];
+
+				if(act['group'] == 'inventory')
+				{
+					action_id = act['uid'].split('.');
+					if(action_id[2] == 'changeitem')
+					{
+						// Keep track of the details, but don't display
+						// anything
+						inventory_action = act['uid'];
+						pos = act['parameters'].indexOf('_');
+						inventory_parameters = act['parameters'].slice(pos+1);
+						inventory_found = true;
+					}
+				}
+				else
+				{
+					if(actions_panel.innerHTML != "")
+						actions_panel.innerHTML += "<hr/>"
+					actions_panel.innerHTML += act['html'];
+				}
+			}
+			if(inventory_found)
+			{
+				actions_panel.innerHTML += "<button onclick='show_items()'>Change item</button>";
 			}
 		}
 		else
 		{
 			// Error here: No 200 response
-			panel.innerHTML = "Error loading actions.\n<div>" + req.responseText + "</div>";
+			actions_panel.innerHTML = "Error loading actions.\n<div>" + req.responseText + "</div>";
 		}
 	}
 }
@@ -62,6 +87,26 @@ function load_player_act(req)
 function post_action()
 {
 	var fuid = arguments[0];
+	var data = new Array();
+
+	// Extract the requested data from the 
+	for(var i=1; i<arguments.length; i++)
+	{
+		param_name = arguments[i];
+		elt = document.getElementById(param_name);
+		if(elt)
+		{
+			split_point = data.indexOf('_');
+			key = param_name.slice(split_point+1);
+			data[key] = elt.value;
+		}
+	}
+
+	post_action_data(fuid, data);
+}
+
+function post_action_data(fuid, data)
+{
 	var account = document.getElementById("account").value
 	var password = document.getElementById("password").value
 	var actid = document.getElementById("actorid").value
@@ -70,21 +115,13 @@ function post_action()
 	var act_req = get_ajax_object();
 	act_req.onreadystatechange = function() { act_response(act_req); };
 	act_req.open("POST", api + "/actor/self/actions", true, account, password);
-	act_req.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
-	act_req.setRequestHeader("X-WoR-Actor", actid)
+	act_req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	act_req.setRequestHeader("X-WoR-Actor", actid);
 
 	return_data = "action:" + fuid + "\r\n";
-
-	for(var i=1; i<arguments.length; i++)
+	for(var key in data)
 	{
-		data = arguments[i];
-		elt = document.getElementById(data);
-		if(elt)
-		{
-			split_point = data.indexOf('_');
-			key = data.slice(split_point+1);
-			return_data += key + ":" + elt.value + "\r\n";
-		}
+		return_data += key + ":" + data[key] + "\r\n";
 	}
 	act_req.setRequestHeader("Content-Length", return_data.length)
 
