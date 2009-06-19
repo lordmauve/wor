@@ -106,19 +106,24 @@ class Player(Actor):
 			name = action_id[2]
 		
 		# What can we do of ourselves?
-		if Util.match_id(action_id, self, "say_boo"):
-			uid = Action.make_id(self, "say_boo")
+		# We could say "Boo!" (debug action)
+		# FIXME: Remove this
+		if Util.match_id(action_id, self, "sayboo"):
+			uid = Action.make_id(self, "sayboo")
 			acts[uid] = Action(uid, caption="Say Boo",
 							   action=lambda d: self.say_boo(),
 							   group="player")
 
-		#get_inventory = "Get some inventory"
-		#
-		#uid = Action.make_id(self, "hold")
-		#acts[uid] = Action(uid, caption="Change",
-		#				   action=lambda d: False,
-		#				   group="player",
-		#				   html=get_inventory)
+		# We can change the held item.
+		if Util.match_id(action_id, self, "changeitem"):
+			uid = Action.make_id(self, "changeitem")
+			act_html = "Use item <input id='%s_id' size='3'>. " % uid
+			acts[uid] = Action(
+				uid, caption="Change", ap=0, group="inventory",
+				action=lambda d: self.change_item_action(d),
+				html=act_html, parameters=['id']
+				)
+			acts[uid].html += acts[uid].make_button_for()
 
 		# What can we do to the item we're holding?
 		item = self.held_item()
@@ -150,12 +155,10 @@ class Player(Actor):
 		actions = self.get_actions(action_id)
 		if action_id in actions:
 			self.last_action = Context.request_time
-			log.debug("Last action at " + str(self.last_action))
 			actions[action_id].perform(data)
 
 	def say_boo(self):
 		"""Test action"""
-		log.info("Boo!")
 		self.message("You say 'Boo!'")
 		self.message(self.name + ": Boo!", "sound")
 		self.ap.value -= 1

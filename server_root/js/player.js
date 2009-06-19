@@ -74,23 +74,22 @@ function post_action()
 	act_req.setRequestHeader("X-WoR-Actor", actid)
 
 	return_data = "action:" + fuid + "\r\n";
-	for(var i in arguments)
+
+	for(var i=1; i<arguments.length; i++)
 	{
-		if(i == 0) { continue; }
 		data = arguments[i];
 		elt = document.getElementById(data);
 		if(elt)
 		{
-			return_data += data + ":" + elt.value + "\r\n";
+			split_point = data.indexOf('_');
+			key = data.slice(split_point+1);
+			return_data += key + ":" + elt.value + "\r\n";
 		}
 	}
 	act_req.setRequestHeader("Content-Length", return_data.length)
 
 	act_req.send(return_data);
 }
-
-// FIXME: Add an act_complex which takes a list of form fields and
-// returns those fields' data to the server in the .send() call
 
 function act_response(req)
 {

@@ -51,6 +51,17 @@ class Actor(SerObject.SerObject):
 			return None
 		return Item.load(self.holding)
 
+	def change_item_action(self, data):
+		if 'id' not in data:
+			return False
+		
+		try:
+			self.holding = int(data['id'])
+		except Exception, e:
+			return False
+
+		return True
+
 	def equipment(self):
 		"""Return an iterator over the equipment currently worn by the actor"""
 		pass
