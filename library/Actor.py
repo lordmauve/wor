@@ -86,7 +86,7 @@ class Actor(SerObject.SerObject):
 		if auth == Context.ADMIN:
 			fields = Context.all_fields(self)
 		elif auth == Context.OWNER:
-			fields = [ 'ap', 'name', 'hp' ]
+			fields = [ 'ap', 'name', 'hp', 'holding' ]
 		elif auth == Context.STRANGER_VISIBLE:
 			fields = [ 'name' ]
 		else:
@@ -101,7 +101,7 @@ class Actor(SerObject.SerObject):
 			except KeyError:
 				pass
 			else:
-				if v != None:
+				if v != None and k not in ret:
 					if hasattr(v, 'context_get'):
 						ret[k] = v.context_get()
 					else:
