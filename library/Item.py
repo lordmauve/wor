@@ -2,23 +2,21 @@
 
 ########
 
-import SerObject
-import Actor
-import Location
-import Util
-import BaseConfig
 import os
 import os.path
+
+from SerObject import SerObject
+import Util
+import BaseConfig
 from Plan import Plan, makeable_plans
 from ActionMake import ActionMake
-from Logger import log
 import Context
 
 # We must do this to run the code that defines all possible plans.
 # Can't be done in Plan, for circular reference reasons.
 import Plans
 
-class Item(SerObject.SerObject):
+class Item(SerObject):
 	"""An item. By default, all items are unique. Some items are
 	'aggregate' and represent a block of otherwise identical things --
 	e.g. coins -- and can be combined and split (see AggregateItem).
@@ -84,14 +82,12 @@ class Item(SerObject.SerObject):
 	def owner(self):
 		"""Return the owner of this object, loading it if necessary"""
 		if self._owner == None:
-			if self.owner_type == 'Actor':
-				self._owner = Actor.load(self.owner_id)
-			elif self.owner_type == 'Location':
-				self._owner = Location.load(self.owner_id)
-			elif self.owner_type == 'Item':
-				self._owner = Item.load(self.owner_id)
-			else:
-				pass
+			# Get the module for the right type of object, loading the class
+			mod = __import__(self.owner_type, globals(), locals(), [self.owner_type], -1)
+			# Get a handle on the class itself
+			cls = mod.__dict__[self.owner_type]
+			# Use the class's load() method to load the owner object
+			self._owner = cls.load(self.owner_id)
 		return self._owner
 
 	def power(self, name):
@@ -115,9 +111,7 @@ class Item(SerObject.SerObject):
 		object whilst held."""
 		# Build system
 		plans = makeable_plans(player, self)
-		log.debug("IEA " + str(plans))
 		for p in plans:
-			log.debug("Item.external_actions: "+p.name)
 			act = ActionMake(player, self, p)
 			acts[act.uid] = act
 
