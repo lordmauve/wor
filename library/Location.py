@@ -149,7 +149,8 @@ class Location(SerObject):
 	def context_get(self):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
-		ret = { 'type': self.ob_type() }
+		ret = { 'type': self.ob_type(),
+				'id': str(self._id) }
 
 		auth = Context.authz_location(self)
 		if auth == Context.ADMIN:
