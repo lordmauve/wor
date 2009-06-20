@@ -4,7 +4,7 @@
 import types
 import time
 
-import SerObject
+from SerObject import SerObject
 import Util
 import Context
 from Item import Item
@@ -13,7 +13,7 @@ from Location import Location
 from Action import Action
 from Database import DB
 
-class Actor(SerObject.SerObject):
+class Actor(SerObject):
 	# We have our own DB table and caching scheme for Actors
 	_table = 'actor'
 	cache_by_id = {}
