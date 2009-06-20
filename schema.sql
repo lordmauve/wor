@@ -8,6 +8,13 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET escape_string_warning = off;
 
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
+--
+
+COMMENT ON SCHEMA public IS 'Standard public schema';
+
+
 SET search_path = public, pg_catalog;
 
 --
@@ -74,10 +81,10 @@ ALTER TABLE public.actor_id_seq OWNER TO wor;
 CREATE TABLE actor (
     id integer DEFAULT nextval('actor_id_seq'::regclass) NOT NULL,
     name character varying(32),
+    state bytea,
     x integer,
     y integer,
-    layer character varying(32),
-    state bytea
+    layer character varying(32)
 );
 
 
@@ -103,6 +110,7 @@ ALTER TABLE public.actor_message OWNER TO wor;
 --
 
 CREATE SEQUENCE actor_message_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -250,6 +258,43 @@ CREATE TABLE location_properties (
 ALTER TABLE public.location_properties OWNER TO wor;
 
 --
+-- Name: log_raw_action; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE log_raw_action (
+    id integer NOT NULL,
+    stamp timestamp without time zone,
+    request_id text,
+    action_id text,
+    action_name text,
+    parameters text
+);
+
+
+ALTER TABLE public.log_raw_action OWNER TO wor;
+
+--
+-- Name: log_raw_action_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
+--
+
+CREATE SEQUENCE log_raw_action_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.log_raw_action_id_seq OWNER TO wor;
+
+--
+-- Name: log_raw_action_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: wor
+--
+
+ALTER SEQUENCE log_raw_action_id_seq OWNED BY log_raw_action.id;
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: public; Owner: wor
 --
 
@@ -268,6 +313,13 @@ ALTER TABLE item ALTER COLUMN id SET DEFAULT nextval('item_id_seq'::regclass);
 --
 
 ALTER TABLE location ALTER COLUMN id SET DEFAULT nextval('location_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: wor
+--
+
+ALTER TABLE log_raw_action ALTER COLUMN id SET DEFAULT nextval('log_raw_action_id_seq'::regclass);
 
 
 --
@@ -372,6 +424,14 @@ ALTER TABLE ONLY location
 
 ALTER TABLE ONLY location_properties
     ADD CONSTRAINT location_properties_pkey PRIMARY KEY (location_id, key);
+
+
+--
+-- Name: log_raw_action_pkey; Type: CONSTRAINT; Schema: public; Owner: wor; Tablespace: 
+--
+
+ALTER TABLE ONLY log_raw_action
+    ADD CONSTRAINT log_raw_action_pkey PRIMARY KEY (id);
 
 
 --
