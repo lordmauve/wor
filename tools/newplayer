@@ -49,7 +49,12 @@ for o, a in optlist:
 		usage()
 		sys.exit(0)
 
+if len(args) != 1:
+	usage()
+	sys.exit(1)
+
 p = Player(args[0], align)
+print "Created player id", p._id
 rock = Rock()
 p.inventory.add(rock)
 
