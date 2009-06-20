@@ -5,7 +5,7 @@ function show_items()
 {
 	var select_panel = document.getElementById("inventory_panel");
 	select_panel.innerHTML = "<table id='inventory_panel_table'></table>";
-	select_panel.visible = true;
+	select_panel.style.visibility = 'visible';
 
 	var account = document.getElementById("account").value
 	var password = document.getElementById("password").value
@@ -67,5 +67,5 @@ function inventory_change(item_id)
 	data[inventory_parameters] = item_id;
 	post_action_data(inventory_action, data);
 	var select_panel = document.getElementById("inventory_panel");
-	select_panel.visible = false;
+	select_panel.style.visibility = 'hidden';
 }

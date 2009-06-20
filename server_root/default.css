@@ -37,6 +37,22 @@ tr.hex_corner td {
 	padding: 5px;
 }
 
+#inventory_panel {
+	border: 3px green solid;
+	padding: 5px;
+	top: 10%;
+	bottom: 10%;
+	left: 20%;
+	right: 20%;
+	position: fixed;
+	background-color: #dfd;
+	visibility: hidden;
+}
+
+#inventory_panel td {
+	width: 33%;
+}
+
 div.message {
 	border: 3px solid #aaa;
 	background-color: #ccc;
