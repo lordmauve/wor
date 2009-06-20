@@ -92,6 +92,7 @@ class Actor(SerObject.SerObject):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
 		ret = {}
+		ret['id'] = str(self._id)
 
 		auth = Context.authz_actor(self)
 		if auth == Context.ADMIN:
@@ -178,5 +179,9 @@ class Actor(SerObject.SerObject):
 	# Items/inventory/equipment
 	def has(self, itemtype, number=1):
 		count = 0
+		# FIXME: This is incomplete
+		return True
+
+	def has_item(self, item):
 		# FIXME: This is incomplete
 		return True
