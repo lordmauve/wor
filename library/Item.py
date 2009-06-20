@@ -12,6 +12,7 @@ import os.path
 from Plan import Plan, makeable_plans
 from ActionMake import ActionMake
 from Logger import log
+import Context
 
 # We must do this to run the code that defines all possible plans.
 # Can't be done in Plan, for circular reference reasons.
@@ -110,6 +111,8 @@ class Item(SerObject.SerObject):
 		return False
 
 	def external_actions(self, acts, player, name=None):
+		"""Retrieve the set of actions that can be performed on this
+		object whilst held."""
 		# Build system
 		plans = makeable_plans(player, self)
 		log.debug("IEA " + str(plans))
@@ -117,3 +120,36 @@ class Item(SerObject.SerObject):
 			log.debug("Item.external_actions: "+p.name)
 			act = ActionMake(player, self, p)
 			acts[act.uid] = act
+
+	def context_get(self):
+		"""Return a dictionary of properties of this object, given the
+		current authZ context"""
+		ret = {}
+		ret['id'] = str(self._id)
+		ret['type'] = self.ob_type()
+
+		auth = Context.authz_item(self)
+		if auth == Context.ADMIN:
+			fields = Context_all_fields(self)
+		elif auth == Context.OWNER:
+			fields = [ 'name', 'damage' ]
+			#ret['description'] = self.description()
+		else:
+			fields = [ 'name' ]
+
+		for k in fields:
+			if k in ( 'cache_by_id' ):
+				continue
+			
+			try:
+				v = self[k]
+			except KeyError:
+				pass
+			else:
+				if v != None and k not in ret:
+					if hasattr(v, 'context_get'):
+						ret[k] = v.context_get()
+					else:
+						ret[k] = str(v)
+
+		return ret

@@ -6,6 +6,28 @@ from Item import Item
 from Logger import log
 from mod_python import apache
 
+def item_handler(req, target, components):
+	"""Handle a request for item information, for the given target ID"""
+	if len(components) != 1:
+		return apache.HTTP_NOT_FOUND
+
+	req.content_type = "text/plain"
+	item = Item.load(target)
+
+	if req.method != 'GET':
+		# If it's not a GET request, throw a wobbly
+		return apache.HTTP_METHOD_NOT_ALLOWED
+
+	log.debug("Item handler: requested " + str(components))
+	if components[0] == 'desc':
+		# Get description
+		info = item.context_get()
+		Util.render_info(info, req)
+	else:
+		return apache.HTTP_NOT_FOUND
+
+	return apache.OK
+
 def item_names_handler(req, components):
 	"""Handle a request for item class information"""
 	# We must have at most one component in the request URL
