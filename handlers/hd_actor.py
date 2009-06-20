@@ -17,7 +17,7 @@ def actor_handler(req, target, components):
 		return apache.HTTP_NOT_FOUND
 
 	req.content_type = "text/plain"
-	actor = Player.load(target)
+	actor = Actor.load(target)
 
 	# Check for actions first -- simplifies the handling of action POSTs
 	if components[0] == 'actions':
