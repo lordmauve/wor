@@ -59,6 +59,9 @@ def authz_item(item):
 	if context['admin']:
 		return ADMIN
 
+	if context.has_item(item):
+		return OWNER
+
 	return STRANGER_INVISIBLE
 
 def all_fields(obj):
