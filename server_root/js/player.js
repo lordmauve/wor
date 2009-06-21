@@ -1,5 +1,15 @@
 ////////////
 // Base player state
+
+// Global to hold the details of the player, for use by other functions
+var player;
+
+function update_player_details()
+{
+	basic_ajax_get("/actor/self/desc", load_basic_player);
+
+}
+
 function load_basic_player(req)
 {
 	if(req.readyState == 4)
@@ -10,12 +20,15 @@ function load_basic_player(req)
 		{
 			// Success! Create a Player
 			var ps = parse_input(req.responseText);
-			var p = ps[0];
+			player = ps[0];
 			
+			// Despatch the request for the currently-held item ASAP
+			update_held_item();
+
 			panel = "<table><tr>";
-			panel += "<td class='header'><b>" + p['name'] + "</b></td>";
-			panel += "<td class='header'>AP " + p['ap.value'] + "/" + p['ap.maximum'] + "</td>";
-			panel += "<td class='header'>HP " + p['hp'] + "/" + p.maxhp + "</td>";
+			panel += "<td class='header'><b>" + player.name + "</b></td>";
+			panel += "<td class='header'>AP " + player['ap.value'] + "/" + player['ap.maximum'] + "</td>";
+			panel += "<td class='header'>HP " + player.hp + "/" + player.maxhp + "</td>";
 			panel += "</tr></table>";
 
 			top_panel.innerHTML = panel;
@@ -30,6 +43,12 @@ function load_basic_player(req)
 
 ////////////
 // Actions
+
+function update_player_actions()
+{
+	basic_ajax_get("/actor/self/actions", load_player_act);
+}
+
 var inventory_action = "";
 var inventory_parameter = "";
 

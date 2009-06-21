@@ -10,34 +10,6 @@ function load_game()
 	update_messages();
 }
 
-function update_player_details()
-{
-	var player_req = get_ajax_object();
-	var account = document.getElementById("account").value
-	var password = document.getElementById("password").value
-	var actid = document.getElementById("actorid").value
-
-	player_req.onreadystatechange = function() { load_basic_player(player_req); };
-	player_req.open("GET", api + "/actor/self/desc", true,
-					account, password);
-	player_req.setRequestHeader("X-WoR-Actor", actid);
-	player_req.send("");
-}
-
-function update_player_actions()
-{
-	var player_act_req = get_ajax_object();
-	var account = document.getElementById("account").value
-	var password = document.getElementById("password").value
-	var actid = document.getElementById("actorid").value
-
-	player_act_req.onreadystatechange = function() { load_player_act(player_act_req); };
-	player_act_req.open("GET", api + "/actor/self/actions", true,
-						account, password);
-	player_act_req.setRequestHeader("X-WoR-Actor", actid)
-	player_act_req.send("");
-}
-
 ////////////
 // Library functions
 
@@ -54,6 +26,19 @@ function get_ajax_object()
 		return new XMLHttpRequest();
 	else
 		return false;
+}
+
+function basic_ajax_get(url, callback)
+{
+	var req = get_ajax_object();
+	var account = document.getElementById("account").value
+	var password = document.getElementById("password").value
+	var actid = document.getElementById("actorid").value
+
+	req.onreadystatechange = function() { callback(req); };
+	req.open("GET", api + url, true, account, password);
+	req.setRequestHeader("X-WoR-Actor", actid)
+	req.send("");
 }
 
 function get_side_panel(panel_id)
