@@ -36,9 +36,6 @@ def actor_handler(req, target, components):
 
 			# Save any game state that might have changed
 			GameUtil.save()
-			Actor.flush_cache()
-			#Location.flush_cache()
-			#Item.flush_cache()
 		else:
 			# If it's not GET or POST, complain
 			return apache.HTTP_METHOD_NOT_ALLOWED
