@@ -19,6 +19,11 @@ import hd_item
 import hd_location
 
 def api_handler(req):
+	ret_value = api_handler_core(req)
+	GameUtil.flush_cache()
+	return ret_value
+
+def api_handler_core(req):
 	"""This is the core function for the REST API. All requests pass
 	through this function. It sets up the global AuthZ context for
 	this request, parses the URL of the request and checks it for
@@ -76,7 +81,6 @@ def api_handler(req):
 
 		elif components[0] == 'items':
 			# Get information on items: class/name mapping, for example
-			# FIXME: Pass off to item handlers
 			if components[1] == 'names':
 				return retry_process(
 					lambda: hd_item.item_names_handler(
@@ -114,12 +118,10 @@ def api_handler(req):
 					target = Context.context.loc()._id
 				elif components[1] == 'neighbourhood':
 					target = Context.context.loc()._id
-					retry_process(
+					return retry_process(
 						lambda: hd_location.neighbourhood_handler(
 							req,
 							target, components[2:]))
-
-					return apache.OK
 				elif components[1].isdigit():
 					target = int(components[1])
 				else:
