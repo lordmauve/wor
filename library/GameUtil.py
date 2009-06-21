@@ -9,3 +9,9 @@ def save():
 	Item.save_cache()
 	Actor.save_cache()
 	Location.save_cache()
+
+def flush_cache():
+	"""Flush all object caches"""
+	Actor.flush_cache()
+	#Item.flush_cache()
+	#Location.flush_cache()
