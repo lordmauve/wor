@@ -37,7 +37,7 @@ function basic_ajax_get(url, callback)
 
 	req.onreadystatechange = function() { callback(req); };
 	req.open("GET", api + url, true, account, password);
-	req.setRequestHeader("X-WoR-Actor", actid)
+	req.setRequestHeader("X-WoR-Actor", actid);
 	req.send("");
 }
 
