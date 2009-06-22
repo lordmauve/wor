@@ -3,16 +3,7 @@
 
 function update_messages()
 {
-	var req = get_ajax_object();
-	var account = document.getElementById("account").value
-	var password = document.getElementById("password").value
-	var actid = document.getElementById("actorid").value
-
-	req.onreadystatechange = function() { load_messages(req); };
-	req.open("GET", api + "/actor/self/log", true,
-				account, password);
-	req.setRequestHeader("X-WoR-Actor", actid);
-	req.send("");
+	basic_ajax_get("/actor/self/log", load_messages);
 }
 
 function load_messages(req)
