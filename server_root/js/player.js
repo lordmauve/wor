@@ -7,7 +7,6 @@ var player;
 function update_player_details()
 {
 	basic_ajax_get("/actor/self/desc", load_basic_player);
-
 }
 
 function load_basic_player(req)
@@ -23,7 +22,7 @@ function load_basic_player(req)
 			player = ps[0];
 			
 			// Despatch the request for the currently-held item ASAP
-			update_held_item();
+			update_held_item(player.holding);
 
 			panel = "<table><tr>";
 			panel += "<td class='header'><b>" + player.name + "</b></td>";
@@ -68,28 +67,38 @@ function load_player_act(req)
 			{
 				act = actions[aid];
 
-				if(act['group'] == 'inventory')
+				if(act.group == 'inventory')
 				{
-					action_id = act['uid'].split('.');
+					action_id = act.uid.split('.');
 					if(action_id[2] == 'changeitem')
 					{
 						// Keep track of the details, but don't display
 						// anything
-						inventory_action = act['uid'];
-						pos = act['parameters'].indexOf('_');
-						inventory_parameters = act['parameters'].slice(pos+1);
+						inventory_action = act.uid;
+						pos = act.parameters.indexOf('_');
+						inventory_parameters = act.parameters.slice(pos+1);
 						inventory_found = true;
 					}
+				}
+				else if(act.group == 'item')
+				{
+					var panel = get_item_panel();
+					var actions = document.getElementById("held_item_actions");
+					if(actions.innerHTML != "")
+						actions.innerHTML += "<hr/>";
+					actions.innerHTML += act.html;
 				}
 				else
 				{
 					if(actions_panel.innerHTML != "")
-						actions_panel.innerHTML += "<hr/>"
-					actions_panel.innerHTML += act['html'];
+						actions_panel.innerHTML += "<hr/>";
+					actions_panel.innerHTML += act.html;
 				}
 			}
 			if(inventory_found)
 			{
+				if(actions_panel.innerHTML != "")
+					actions_panel.innerHTML += "<hr/>";
 				actions_panel.innerHTML += "<button onclick='show_items()'>Change item</button>";
 			}
 		}
