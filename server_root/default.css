@@ -1,12 +1,19 @@
+h2 {
+	margin: 0px;
+	font-size: 125%;
+	font-weight: bold;
+	font-variant: small-caps;
+}
+
 table.top_level {
 	width: 100%;
 }
 
 table.top_level td {
 	margin: 5px;
-	border: solid 2px black;
 	padding: 5px;
 }
+
 table.top_level table td {
 	border: 0px none;
 }
@@ -18,6 +25,14 @@ tr.hex_corner {
 tr.hex_corner td {
 	margin: 0px;
 	padding: 0px;
+}
+
+.middle_panel_cell {
+	vertical-align: top;
+}
+
+#left_panel_cell {
+	width: 30%;
 }
 
 #top_panel table {
@@ -35,6 +50,7 @@ tr.hex_corner td {
 	background: #ddd;
 	border: 2px solid black;
 	padding: 5px;
+	margin: 2px;
 }
 
 #inventory_panel {
