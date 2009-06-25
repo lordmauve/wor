@@ -4,6 +4,7 @@
 import copy
 from Database import DB
 from SerObject import SerObject
+from Action import Action
 from Logger import log
 import Context
 import types
@@ -12,6 +13,8 @@ class Location(SerObject):
 	_table = 'location'
 	cache_by_id = {}
 	cache_by_pos = {}
+
+	move_ap = 0
 
 	####
 	# Load the location
@@ -295,10 +298,23 @@ class Location(SerObject):
 		else:
 			return self.directions[(5+who.power('rotated')) % 6](self)
 
+	local_directions = [ r, ur, ul, l, ll, lr ]
+	local_directions_name = [ 'r', 'ur', 'ul', 'l', 'll', 'lr' ]
+
 	# Actions
 	def external_actions(self, acts, player, name=None):
 		"""Add to acts a list of actions that we could perform"""
-		pass
+		for i in range(0, 6):
+			# FIXME: This is awkward -- why are both arrays needed?
+			n = self.local_directions_name[i]
+			l = self.local_directions[i](self)
+			if self.could_go(player, n):
+				uid = Action.make_id(self, "move_" + n)
+				cost = self.move_cost(player, l)
+				acts[uid] = Action(uid, caption="Move " + n.upper(),
+								   ap=cost,
+								   action=lambda d: player.move_to(self),
+								   group="move")
 
 	# Who's here?
 	def actor_ids(self):
@@ -315,3 +331,13 @@ class Location(SerObject):
 			row = cur.fetchone()
 			
 		return ret
+
+	def could_go(self, player, direction):
+		# FIXME: Add support for edge conditions
+		loc = getattr(self, direction)(self)
+		if loc == None:
+			return False
+		return True
+
+	def move_cost(self, player, destination):
+		return self.move_ap + destination.move_ap
