@@ -1,0 +1,85 @@
+#!/usr/bin/python
+
+######
+# Modify a property of a location
+
+import sys
+import getopt
+
+from Location import Location
+from Position import Position
+from Database import DB
+
+def usage():
+	print """Usage: setlocstat [options] { <x> <y> <layer> | -i <locid> } <propertyname> <value>
+Options:
+\t-i, --id=<n>\t\tUse location id <n>
+\t-n, --int\t\tForce value to integer
+\t-f, --float\t\tForce value to float
+\t-s, --string\t\tForce value to string
+"""
+
+def retype(value):
+	"""Converts the string value into an int, float or string"""
+	try:
+		r = int(value)
+	except:
+		try:
+			r = float(value)
+		except:
+			r = str(value)
+	return r
+
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?i:nfs', ['help', 'id=', 'int', 'float', 'string'])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+lid = None
+typ = None
+
+for o, a in optlist:
+	if o in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	elif o in ('-i', '--id'):
+		lid = int(a)
+	elif o in ('-n', '--int'):
+		typ = int
+	elif o in ('-f', '--float'):
+		typ = float
+	elif o in ('-s', '--string'):
+		typ = str
+	else:
+		usage()
+		sys.exit(0)
+
+if len(args) < 2 or len(args) > 5:
+	usage()
+	sys.exit(2)
+
+if lid != None:
+	loc = Location.load(lid)
+else:
+	x, y, layer = args[0:3]
+	del(args[0:3])
+	pos = Position(x, y, layer)
+	loc = Location.load_by_pos(pos)
+
+if loc == None:
+    print "Location not found"
+    sys.exit(3)
+
+# Convert the string parameter from the command line to an appropriate
+# type
+if typ == None:
+	value = retype(args[1])
+else:
+	value = typ(args[1])
+
+loc[args[0]] = value
+    
+loc.save()
+DB.commit()
