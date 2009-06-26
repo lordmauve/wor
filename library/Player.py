@@ -43,6 +43,7 @@ class Player(Actor):
 		Called after an object has been loaded and cached in
 		cls.cache_by_id"""
 		super(Player, cls)._cache_object(obj)
+		# FIXME: Complain if we have a duplicate cache key
 		cls.cache_by_name[obj.name] = obj
 
 	@classmethod
@@ -65,6 +66,7 @@ class Player(Actor):
 			position = Position(0, 0, 'main')
 
 		super(Player, self).__init__(name, position)
+		self._cache_object(self)
 		self.align = align
 		# Start at 120AP, get one more every 6 minutes (240 per day),
 		# maximum 240.
@@ -75,9 +77,6 @@ class Player(Actor):
 		self.inventory = ItemContainer(self, "inventory")
 		punch = Punch()
 		self.inventory.add(punch)
-
-		self._cache_object(self) # Must be called explicitly in
-                                 # __init__() here.
 
 	####
 	# Movement

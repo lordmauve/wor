@@ -7,6 +7,9 @@ class Position:
 		self.y = y
 		self.layer = layer
 
+	def __repr__(self):
+		return "%d,%d,%s" % (self.x, self.y, self.layer)
+
 	def context_get(self):
 		return { 'x': self.x,
 				 'y': self.y,

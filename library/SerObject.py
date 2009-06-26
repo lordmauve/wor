@@ -61,6 +61,7 @@ class SerObject(object):
 		
 		obj._id = int(row[0])
 		obj._setup()
+		obj._cache_object(obj)
 
 		# Anything (member objects) which wants to be called after
 		# load gets called here

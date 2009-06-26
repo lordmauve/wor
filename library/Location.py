@@ -23,7 +23,10 @@ class Location(SerObject):
 		"""Load a complete location stack by position"""
 		rpos = repr(pos)
 		if rpos in Location.cache_by_pos:
-			return Location.cache_by_pos[rpos]
+			stack = Location.cache_by_pos[rpos]
+			overlays = stack.keys()
+			overlays.sort()
+			return stack[overlays[-1]]
 
 		cur = DB.cursor()
 		cur.execute('SELECT id, state FROM location '
@@ -50,8 +53,18 @@ class Location(SerObject):
 
 	@classmethod
 	def _cache_object(cls, obj):
+		"""Hook to allow classes to define their own caching scheme.
+		Called after an object has been loaded and cached in
+		cls.cache_by_id"""
+		super(Location, cls)._cache_object(obj)
 		rpos = repr(obj.pos)
-		cls.cache_by_pos[rpos] = obj
+		stack = cls.cache_by_pos.setdefault(rpos, {})
+		if obj.overlay in stack:
+			# FIXME: Raise an exception here: we've just loaded a
+			# duplicate object
+			log.error("Trying to cache a Location overlay that already exists, at (%d, %d, %s, %d)" % (obj.pos.x, obj.pos.y, obj.pos.layer, obj.overlay))
+			return
+		stack[obj.overlay] = obj
 
 	def _save_indices(self):
 		inds = super(Location, self)._save_indices()
@@ -65,13 +78,11 @@ class Location(SerObject):
 	# Create a new location
 	def __init__(self, pos):
 		"""Create a completely new location"""
+		self._underneath = None
+		self._above = None
 		super(Location, self).__init__()
 		self.pos = pos
 		self.overlay = 0
-		self._underneath = None
-		self._above = None
-		#self.set_mapping() # FIXME: See note about this method
-		
 		self._cache_object(self)
 
 	####
@@ -160,10 +171,10 @@ class Location(SerObject):
 			fields = Context.all_fields(self)
 			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
 		elif auth == Context.OWNER:
-			fields = [ ]
+			fields = [ 'name' ]
 			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
 		elif auth == Context.STRANGER_VISIBLE:
-			fields = [ ]
+			fields = [ 'name' ]
 			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
 		else:
 			fields = [ ]
@@ -174,7 +185,7 @@ class Location(SerObject):
 			
 			try:
 				v = getattr(self, k)
-			except KeyError:
+			except AttributeError:
 				pass
 			else:
 				if v != None:
