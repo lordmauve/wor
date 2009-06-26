@@ -3,7 +3,7 @@
 # This is the base object for all objects that might end up in the database
 
 from Database import DB
-from Logger import log
+from Logger import log, exception_log
 import pickle
 import pickletools
 import copy
@@ -29,7 +29,7 @@ class SerObject(object):
 						)
 			row = cur.fetchone()
 		except psycopg2.Error, dbex:
-			sys.stderr.write("Database exception:" + dbex + "\n")
+			exception_log.info("Database exception:" + dbex + "\n")
 			return None
 
 		if row == None:
@@ -56,7 +56,7 @@ class SerObject(object):
 					obj._set_prop_from_row(prop)
 					prop = cur.fetchone()
 			except psycopg2.Error, dbex:
-				sys.stderr.write("Database exception:" + dbex + "\n")
+				exception_log.info("Database exception:" + dbex + "\n")
 				return None
 		
 		obj._id = int(row[0])
