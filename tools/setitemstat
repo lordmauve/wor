@@ -1,0 +1,81 @@
+#!/usr/bin/python
+
+######
+# Modify a property of an item
+
+import sys
+import getopt
+
+from Item import Item
+from Database import DB
+
+def usage():
+	print """Usage: setitemstat [options] <itemid> <propertyname> <value>
+Options:
+\t-n, --int\t\tForce value to integer
+\t-f, --float\t\tForce value to float
+\t-s, --string\t\tForce value to string
+"""
+
+def retype(value):
+	"""Converts the string value into an int, float or string"""
+	try:
+		r = int(value)
+	except:
+		try:
+			r = float(value)
+		except:
+			r = str(value)
+	return r
+
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?nfs', ['help', 'int', 'float', 'string'])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+typ = None
+
+for o, a in optlist:
+	if o in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	elif o in ('-n', '--int'):
+		typ = int
+	elif o in ('-f', '--float'):
+		typ = float
+	elif o in ('-s', '--string'):
+		typ = str
+	else:
+		usage()
+		sys.exit(0)
+
+if len(args) != 3:
+	usage()
+	sys.exit(2)
+
+iid = int(args.pop(0))
+item = Item.load(iid)
+
+if item == None:
+    print "Item not found"
+    sys.exit(3)
+
+# Convert the string parameter from the command line to an appropriate
+# type
+if typ == None:
+	value = retype(args[1])
+else:
+	value = typ(args[1])
+
+# Walk through the object tree, if there are dots in the parameter
+path = args[0].split('.')
+ob = item
+while len(path) > 1:
+	ob = ob[path.pop(0)]
+
+setattr(ob, path[0], value)
+
+item.save(force = True)
+DB.commit()
