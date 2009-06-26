@@ -14,7 +14,6 @@ def default(v, d=0):
 
 def render_info(info, req, prefix='', indent=0):
 	"""Recursively render the data in info into the request object"""
-	log.debug(str(info))
 	for k, v in info.iteritems():
 		if isinstance(v, dict):
 			render_info(v, req, prefix + k + '.', indent-len(prefix))
