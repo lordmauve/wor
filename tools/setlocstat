@@ -79,7 +79,13 @@ if typ == None:
 else:
 	value = typ(args[1])
 
-loc[args[0]] = value
-    
-loc.save()
+# Walk through the object tree, if there are dots in the parameter
+path = args[0].split('.')
+ob = loc
+while len(path) > 1:
+	ob = ob[path.pop(0)]
+
+setattr(ob, path[0], value)
+
+loc.save(force = True)
 DB.commit()
