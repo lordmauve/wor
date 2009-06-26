@@ -94,9 +94,9 @@ class SerObject(object):
 
 	####
 	# Saving the object to the database
-	def save(self):
+	def save(self, force=False):
 		"""Save to the database the parts of the object that have changed"""
-		if not self._changed:
+		if not force and not self._changed:
 			return
 		if self._deleted:
 			cur = DB.cursor()
@@ -365,7 +365,6 @@ class SerObject(object):
 		cur.execute('INSERT INTO ' + self._table
 					+ ' (id, state) VALUES (%(id)s, NULL)',
 					{ 'id': self._id })
-		print "New SerObject ID =", self._id
 		self._setup()
 		self.value_triggers = {}
 
