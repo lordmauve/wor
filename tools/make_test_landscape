@@ -1,0 +1,64 @@
+#!/usr/bin/python
+
+######
+# Create a whole test landscape
+
+import sys
+import getopt
+
+from Location import Location
+from Position import Position
+from Database import DB
+import GameUtil
+
+def usage():
+	print """Usage: make_test_landscape
+Create a default test area for landscape things.
+"""
+
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?i:', ['help'])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+aid = None
+
+for o, a in optlist:
+	if o in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	else:
+		usage()
+		sys.exit(0)
+
+if len(args) != 0:
+	usage()
+	sys.exit(1)
+
+ccl = Position( 0,  0, 'test')
+
+for x in range(-3, 4):
+	for y in range(-3, 4):
+		pos = Position(x, y, 'test')
+		if ccl.hop_distance(pos) <= 3:
+			old = Location.load_by_pos(pos)
+			if old != None:
+				old.demolish()
+			l = Location(pos)
+			l.name = "(%d, %d)" % (x, y)
+
+# Set up a warp location
+wrp_to_pos = Position(1, 1, 'test_warp')
+wrp_to = Location(wrp_to_pos)
+wrp_to.name = "WARP"
+wrp_fm = Location.load_by_pos(Position(0, 1, 'test'))
+wrp_fm.warp_e = wrp_to_pos
+
+# Delete a location
+Location.load_by_pos(Position(-1, 0, 'test')).demolish()
+
+GameUtil.save()
+
+DB.commit()
