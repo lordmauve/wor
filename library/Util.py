@@ -88,3 +88,7 @@ def parse_input(req):
 
 	log.debug("Parsed input: " + repr(result))
 	return result
+
+class WorError(Exception):
+	"""Base Exception for all WOR code.  Subclass if needed"""
+	pass

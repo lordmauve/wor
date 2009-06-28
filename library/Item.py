@@ -147,3 +147,14 @@ class Item(SerObject):
 						ret[k] = str(v)
 
 		return ret
+
+	def merge(self, new_item):
+		"""Merge the given item with this item, if possible.  Return 
+		  True if the new item should be discarded, False otherwise"""
+		return False
+		  
+        def split(self, num_items):
+		"""Splits the given number of items from this item.  If this is 
+		   an aggregate, the split instance should be returned.  If 
+		   not, None will be returned"""
+		return None

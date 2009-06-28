@@ -63,6 +63,12 @@ class ItemContainer(OnLoad):
 							+ '   AND owner_id = %(owner_id)s'
 							+ '   AND container_name = %(container)s',
 							params)
+				# Make sure to remove the item from our internal
+				# collections as well
+				self._item_ids.remove(item_id)
+				for item_ids in self._item_types.values():
+					if item_id in item_ids:
+						item_ids.remove(item_id)
 
 	def __getstate__(self):
 		"""Pickle this object. The contents of _item_ids and
@@ -138,22 +144,64 @@ class ItemContainer(OnLoad):
 		itemclass. itemclass must be a class object."""
 		if itemclass.__name__ not in self._item_types:
 			return False
+
+		# Since items have a count of 1 by default, we can just 
+		# iterate through all of them, regardless of the 
 		if itemclass.aggregate:
-			total = 0
-			for item in self._item_types[itemclass.__name__]:
-				total += item.count
+			# Note that we can only have a single aggregate of a 
+			# given type per container
+			total = __get_first_item(itemclass.__name__).count
+		
 		else:
 			total = len(self._item_types[itemclass.__name__])
+
 		return total >= count
 
 	def add(self, item):
-		self._item_ids.add(item._id)
+		"""Add the given item to the container"""
+		# Get the type from the item
 		itype = item.ob_type()
+		
+		discard = False
+
+		# If our type is not in the container already, create a new set 
+                # for it
 		if itype not in self._item_types:
 			self._item_types[itype] = set()
-		self._item_types[itype].add(item._id)
-		self._changes.add(item._id)
+		else:
+			# On the other hand, if it IS in the container already, 
+			# get the first element of the type.  
+			existing_item = __get_first_item(itype)
 
-	# FIXME: Write this function
-	#def remove(self, item):
-	#	self._changes.add(item._id)
+			# Now, try to merge the new item into it.  Note that if 
+			# this is an aggregate, we'll only have one element in 
+			# the set.  If it's not, there'll be no need to merge 
+			# anyhow, so we can get away  with only eyeballing the 
+			# first element
+			shouldDiscard = existing_item.merge(new_item)
+
+		# If merge does not indicate we should discard the element, add
+		# it to our ID and type collections
+		if shouldDiscard == False:
+			self._item_ids.add(item._id)
+			self._item_types[itype].add(item._id)
+			self._changes.add(item._id)
+
+	def remove(self, item):
+		"""Removes the given item from the container.  Note that this 
+		   does NOT change the persistent state of the item at all"""
+		self._changes.add(item._id)
+		
+	
+	def split(self, item_id, num_items):
+		"""Splits the given number of items from this item.  If this is 
+		   an aggregate, the split instance should be returned.  If 
+		   not, None will be returned"""
+		# Get the item in question.  
+		item = SerObject.load(item_id)
+		return item.split(num_items)
+
+	def __get_first_item(self, itype):
+		item_id = iter(self.item_types[itype]).next()
+		item = SerObject.load(itype, item_id)
+		return item
