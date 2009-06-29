@@ -24,6 +24,8 @@ class ItemContainer(OnLoad):
 	# Loading and saving
 	def save(self):
 		"""Called when its parent object is save()d"""
+                print "***TRACE: ItemContainer.save() called"
+
 		# Update the database, using our list of changed fields
 		cur = DB.cursor()
 		params = {}
@@ -34,6 +36,7 @@ class ItemContainer(OnLoad):
 		for itemid in self._changes:
 			params['id'] = itemid
 			if itemid in self._item_ids:
+				print "***TRACE: adding item " + str(itemid)
 				# The item has been added to this container, so we
 				# need to add it to the database
 				try:
@@ -46,15 +49,18 @@ class ItemContainer(OnLoad):
 								+ '		 %(owner_id)s, %(container)s)',
 								params)
 				except psycopg2.Error, ex:
+					print "***TRACE: error on insert"
 					# If the insert failed, we roll back the savepoint
 					# just to keep it all sane.
 					cur.execute('ROLLBACK TO SAVEPOINT item_update')
 				else:
+					print "***TRACE: insert succeeded"
 					# If the insert succeeded, we close the
 					# savepoint. If it failed, we've rolled it back
 					# already.
 					cur.execute('RELEASE SAVEPOINT item_update')
 			else:
+				print "***TRACE: Deleting item " + str(itemid)
 				# The item is no longer in this container, so we need
 				# to delete it from the database
 				cur.execute('DELETE FROM item_owner'
@@ -150,7 +156,7 @@ class ItemContainer(OnLoad):
 		if itemclass.aggregate:
 			# Note that we can only have a single aggregate of a 
 			# given type per container
-			total = __get_first_item(itemclass.__name__).count
+			total = self.__get_first_item(itemclass.__name__).count
 		
 		else:
 			total = len(self._item_types[itemclass.__name__])
@@ -159,10 +165,13 @@ class ItemContainer(OnLoad):
 
 	def add(self, item):
 		"""Add the given item to the container"""
+
+		print "***TRACE: Adding item: " + str(item)
+
 		# Get the type from the item
 		itype = item.ob_type()
 		
-		discard = False
+		shouldDiscard = False
 
 		# If our type is not in the container already, create a new set 
                 # for it
@@ -171,21 +180,25 @@ class ItemContainer(OnLoad):
 		else:
 			# On the other hand, if it IS in the container already, 
 			# get the first element of the type.  
-			existing_item = __get_first_item(itype)
+			existing_item = self.__get_first_item(itype)
 
 			# Now, try to merge the new item into it.  Note that if 
 			# this is an aggregate, we'll only have one element in 
 			# the set.  If it's not, there'll be no need to merge 
 			# anyhow, so we can get away  with only eyeballing the 
 			# first element
-			shouldDiscard = existing_item.merge(new_item)
+			shouldDiscard = existing_item.merge(item)
 
 		# If merge does not indicate we should discard the element, add
 		# it to our ID and type collections
 		if shouldDiscard == False:
+			print "***TRACE: Adding association to item " + str(item._id)
 			self._item_ids.add(item._id)
 			self._item_types[itype].add(item._id)
 			self._changes.add(item._id)
+		else:
+			print "***TRACE: Discarding item " + str(item._id)
+			item.demolish()
 
 	def remove(self, item):
 		"""Removes the given item from the container.  Note that this 
@@ -202,6 +215,16 @@ class ItemContainer(OnLoad):
 		return item.split(num_items)
 
 	def __get_first_item(self, itype):
-		item_id = iter(self.item_types[itype]).next()
-		item = SerObject.load(itype, item_id)
+		print "***TRACE: in __get_first_item"
+
+		item_id = iter(self._item_types[itype]).next()
+		print  "***TRACE: item_id = " + str(item_id)
+		print "***TRACE: itype = " + itype
+
+		item_class = Item.get_class(itype)
+		print "***TRACE: item_class = " + str(item_class)
+
+		item = Item.load(item_id)
+		print "***TRACE: item = " + str(item)
+
 		return item

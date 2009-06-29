@@ -31,6 +31,7 @@ class Item(SerObject):
 
 	name = "Item"
 	aggregate = False
+	count = 1
 
 	# Failure-rate (aka hazard) functions: return the probability
 	# [0.0, 1.0) that this item will fail, given a lifetime of x

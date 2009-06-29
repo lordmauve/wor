@@ -11,10 +11,6 @@ class AggregateItem(Item.Item):
 	   than containing 500 Gold objects, for example, it's simply a Gold 
 	   object with a 500 count"""
 	aggregate = True
-	count = 0;
-
-	def __init__(self):
-		count = 1
 
 	def merge(self, new_item):
 		"""Merge the given item with this item, if possible.  Return 
@@ -25,8 +21,11 @@ class AggregateItem(Item.Item):
 		# TODO: Is this good, or do we need to support subclasses as 
 		#       well?
 		if self.ob_type() == new_item.ob_type():
-			self.count += newItem.count
-			Logger.log_item_event(ITEM_MERGE)
+			self.count += new_item.count
+			
+			# FIXME: the log_item_event table appears to be 
+			#        nonexistent atm
+			#Logger.log_item_event(Logger.ITEM_MERGE)
 			return True
 		else:
 			raise WorError("Incompatible types ("

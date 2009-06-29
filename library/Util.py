@@ -26,7 +26,8 @@ def render_info(info, req, prefix='', indent=0):
 def render_equip(info, req):
 	"""Render a table of data in info into the request object"""
 	for item in info:
-		req.write(item[0] + ":" + str(item[1]) + ":" + item[2] + "\n")
+		row = item[0] + ":" + str(item[1]) + ":" + item[2]
+		req.write(row + "\n")
 
 def render_messages(info, req):
 	"""Render a table of messages into the request object"""
