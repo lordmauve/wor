@@ -18,6 +18,8 @@ class SerObject(object):
 	@classmethod
 	def load(cls, id, allprops=False):
 		"""Get the SerObject with the given id from the given table"""
+
+		print "***TRACE: in SerObject.load(id = " + str(id) + ")"
 		if id in cls.cache_by_id:
 			return cls.cache_by_id[id]
 
@@ -29,7 +31,7 @@ class SerObject(object):
 						)
 			row = cur.fetchone()
 		except psycopg2.Error, dbex:
-			exception_log.info("Database exception:" + dbex + "\n")
+			exception_log.info("Database exception:" + str(dbex) + "\n")
 			return None
 
 		if row == None:
@@ -39,6 +41,7 @@ class SerObject(object):
 
 	@classmethod
 	def _load_from_row(cls, row, allprops):
+		print "***TRACE: in _load_from_row()"
 		obj = pickle.loads(row[1])
 
 		if allprops:
@@ -56,7 +59,7 @@ class SerObject(object):
 					obj._set_prop_from_row(prop)
 					prop = cur.fetchone()
 			except psycopg2.Error, dbex:
-				exception_log.info("Database exception:" + dbex + "\n")
+				exception_log.info("Database exception:" + str(dbex) + "\n")
 				return None
 		
 		obj._id = int(row[0])

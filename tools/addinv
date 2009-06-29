@@ -1,0 +1,70 @@
+#!/usr/bin/python
+
+######
+# Add items to a player's inventory
+
+import sys
+import getopt
+
+from Player import Player
+from Item import Item
+from Database import DB
+import GameUtil
+
+def usage():
+    print """Usage: addinv [options] <player_name> <item_class>
+Options:
+\t-c, --count=<count>\tNumber of items to give.  1 By default.
+\t-h, --help\t\tDisplay this message
+"""
+
+def add_item(name, item_class_name, count):
+    """Adds count instances of the given item to the given player's inventory.  
+       Defined as such to simplify refactoring into a UI-driven class"""
+
+    # Get the player
+    p = Player.load_by_name(name)
+
+    # Now get the requested item class
+    item_class = Item.get_class(item_class_name)
+
+    item = item_class()
+    if count > 0:
+        item.count = count
+
+    # Now just add the inventory to the player
+    p.inventory.add(item)
+    # TODO: insert something witty here.  If we were REALLY feeling ambitious, 
+    #       we could even have it pick a saying at random from a list 
+    p.message("Your friendly neighbourhood Sourceror appears, gives you an item, and vanishes in a burst of code.")
+    p.message("You gain " + str(count) + item_class.name_for(count))
+
+    p.save(force = True)
+    GameUtil.save()
+    DB.commit()
+    
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?c:', ['help', 'count='])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+count = 0
+
+for opt, arg in optlist:
+	if opt in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	elif opt in ('-c', '--count'):
+		count = arg
+	else:
+		usage()
+		sys.exit(0)
+
+if len(args) != 2:
+    usage()
+    sys.exit(1)
+
+add_item(args[0], args[1], count)
+
