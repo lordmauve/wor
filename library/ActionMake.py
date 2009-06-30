@@ -25,7 +25,7 @@ class ActionMake(Action):
 		self.html += " from "
 		self.html += self.objectlist(player, plan.materials)
 
-		self.html += " <input id='%s_quantity' size='3'> times. " % self.uid
+		self.html += " <input id='%s_quantity' size='3' /> times. " % self.uid
 		self.html += self.make_button_for()
 
 	def build(self, data):
