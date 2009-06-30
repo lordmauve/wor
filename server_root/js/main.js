@@ -31,9 +31,9 @@ function get_ajax_object()
 function basic_ajax_get(url, callback)
 {
 	var req = get_ajax_object();
-	var account = document.getElementById("account").value
-	var password = document.getElementById("password").value
-	var actid = document.getElementById("actorid").value
+	var account = document.getElementById("account").value;
+	var password = document.getElementById("password").value;
+	var actid = document.getElementById("actorid").value;
 
 	req.onreadystatechange = function() { callback(req); };
 	req.open("GET", api + url, true, account, password);
