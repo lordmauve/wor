@@ -116,7 +116,7 @@ class Player(Actor):
 		# We can change the held item.
 		if Util.match_id(action_id, self, "changeitem"):
 			uid = Action.make_id(self, "changeitem")
-			act_html = "Use item <input id='%s_id' size='3'>. " % uid
+			act_html = "Use item <input id='%s_id' size='3' />. " % uid
 			acts[uid] = Action(
 				uid, caption="Change", ap=0, group="inventory",
 				action=lambda d: self.change_item_action(d),
