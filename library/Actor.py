@@ -167,7 +167,7 @@ class Actor(SerObject):
 
 		# They could attack us...
 		if ("attack" in requested
-			and self != player):
+			and self._id is not player._id):
 			
 			uid = Action.make_id(self, "attack")
 			acts[uid] = Action(

@@ -19,9 +19,13 @@ class SerObject(object):
 	def load(cls, id, allprops=False):
 		"""Get the SerObject with the given id from the given table"""
 
-		print "***TRACE: in SerObject.load(id = " + str(id) + ")"
+		#log.debug("Request to load " + str(id) + " from " + cls._table)
+
 		if id in cls.cache_by_id:
-			return cls.cache_by_id[id]
+			obj = cls.cache_by_id[id]
+			#log.debug("... found in cache, returning " + str(obj))
+			#log.debug("Cache is " + str(cls.cache_by_id))
+			return obj
 
 		try:
 			cur = DB.cursor()
@@ -37,11 +41,13 @@ class SerObject(object):
 		if row == None:
 			return None
 
-		return cls._load_from_row(row, allprops)
+		obj = cls._load_from_row(row, allprops)
+		#log.debug("... found in database, returning " + str(obj))
+		#log.debug("Cache is " + str(cls.cache_by_id))
+		return obj
 
 	@classmethod
 	def _load_from_row(cls, row, allprops):
-		print "***TRACE: in _load_from_row()"
 		obj = pickle.loads(row[1])
 
 		if allprops:
@@ -377,7 +383,15 @@ class SerObject(object):
 		self._changed = False
 		self._deleted = False
 		self._changed_props = set()
-		self.__class__.cache_by_id[self._id] = self
+		if self._id not in self.__class__.cache_by_id:
+			self.__class__.cache_by_id[self._id] = self
+		else:
+			log.error("Attempting to recache object with ID "
+					  + str(self._id)
+					  + ": cache holds "
+					  + str(self.__class__.cache_by_id[self._id])
+					  + " and we are " + str(self)
+					  )
 
 	####
 	# Destruction
