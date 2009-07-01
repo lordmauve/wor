@@ -1,0 +1,69 @@
+#!/usr/bin/python
+
+######
+# Create a new account
+
+import sys
+import getopt
+
+from Database import DB
+import GameUtil
+
+def usage():
+	print """Usage: newaccount [options] <account>
+Options:
+\t-p, --password=<pwd>\tSet password (otherwise, generate a random one and print it)
+\t-r, --realname=<name>\tSet a real name for the account
+\t-e, --email=<address>\tSet an email address for the account
+\t
+"""
+
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?p:r:e:', ['help', 'password=', 'realname=', 'email='])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+password = None
+realname = None
+email = None
+
+for o, a in optlist:
+	if o in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	elif o in ('-p', '--password'):
+		password = a
+	elif o in ('-r', '--realname'):
+		realname = a
+	elif o in ('-e', '--email'):
+		email = a
+	else:
+		usage()
+		sys.exit(0)
+
+if len(args) != 1:
+	usage()
+	sys.exit(1)
+
+if password == None:
+	valid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=+,.<>:;!$%^&*()?/"
+	password = ""
+	f = open("/dev/urandom", "r")
+	while len(password) < 12:
+		b = f.read(1)
+		if b in valid:
+			password += b
+	f.close()
+	print password
+
+cur = DB.cursor()
+cur.execute("INSERT INTO account (username, password, realname, email)"
+		+ " VALUES (%(uname)s, %(pwd)s, %(rname)s, %(email)s)",
+		{ "uname": args[0],
+		  "pwd": password,
+		  "rname": realname,
+		  "email": email })
+
+DB.commit()
