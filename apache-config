@@ -1,28 +1,28 @@
 <VirtualHost *:80>
-	ServerAdmin webmaster@localhost
-	ServerName worldofrodney.org
+	ServerAdmin webmaster@worldofrodney.org
+	ServerName game.worldofrodney.org
 	ServerAlias www.worldofrodney.org
 	ServerAlias test.worldofrodney.org
 
 	PythonDebug On
 	
 	# First, map the file paths to the server root
-	DocumentRoot /home/hrm/develop/wor/server_root
+	DocumentRoot /home/wor/server_root
 	<Directory />
 		Options FollowSymLinks
 		AllowOverride None
 	</Directory>
 
 	PythonAutoReload On
-	PythonOption wor.root_path /home/hrm/develop/wor
-	PythonPath "sys.path + ['/home/hrm/develop/wor/library', '/home/hrm/develop/wor/handlers', '/home/hrm/develop/wor/content']"
+	PythonOption wor.root_path /home/wor
+	PythonPath "sys.path + ['/home/wor/library', '/home/wor/handlers', '/home/wor/content']"
 
 	<Location />
 		AuthType Digest
 		AuthName WoR
 		AuthDigestDomain http://test.worldofrodney.org/ http://game.worldofrodney.org/ http://www.worldofrodney.org/ http://worldofrodney.org/
 		AuthDigestProvider file
-		AuthUserFile /home/hrm/develop/wor/authn_file
+		AuthUserFile /home/wor/authn_file
 		Require valid-user
 	</Location>
 
