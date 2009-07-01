@@ -22,8 +22,8 @@ class Actor(SerObject):
 	# Creating a new object
 	def __init__(self, name, position):
 		"""Create a completely new actor"""
-		self.name = name
 		super(Actor, self).__init__()
+		self.name = name
 		self.position = position
 
 	def _save_indices(self):
