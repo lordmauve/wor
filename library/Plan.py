@@ -15,7 +15,6 @@ def makeable_plans(who, item):
 		if not p.can_be_made(who, 1):
 			continue
 		rv.append(p)
-	log.debug(str(rv))
 	return rv
 
 def visible_plans(who):
