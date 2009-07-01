@@ -17,17 +17,19 @@
 	PythonOption wor.root_path /home/hrm/develop/wor
 	PythonPath "sys.path + ['/home/hrm/develop/wor/library', '/home/hrm/develop/wor/handlers', '/home/hrm/develop/wor/content']"
 
+	<Location />
+		AuthType Digest
+		AuthName WoR
+		AuthDigestDomain http://test.worldofrodney.org/ http://game.worldofrodney.org/ http://www.worldofrodney.org/ http://worldofrodney.org/
+		AuthDigestProvider file
+		AuthUserFile /home/hrm/develop/wor/authn_file
+		Require valid-user
+	</Location>
+
 	# Now map the REST API to a suitable set of paths:
 	<Location /api>
 		Order deny,allow
 		Allow from all
-
-		AuthType Digest
-		AuthName WoR
-		AuthDigestDomain /api
-		AuthDigestProvider file
-		AuthUserFile /home/hrm/develop/wor/authn_file
-		Require valid-user
 
 		SetHandler mod_python
 		PythonHandler hd_all::api_handler
