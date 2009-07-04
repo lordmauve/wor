@@ -27,6 +27,8 @@ def render_equip(info, req):
 	"""Render a table of data in info into the request object"""
 	for item in info:
 		row = item[0] + ":" + str(item[1]) + ":" + item[2]
+		if len(item) == 4:
+			row = row + " (x" + str(item[3]) + ")"
 		req.write(row + "\n")
 
 def render_messages(info, req):

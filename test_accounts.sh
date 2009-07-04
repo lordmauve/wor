@@ -3,7 +3,7 @@
 . ./set_env
 ./tools/newaccount -r "Hugo Mills" -e hugo@carfax.org.uk Ruthven
 ./tools/newaccount -r "David Merritt" -e DavidBMerritt@yahoo.com Mongo
-./tools/newaccount Thog
+./tools/newaccount -r "Don Brinker" -e dbrinker@pobox.com Thog
 ./tools/newaccount PotatoEngineer
 ./tools/newaccount AndyLandy
 
