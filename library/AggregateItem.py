@@ -21,8 +21,9 @@ class AggregateItem(Item.Item):
 		# TODO: Is this good, or do we need to support subclasses as 
 		#       well?
 		if self.ob_type() == new_item.ob_type():
-			self.count += new_item.count
-			
+			self.count += int(new_item.count)
+			print "***TRACE: self._changed = " + str(self._changed)
+
 			# FIXME: the log_item_event table appears to be 
 			#        nonexistent atm
 			#Logger.log_item_event(Logger.ITEM_MERGE)

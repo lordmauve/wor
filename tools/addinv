@@ -40,7 +40,7 @@ def add_item(name, item_class_name, count):
     p.message("You gain " + str(count) + item_class.name_for(count))
 
     p.save(force = True)
-    GameUtil.save()
+    GameUtil.flush_cache()
     DB.commit()
     
 try:
