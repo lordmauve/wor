@@ -154,7 +154,7 @@ class Item(SerObject):
 		  True if the new item should be discarded, False otherwise"""
 		return False
 		  
-        def split(self, num_items):
+	def split(self, num_items):
 		"""Splits the given number of items from this item.  If this is 
 		   an aggregate, the split instance should be returned.  If 
 		   not, None will be returned"""
