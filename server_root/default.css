@@ -80,12 +80,12 @@ div.message {
 
 div.msg_type_rodney {
 	border-color: #f00;
-	background-color: fcc;
+	background-color: #fcc;
 }
 
 div.msg_type_sound {
 	border-color: #ff0;
-	background-color: ffc;
+	background-color: #ffc;
 }
 
 span.timestamp {
