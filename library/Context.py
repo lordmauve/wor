@@ -67,12 +67,16 @@ def authz_item(item):
 def all_fields(obj):
 	"""Return all "interesting" properties of this object."""
 	fields = dir(obj)
-	# Filter out anything starting with __
-	fields = filter(lambda x: x[0] != '_' or x[1] != '_', fields)
+	# Filter out anything starting with _
+	#fields = filter(lambda x: x[0] != '_' or x[1] != '_', fields)
+	fields = filter(lambda x: x[0] != '_', fields)
 	# Filter out methods
 	fields = filter(lambda x: not isinstance(getattr(obj, x),
 											 types.MethodType),
 					fields)
+	# Filter out other unwanted bits
+	fields.remove('cache_by_name')
+	fields.remove('inventory')
 	return fields
 
 
