@@ -118,11 +118,7 @@ class ItemContainer(OnLoad):
 				textname = item_class.name_for(Context.context)
 
 				item = Item.load(itemid)
-				if hasattr(item, 'count'):
-					ret.append((itype, itemid, textname, 
-						    item.count))
-				else:
-					ret.append((itype, itemid, textname))
+				ret.append((itype, itemid, item.count, textname))
 
 		return ret
 

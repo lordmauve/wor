@@ -27,10 +27,10 @@ function inventory_response(req)
 		if(req.status == 200)
 		{
 			// Get the table of item data
-			var items = parse_input_table(req.responseText, 3);
+			var items = parse_input_table(req.responseText, 4);
 			items.sort(function(a,b) {
-						if(a[2] == b[2]) return 0;
-						if(a[2] < b[2]) return -1;
+						if(a[3] == b[3]) return 0;
+						if(a[3] < b[3]) return -1;
 						return 1;
 					});
 
@@ -46,7 +46,10 @@ function inventory_response(req)
 					{
 						line += "<a href='javascript:inventory_change(";
 						line += items[pos][1];
-						line += ")'>" + items[pos][2] + "</a>";
+						line += ")'>" + items[pos][3];
+						if(items[pos][2] > 1)
+							line += " (x" + items[pos][2] + ")";
+						line += "</a>";
 					}
 					line += "</td>";
 				}
