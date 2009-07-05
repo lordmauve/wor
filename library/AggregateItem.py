@@ -1,12 +1,12 @@
 ########
 # An aggregate item
 
-import Item
+from Item import Item
 import Logger
 from Logger import log
 import Util
 
-class AggregateItem(Item.Item):
+class AggregateItem(Item):
 	"""An item containing a number of identical objects.  Note that it 
            contains the underlying stuff in a conceptual sense only - rather 
 	   than containing 500 Gold objects, for example, it's simply a Gold 
