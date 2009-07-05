@@ -3,6 +3,7 @@
 
 import Item
 import Logger
+from Logger import log
 import Util
 
 class AggregateItem(Item.Item):
@@ -15,7 +16,7 @@ class AggregateItem(Item.Item):
 	def merge(self, new_item):
 		"""Merge the given item with this item, if possible.  Return 
 		  True if the new item should be discarded, False otherwise"""
-		
+
 		# Make sure we're merging an object of the proper type
 		#
 		# TODO: Is this good, or do we need to support subclasses as 
@@ -36,7 +37,7 @@ class AggregateItem(Item.Item):
 				       + ") cannot be merged")
 
 
-        def split(self, num_items):
+	def split(self, num_items):
 		"""Splits the given number of items from this item.  If this is 
 		   an aggregate, the split instance should be returned.  If 
 		   not, None will be returned"""
