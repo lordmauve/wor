@@ -30,6 +30,10 @@ class Actor(SerObject):
 		super(Actor, self).__init__()
 		self.name = name
 		self.position = position
+		self.hp = 1
+
+		# When HP passes zero, going down, call the dead() function
+		hp_trigger = TriggerLatchDown(self, 'hp', lambda: self.dead())
 
 	def _save_indices(self):
 		inds = super(Actor, self)._save_indices()
@@ -310,3 +314,10 @@ class Actor(SerObject):
 			if first_strike:
 				# Give them an opportunity to riposte
 				victim.attacked(self, weapon)
+
+	####
+	# Events
+
+	def dead(self):
+		"""We died. What happens?"""
+		pass
