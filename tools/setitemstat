@@ -73,7 +73,7 @@ else:
 path = args[0].split('.')
 ob = item
 while len(path) > 1:
-	ob = ob[path.pop(0)]
+	ob = getattr(ob, path.pop(0))
 
 setattr(ob, path[0], value)
 
