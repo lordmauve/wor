@@ -168,7 +168,7 @@ class ItemContainer(OnLoad):
 		shouldDiscard = False
 
 		# If our type is not in the container already, create a new set 
-                # for it
+		# for it
 		if itype not in self._item_types:
 			self._item_types[itype] = set()
 		else:
