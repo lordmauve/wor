@@ -116,6 +116,8 @@ class SerObject(object):
 			self._changed = False
 			return
 
+		log.debug("save " + self.ob_type() + str(self._id) + ": changed is " + str(self._changed_props))
+
 		# The only time pickle() gets called is during save. We set up
 		# for that event by constructing a set of property names that
 		# we should pickle (rather than dump to the database table)
@@ -285,15 +287,50 @@ class SerObject(object):
 				self.__dict__[key] = None
 		return self.__dict__[key]
 
-	def __getattr__(self, key):
-		"""Does on-demand loading of properties from the DB. Raises an
-		error if not found. This method is only called if the property
-		is not found through the normal search path (this object's
-		__dict__, this class, parent classes)."""
-		if key[0] != '_' and key not in self.__dict__:
-			if not self._demand_load_property(key):
-				raise AttributeError, (key, self.__class__)
-		return self.__dict__[key]
+	def __getattribute__(self, key):
+		"""This is called unconditionally on every attribute access.
+		We maintain a list of all the properties that we have already
+		sought and not found."""
+
+		#log.debug("__getattribute__: " + str(key))
+
+		# If it's a "special" property, use the normal access method
+		if key[0] == '_':
+			#log.debug(" ... special property")
+			return object.__getattribute__(self, key)
+		
+		# We look in the current object's dictionary first. If it's
+		# there, we return it
+		mydict = object.__getattribute__(self, "__dict__")
+		if key in mydict:
+			#log.debug(" ... in dictionary: " + str(mydict[key]))
+			return mydict[key]
+		
+		# If it's not there, we check to see whether it's a property
+		# we've tried to load before and failed
+		failed = object.__getattribute__(self, "_failed_props")
+		if key not in failed:
+			#log.debug(" ... looking in DB")
+			# It's not in the object's dictionary, and it's not
+			# something we've tried before and failed to load, so we
+			# can try loading from the DB
+			if object.__getattribute__(self, "_demand_load_property")(key):
+				# We've found a property in the DB, so we can return
+				# it
+				#log.debug(" ... found")
+				return mydict[key]
+			else:
+				# We didn't find it in the DB, so set a failure on the
+				# key
+				#log.debug(" ... missed")
+				failed.add(key)
+				
+		# At this point, we know it's not in the object dictionary,
+		# and it's not in the DB, so if it's anywhere, it's in the
+		# class hierarchy as a class property. So we go looking for
+		# it in the class hierarchy.
+		#log.debug(" ... going upstream")
+		return object.__getattribute__(self, key)
 
 	def _demand_load_property(self, key):
 		cur = DB.cursor()
@@ -383,6 +420,7 @@ class SerObject(object):
 		self._changed = False
 		self._deleted = False
 		self._changed_props = set()
+		self._failed_props = set()
 		if self._id not in self.__class__.cache_by_id:
 			self.__class__.cache_by_id[self._id] = self
 		else:
