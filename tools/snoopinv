@@ -53,4 +53,4 @@ if p == None:
 	sys.exit(1)
 
 info = p.inventory.context_get_equip()
-Util.render_equip(info, sys.stdout)
+Util.render_table(info, sys.stdout)
