@@ -14,24 +14,26 @@ class ActionMake(Action):
 		
 		self.action = lambda d: self.build(d)
 		self.item = item
+		self.plan = plan
+		self.player = player
 
 		self.parameters = ['quantity']
 
 		# What are we making?
 		self.html = "Make "
-		self.html += self.objectlist(player, plan.makes)
+		self.html += self.objectlist(self.plan.makes)
 
 		# What are we making it from?
 		self.html += " from "
-		self.html += self.objectlist(player, plan.materials)
+		self.html += self.objectlist(self.plan.materials)
 
 		self.html += " <input id='%s_quantity' size='3' /> times. " % self.uid
 		self.html += self.make_button_for()
 
 	def build(self, data):
-		plan.make(self.player, data[self.uid + 'quantity'])
+		self.plan.make(self.player, data[self.uid + '_quantity'])
 
-	def objectlist(self, player, hash):
+	def objectlist(self, hash):
 		"""Return a well-formatted string describing the set of items
 		passed in hash"""
 		ret = ""
@@ -43,7 +45,7 @@ class ActionMake(Action):
 			# imports ActionMake, so we can't import Item in this
 			# module.
 			icls = self.item.get_class(item)
-			bits.append(str(quant) + " " + icls.name_for(player, quant))
+			bits.append(str(quant) + " " + icls.name_for(self.player, quant))
 
 		ret += ', '.join(bits[:-1])
 		if len(bits) > 1:
