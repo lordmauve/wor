@@ -126,7 +126,8 @@ class Player(Actor):
 
 		# What can we do to the item we're holding?
 		item = self.held_item()
-		if item != None and Util.match_id(action_id, self):
+		# Match any action at this stage
+		if item != None and Util.match_id(action_id, item):
 			item.external_actions(acts, self, name)
 		
 		# What can we do to the items we're wearing?

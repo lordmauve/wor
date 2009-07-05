@@ -192,6 +192,25 @@ class Actor(SerObject):
 		# FIXME: This is incomplete
 		return True
 
+	def take_items(self, name, count=1):
+		"""Remove items by name from the default item container for
+		this actor"""
+		log.debug(str(self._id) + ": Removing " + str(count) + " " + name)
+		# FIXME: This is incomplete
+		pass
+
+	def add_items(self, name, count=1):
+		"""Add items by name to the default item container for this
+		actor"""
+		log.debug(str(self._id) + ": Adding " + str(count) + " " + name)
+		# FIXME: This is incomplete
+		pass
+
+	def add_item(self, item):
+		"""Add an item to the default item container"""
+		# FIXME: This is incomplete
+		pass
+
 	####
 	# Luckiness
 	def luck_coefficient(self):

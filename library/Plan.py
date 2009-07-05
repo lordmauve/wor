@@ -1,5 +1,6 @@
 """Plan: A plan for constructing stuff from other stuff"""
 
+import math
 from Logger import log
 
 plans = []
@@ -73,11 +74,11 @@ class Plan(object):
 		# See http://worldofrodney.org/index.php/Dev:Low-level_Infrastructure#Build_system
 		benefit10 = self.ap10 / (10 * self.ap)
 		benefit_all = math.pow(benefit10, math.log10(total))
-		who.ap -= math.floor(total * self.ap * benefit_all)
+		who.ap.value -= int(total * self.ap * benefit_all)
 
 		# Take the materials
 		for iname, quant in self.materials.iteritems():
-			who.take_item(iname, quant*total)
+			who.take_items(iname, quant*total)
 
 		# Test for success, and potentially fail here
 		if not self.success(self, who, total):
@@ -85,7 +86,7 @@ class Plan(object):
 
 		# Add the results
 		for iname, quant in self.makes.iteritems():
-			who.add_item(iname, quant*total)
+			who.add_items(iname, quant*total)
 		
 		# Run the postcondition
 		return self.postcondition(self, who, total)
