@@ -18,6 +18,11 @@ class Actor(SerObject):
 	_table = 'actor'
 	cache_by_id = {}
 
+	# Define constants for scaling the to-hit function
+	TO_HIT_SCALAR = 100
+	TO_HIT_MIN = 0.05
+	TO_HIT_MAX = 0.95
+
 	####
 	# Creating a new object
 	def __init__(self, name, position):
@@ -167,7 +172,8 @@ class Actor(SerObject):
 
 		# They could attack us...
 		if ("attack" in requested
-			and self._id is not player._id):
+			and self._id is not player._id
+			and self.is_combative(player)):
 			
 			uid = Action.make_id(self, "attack")
 			acts[uid] = Action(
@@ -185,3 +191,103 @@ class Actor(SerObject):
 	def has_item(self, item):
 		# FIXME: This is incomplete
 		return True
+
+	####
+	# Luckiness
+	def luck_coefficient(self):
+		luck_factor = self.power('luck')
+		if luck_factor < 0:
+			return 100.0/(100.0-luck_factor)
+		else:
+			return 1.0 + luck_factor / 100.0
+
+	def lucky(self, q):
+		return random() < math.pow(q, self.luck_coefficient())
+
+	def unlucky(self, q):
+		return random() < math.pow(q, 1.0/self.luck_coefficient())
+
+	####
+	# Combat
+	def is_combative(self, attacker, first_strike=True):
+		"""State whether this actor is willing to engage in combat
+		with the attacker"""
+		# Everything is hostile by default
+		# FIXME: This isn't true. :)
+		return True
+
+	def to_hit(self, victim, weapon):
+		"""The to-hit percentage for us to hit the victim with the
+		weapon (in the Drawing Room, with the Lead Pipe)"""
+		# Work out the relative skills of the attacker and victim
+		x = self.power("attack_skill") + victim.power("defend_skill")
+		# Compute the core function
+		f = x * math.sqrt(x*x - TO_HIT_SCALE * TO_HIT_SCALE)
+		# Shift the function up, and scale so that its range is the
+		# open interval (0, 1)
+		f += 1.0
+		f /= 2.0
+		# Work out how to scale it to lie between the limits we set...
+		scale = self.TO_HIT_MAX - self.TO_HIT_MIN
+		# ... and do so
+		return TO_HIT_MIN + scale * f
+
+	def modify_attack_damage(self, dam, victim, weapon):
+		"""Alter the damage done by us with the given weapon to the
+		given victim"""
+		# Put alignment bonuses to damage in here
+		# Also damage multiplier, etc.
+		return dam
+
+	def modify_damage(self, dam, attacker, weapon):
+		"""Alter the damage done by the given attacker with the given
+		weapon"""
+		# Put armour benefits in here
+		return dam
+
+	def take_damage(self, dam, weapon):
+		"""Actually take damage, from the given weapon. Return True if
+		we died."""
+		# Put insta-kill effects in here
+		self.hp -= dam
+		return self.hp <= 0
+
+	def attacked(self, attacker, weapon):
+		"""We're under attack! AWOOOGA! This is the opportunity to
+		riposte -- e.g. if you're a monster."""
+		pass
+	
+	def attack(self, victim, first_strike=True):
+		"""The core of the combat system. See
+		http://worldofrodney.org/index.php/Dev:CombatModel"""
+
+		if not victim.is_combative(self, first_strike):
+			return False
+
+		# FIXME: Spend the AP
+
+		weapon = self.held_item()
+		weapon.pre_attack(victim)
+		
+		tohit = self.to_hit(victim, weapon)
+		dead = False
+		broken = False
+		if self.lucky(tohit):
+			# We hit
+			# Work out the damage
+			damage = weapon.base_damage_to(victim)
+			damage = self.modify_attack_damage(damage, victim, weapon)
+			damage = victim.modify_damage(damage, self, weapon)
+			# Do the damage
+			dead = victim.take_damage(damage, self, weapon)
+			# Check whether the weapon has broken
+			broken = weapon.weapon_break(self, victim)
+		else:
+			# We missed
+			weapon.miss_actor(self, victim)
+
+		# Has the victim died?
+		if not (dead or victim.hp <= 0):
+			if first_strike:
+				# Give them an opportunity to riposte
+				victim.attacked(self, weapon)
