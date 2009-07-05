@@ -6,39 +6,67 @@ import os
 import re
 import Image
 import ImageDraw
-#from mod_python import apache
+from mod_python import apache
 
-TERRAIN_DIR=os.path.join('server_root','img','terrain')
+#can't assign the full terrain directory until we have the "wor.root_path" PythonOption, accessable from the request object.
+TERRAIN_DIR=''
 
-#First shot at a handler will only take on the <server>/images/terrain/thingy.png requests, and components[0] should be 'terrain'
-def image_handler(req,components):
-	print 'image_handler entered!  '+req+'   '+components
-	if components[0] != 'terrain':
+#First shot at a handler will only take on the <server>/images/terrain/thingy.png requests
+def image_handler(req):
+	pyOpts=req.get_options()
+	global TERRAIN_DIR
+	TERRAIN_DIR=os.path.join(pyOpts['wor.root_path'],'server_root','img','terrain')
+	components = req.uri.split('/')
+	sys.stderr.write( 'image_handler entered!  URL components:'+str(components)+'  TERRAIN_DIR:'+TERRAIN_DIR+'\n')
+	sys.stderr.flush()
+	if components.pop(0) != '':
+		# No leading slash -- something's screwy
+		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
+		req.write("No leading slash on request for URL '"+req.uri+"'")
+		return apache.OK
+
+	if components.pop(0) != 'img':
+		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
+		req.write("Incorrect path prefix on request for URL '"+req.uri+"'")
+		return apache.OK
+		
+	if components.pop(0) != 'terrain':
 		req.status = apache.HTTP_NOT_FOUND
 		req.write('Image: image group not handled')
 		return apache.OK
-	terrain_file=components[1]
+	terrain_file=components.pop(0)
+	
+	sys.stderr.write( 'file requested: '+terrain_file+'\n')
+	sys.stderr.flush()
 	
 	#if it's already there (and/or somebody's just asking for a base file), give it to 'em.
-	if os.path.isfile(terrain_file):
-		req.sendfile(components[1])
+	if os.path.isfile(os.path.join(TERRAIN_DIR,terrain_file)):
+		sys.stderr.write( 'just sending base file: '+terrain_file+'\n')
+		sys.stderr.flush()
+		req.sendfile(os.path.join(TERRAIN_DIR,terrain_file))
 		return apache.OK
 		
+	sys.stderr.write( 'didn\'t find file: '+terrain_file+'\n')
+	sys.stderr.flush()
+	
 	#generate the file.  For now, we'll only hand out completely-rendered files (plus any already-existing file).  Only open up the lower functions if there turns out to be some good reason for it.
 	#format: render-T1-terrain1.terrain2.terrain3-T2-terrain4.terrain5.terrain6-B-border-<F or B>.png for corners
 	#format: render-T-terrain1.terrain2.terrainN-B1-border1-B2-border2.png for hex body
 	#Many people, when looking at a problem, say 'Oh, I'll use regular expressions.'  Now they have two problems.  Hey, look!  I have two problems!  Hm.  Slightly-degenerate regex there, but fortunately filenames aren't insanely long, and the lazy search should take care of most of the CPU cycles.
-	if not re.match('render-T1-[^.]+?(\\.[^.]+?)*?-T2-[^.]+?(\\.[^.]+?)*?-B-[^.]+-[FB]\\.png|render-T-[^.]+?(\\.[^.]+?)*?-B1-[^.]+?-B2-[^.]+\\.png',terrain_file):
+	if not re.match('render-T1-[^.]*?(\\.[^.]+?)*?-T2-[^.]*?(\\.[^.]+?)*?-B-[^.]+-[FB]\\.png|render-T-[^.]*?(\\.[^.]+?)*?-B1-[^.]+?-B2-[^.]+\\.png',terrain_file):
 		req.status = apache.HTTP_NOT_FOUND
 		req.write('Image: image likely not found')
 		return apache.OK
 		
 	if terrain_file[:10]=='render-T1-':
-		req.sendfile(render_corner(terrain_file))
+		file=os.path.join(TERRAIN_DIR,render_corner(terrain_file))
+		sys.stderr.write('full OS path to rendered file:'+file+'\n')
+		sys.stderr.flush()
+		req.sendfile(file)
 		return apache.OK
 		
 	elif terrain_file[:9]=='render-T-':
-		req.sendfile(render_body(terrain_file))
+		req.sendfile(os.path.join(TERRAIN_DIR,render_body(terrain_file)))
 		return apache.OK
 	
 	else:
@@ -67,8 +95,9 @@ def render_body(terrain_file):
 	b2_loc=terrain_file.find('-B2-')
 	left_border=terrain_file[b1_loc+4:b2_loc]
 	end_loc=terrain_file.find('.png')
-	right_border=terrain_file[b2_loc+3:end_loc-2]
-	
+	right_border=terrain_file[b2_loc+4:end_loc]
+	sys.stderr.write('render components for render_body: '+location+'  '+left_border+'   '+right_border+'\n')
+	sys.stderr.flush()
 	return create_final_body(location,left_border,right_border)
 
 
@@ -85,6 +114,8 @@ def get_location_piece(stack,part):
 			file_name+='.'
 		file_name+=loc
 	file_name+='_'+part+'.png'
+	sys.stderr.write('get_location_piece filename: '+file_name+'\n')
+	sys.stderr.flush()
 	if not os.path.isfile(os.path.join(TERRAIN_DIR,file_name)):
 		terrain=Image.new("RGBA",(1,1))
 		for loc in stack:
@@ -225,9 +256,9 @@ def split_border(border):
 def create_final_body(terr_code, left_border, right_border):
 	file_name="render-T-"+terr_code+"-B1-"+left_border+"-B2-"+right_border+".png"
 	if (not os.path.isfile(os.path.join(TERRAIN_DIR,file_name))):
-		terr=Image.open(os.path.join(TERRAIN_DIR,get_location_piece(terr_code,"M")))
+		terr=Image.open(os.path.join(TERRAIN_DIR,get_location_piece(terr_code.split('.'),"M")))
 		left=Image.open(os.path.join(TERRAIN_DIR,get_border(left_border,'L')))
-		right=Image.open(os.path.join(TERRAIN_DIR,get_border(left_border,'R')))
+		right=Image.open(os.path.join(TERRAIN_DIR,get_border(right_border,'R')))
 		largest=None
 		images=[terr,left,right]
 		for i in images:
