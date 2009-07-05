@@ -159,3 +159,25 @@ class Item(SerObject):
 		   an aggregate, the split instance should be returned.  If 
 		   not, None will be returned"""
 		return None
+
+
+	####
+	# Combat functions: Move this to a separate mix-in class?
+	def pre_attack(self, victim):
+		"""Called before any attack happens"""
+		pass
+
+	def base_damage_to(self, victim):
+		"""Return the base damage of this weapon"""
+		return self.damage
+
+	def weapon_break(self, user, victim):
+		"""Test for breakage after hitting someone. Return True if
+		we've broken."""
+		broken = user.unlucky(self.break_profile(life))
+		self.uses += 1
+		return broken
+
+	def miss_actor(self, user, victim):
+		"""What to do if we missed the victim"""
+		pass
