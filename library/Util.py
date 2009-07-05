@@ -14,19 +14,13 @@ def render_info(info, req, prefix='', indent=0):
 			value = str(v).replace('\n', '\n ')
 			req.write(fmt % (key, value))
 
-def render_equip(info, req):
-	"""Render a table of data in info into the request object"""
+def render_table(info, req):
+	"""Render a table of data into the request object"""
 	for item in info:
-		row = item[0] + ":" + str(item[1]) + ":" + str(item[2]) + ":" + item[3]
-		req.write(row + "\n")
-
-def render_messages(info, req):
-	"""Render a table of messages into the request object"""
-	# FIXME: Merge this function and the previous one into a single
-	# render_table() function
-	for msg in info:
-		text = msg[2].replace('\n', '\n ')
-		req.write(str(msg[0]) + ":" + msg[1] + ":" + text + "\n")
+		# Make the input "safe" for rendering
+		data = [ str(x).replace('\n', '\n ') for x in item ]
+		# Join it up into table format
+		req.write(':'.join(data) + '\n')
 
 def info_key_length(info):
 	"""Get the maximum key length of the given info dictionary"""

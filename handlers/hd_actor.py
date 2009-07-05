@@ -55,11 +55,11 @@ def actor_handler(req, target, components):
 	elif components[0] == 'inventory':
 		# Inventory
 		info = actor.inventory.context_get_equip()
-		Util.render_equip(info, req)
+		Util.render_table(info, req)
 	elif components[0] == 'equipment':
 		# Equipment
 		info = actor.equipment.context_get_equip()
-		Util.render_equip(info, req)
+		Util.render_table(info, req)
 	elif components[0] == 'log':
 		# Actor logs
 		if 'X-WoR-Messages-Since' in req.headers_in:
@@ -68,7 +68,7 @@ def actor_handler(req, target, components):
 			since = getattr(actor, 'last_action', 0)
 			
 		info = actor.get_messages(since)
-		Util.render_messages(info, req)
+		Util.render_table(info, req)
 	else:
 		return apache.HTTP_NOT_FOUND
 
