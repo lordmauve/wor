@@ -1,6 +1,6 @@
 from AggregateItem import AggregateItem
 
 class GoldPiece(AggregateItem):
-    name = "goldpiece"
+    name = "gold piece"
     damage = 0
 
