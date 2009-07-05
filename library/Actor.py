@@ -47,7 +47,7 @@ class Actor(SerObject):
 
 	def held_item(self):
 		"""Return the item(s) currently held by the actor"""
-		if self['holding'] == None:
+		if getattr(self, 'holding', None) == None:
 			return None
 		return Item.load(self.holding)
 
@@ -72,7 +72,7 @@ class Actor(SerObject):
 		powr = 0
 
 		# Start with intrinsics
-		powr += Util.default(self[name])
+		powr += getattr(self, name, 0)
 
 		# Equipment held
 		held = self.held_item()
@@ -109,8 +109,8 @@ class Actor(SerObject):
 				continue
 			
 			try:
-				v = self[k]
-			except KeyError:
+				v = getattr(self, k)
+			except AttributeError:
 				pass
 			else:
 				if v != None and k not in ret:
