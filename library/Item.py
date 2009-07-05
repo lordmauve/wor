@@ -92,7 +92,7 @@ class Item(SerObject):
 		return self._owner
 
 	def power(self, name):
-		return Util.default(self[name])
+		return getattr(self, name, 0)
 
 	def destroy(self):
 		"""Destroy this item, recycling it if necessary"""
@@ -137,8 +137,8 @@ class Item(SerObject):
 				continue
 			
 			try:
-				v = self[k]
-			except KeyError:
+				v = getattr(self, k)
+			except AttributeError:
 				pass
 			else:
 				if v != None and k not in ret:

@@ -3,15 +3,6 @@
 
 from Logger import log
 
-def default(v, d=0):
-	"""If v is defined, return v. Otherwise, return d."""
-	try:
-		if v != None:
-			return v
-		return d
-	except AttributeError:
-		return d
-
 def render_info(info, req, prefix='', indent=0):
 	"""Recursively render the data in info into the request object"""
 	for k, v in info.iteritems():

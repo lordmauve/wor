@@ -7,9 +7,9 @@ import os
 context = None
 
 # Fake "Player" object to use as an admin context
-class __FakeActor(dict):
+class __FakeActor(object):
 	def __init__(self):
-		self['admin'] = True
+		self.admin = True
 
 ADMIN_CTX = __FakeActor()
 
@@ -30,7 +30,7 @@ def authz_actor(actor):
 	"""Return the degree of data that can be returned w.r.t. the
 	current context."""
 	# Administrators
-	if context['admin']:
+	if getattr(context, 'admin', False):
 		return ADMIN
 
 	if context == actor:
@@ -44,7 +44,7 @@ def authz_actor(actor):
 def authz_location(loc):
 	"""Return the degree of data that can be returned w.r.t. the
 	current context."""
-	if context['admin']:
+	if getattr(context, 'admin', False):
 		return ADMIN
 
 	#if context._id == loc.owner()._id:
@@ -56,7 +56,7 @@ def authz_location(loc):
 	return STRANGER_INVISIBLE
 
 def authz_item(item):
-	if context['admin']:
+	if getattr(context, 'admin', False):
 		return ADMIN
 
 	if context.has_item(item):

@@ -65,9 +65,8 @@ def actor_handler(req, target, components):
 		if 'X-WoR-Messages-Since' in req.headers_in:
 			since = req.headers_in['X-WoR-Messages-Since']
 		else:
-			since = actor['last_action']
-			if since == None:
-				since = 0
+			since = getattr(actor, 'last_action', 0)
+			
 		info = actor.get_messages(since)
 		Util.render_messages(info, req)
 	else:

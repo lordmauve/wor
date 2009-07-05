@@ -116,7 +116,7 @@ class SerObject(object):
 			self._changed = False
 			return
 
-		log.debug("save " + self.ob_type() + str(self._id) + ": changed is " + str(self._changed_props))
+		#log.debug("save " + self.ob_type() + str(self._id) + ": changed is " + str(self._changed_props))
 
 		# The only time pickle() gets called is during save. We set up
 		# for that event by constructing a set of property names that
@@ -278,15 +278,6 @@ class SerObject(object):
 	####
 	# Property access. Not directly related to object serialisation,
 	# but needed by everything.
-	def __getitem__(self, key):
-		"""Used to implement [] subscripting, for string-based
-		property access. Also copes with on-demand loading of
-		properties. Returns None if not found."""
-		if key[0] != '_' and key not in self.__dict__:
-			if not self._demand_load_property(key):
-				self.__dict__[key] = None
-		return self.__dict__[key]
-
 	def __getattribute__(self, key):
 		"""This is called unconditionally on every attribute access.
 		We maintain a list of all the properties that we have already
@@ -346,26 +337,6 @@ class SerObject(object):
 			return True
 		else:
 			return False
-
-	# Yes, these next two are identical. I'm not merging them because
-	# I'm nervous about the precise semantics -HRM
-	def __setitem__(self, key, value):
-		"""Used to set a value via [] subscripting, for string-based
-		property access"""
-		if key[0] != '_':
-			# Get the original value of the attribute
-			old = 0
-			if key in self.__dict__:
-				old = self.__dict__[key]
-			# Set the new value of the attribute
-			self.__dict__[key] = value
-			# Call the triggers
-			self.__call_triggers(key, old, value)
-			self._changed = True
-			self._changed_props.add(key)
-		else:
-			# Set the new value of the attribute
-			self.__dict__[key] = value
 
 	def __setattr__(self, key, value):
 		"""Used to set a value via obj.key = value"""

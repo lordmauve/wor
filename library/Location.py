@@ -200,10 +200,7 @@ class Location(SerObject):
 	####
 	# Basic properties
 	def power(self, name):
-		if hasattr(self, name):
-			return self[name]
-		
-		return 0
+		return getattr(self, name, 0)
 
 
 	def e(self):
