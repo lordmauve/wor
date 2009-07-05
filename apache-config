@@ -34,6 +34,12 @@
 		SetHandler mod_python
 		PythonHandler hd_all::api_handler
 	</Location>
+	<Location /img/terrain>
+		Order deny,allow
+		Allow from all
+		SetHandler mod_python
+		PythonHandler hd_image::image_handler
+	</Location>
 
 	LogLevel warn
 	ErrorLog /var/log/apache2/wor.error.log
