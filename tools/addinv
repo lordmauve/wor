@@ -32,16 +32,16 @@ def add_item(name, item_class_name, count):
     if count > 0:
         item.count = count
 
-    # Now just add the inventory to the player
-    p.inventory.add(item)
-    # TODO: insert something witty here.  If we were REALLY feeling ambitious, 
-    #       we could even have it pick a saying at random from a list 
-    p.message("Your friendly neighbourhood Sourceror appears, gives you an item, and vanishes in a burst of code.", "rodney")
-    p.message("You gain " + str(count) + " " + item_class.name_for(count))
+	# Now just add the inventory to the player
+	p.inventory.add(item)
+	# TODO: insert something witty here.  If we were REALLY feeling ambitious, 
+	#       we could even have it pick a saying at random from a list 
+	p.message("Your friendly neighbourhood Sourceror appears, gives you an item, and vanishes in a burst of code.", "rodney")
+	p.message("You gain " + str(count) + " " + item_class.name_for(count))
 
-    p.save(force = True)
-    GameUtil.flush_cache()
-    DB.commit()
+	GameUtil.save()
+	GameUtil.flush_cache()
+	DB.commit()
     
 try:
 	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?c:', ['help', 'count='])
