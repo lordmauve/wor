@@ -179,22 +179,11 @@ class Location(SerObject):
 		else:
 			fields = [ ]
 
-		for k in fields:
-			if k in ( '_underneath', '_above', 'cache_by_id', 'cache_by_pos' ):
-				continue
-			
-			try:
-				v = getattr(self, k)
-			except AttributeError:
-				pass
-			else:
-				if v != None:
-					if hasattr(v, 'context_get'):
-						ret[k] = v.context_get()
-					else:
-						ret[k] = str(v)
+		for k in ( '_underneath', '_above', 'cache_by_id', 'cache_by_pos' ):
+			if k in fields:
+				fields.delete(k)
 
-		return ret
+		return self.build_context(ret, fields)
 
 
 	####

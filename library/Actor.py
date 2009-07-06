@@ -113,22 +113,10 @@ class Actor(SerObject):
 		else:
 			fields = [ 'name' ]
 
-		for k in fields:
-			if k in ( 'cache_by_id' ):
-				continue
-			
-			try:
-				v = getattr(self, k)
-			except AttributeError:
-				pass
-			else:
-				if v != None and k not in ret:
-					if hasattr(v, 'context_get'):
-						ret[k] = v.context_get()
-					else:
-						ret[k] = str(v)
+		if 'cache_by_id' in fields:
+			fields.delete('cache_by_id')
 
-		return ret
+		return self.build_context(ret, fields)
 
 	####
 	# Administration
