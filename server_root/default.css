@@ -88,6 +88,11 @@ div.msg_type_sound {
 	background-color: #ffc;
 }
 
+div.msg_type_zombie {
+	border-color: #5f0;
+	background-color: #cfe;
+}
+
 span.timestamp {
 	font-style: italic;
 	font-size: 65%;

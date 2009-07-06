@@ -1,3 +1,4 @@
+# coding: utf-8
 ########
 # Player Character
 
@@ -77,6 +78,13 @@ class Player(Actor):
 		self.inventory = ItemContainer(self, "inventory")
 		punch = Punch()
 		self.inventory.add(punch)
+
+	def context_get(self):
+		ret = super(Player, self).context_get()
+		auth = Context.authz_actor(self)
+		fields = [ 'is_zombie' ]
+
+		return self.build_context(ret, fields)
 
 	####
 	# Movement
@@ -159,6 +167,26 @@ class Player(Actor):
 
 	def say_boo(self):
 		"""Test action"""
-		self.message("You say 'Boo!'")
-		self.message(self.name + ": Boo!", "sound")
+		if self.is_zombie():
+			self.message("braaaiiinnnnssss...", "sound")
+		else:
+			self.message("You say 'Boo!'")
+			self.message(self.name + ": Boo!", "sound")
 		self.ap.value -= 1
+
+	####
+	# Event handlers
+	def dead(self):
+		"""Not so much an afterlife, more a kind of après vie."""
+		# Players become zombies for a couple of minutes, go
+		# "mrrrrrrgh!", and then get taken to the necropolis by the
+		# necropolice.
+		self.message("You have died. Have fun as a zombie, until the Necropolice come to take you away.", "zombie")
+		self.message("braaiinnnssss...", "zombie")
+		self.zombie_until = time.time() + 60 * 2
+		self._zombie_trigger = OnLoadZombieTest(self, '_zombie_trigger')
+
+	def is_zombie(self):
+		"""Are we the walking dead?"""
+		z = getattr(self, 'zombie_until', 0)
+		return time.time() < z
