@@ -9,6 +9,7 @@ import pickletools
 import copy
 import psycopg2
 import Util
+import types
 
 ####
 # A serialisable object
@@ -409,3 +410,41 @@ class SerObject(object):
 
 	def ob_type(self):
 		return self.__class__.__name__
+
+	####
+	# REST API
+	def build_context(self, ret, fields):
+		"""Helper function for writing context_get methods. Take the
+		list of fields, and add the corresponding attribute values of
+		this object into the ret hash. If the value of the attribute
+		has a context_get() method of its own, use that. If the value
+		of the attribute is a method, call it (and assume that it has
+		no additional parameters)."""
+		for k in fields:
+			try:
+				# See if the attribute exists in the first place
+				v = getattr(self, k)
+			except AttributeError:
+				# If it doesn't, don't worry
+				pass
+			else:
+				if v == None:
+					pass
+				if k in ret:
+					pass
+
+				if hasattr(v, 'context_get'):
+					# If the attribute is an object that understands
+					# context_get, use that.
+					ret[k] = v.context_get()
+				elif isinstance(v, types.MethodType):
+					# If the attribute is a method, call it (assuming
+					# that it takes no parameters)
+					# Note that it's a bound method, so already has
+					# the implicit self parameter.
+					ret[k] = str(v())
+				else:
+					# Otherwise, just return the data
+					ret[k] = str(v)
+
+		return ret

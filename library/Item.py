@@ -127,27 +127,11 @@ class Item(SerObject):
 		if auth == Context.ADMIN:
 			fields = Context_all_fields(self)
 		elif auth == Context.OWNER:
-			fields = [ 'name', 'damage' ]
-			#ret['description'] = self.description()
+			fields = [ 'name', 'damage', 'description' ]
 		else:
 			fields = [ 'name' ]
 
-		for k in fields:
-			if k in ( 'cache_by_id' ):
-				continue
-			
-			try:
-				v = getattr(self, k)
-			except AttributeError:
-				pass
-			else:
-				if v != None and k not in ret:
-					if hasattr(v, 'context_get'):
-						ret[k] = v.context_get()
-					else:
-						ret[k] = str(v)
-
-		return ret
+		return self.build_context(ret, fields)
 
 	def merge(self, new_item):
 		"""Merge the given item with this item, if possible.  Return 
