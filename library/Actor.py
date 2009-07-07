@@ -114,7 +114,7 @@ class Actor(SerObject):
 			fields = [ 'name' ]
 
 		if 'cache_by_id' in fields:
-			fields.delete('cache_by_id')
+			fields.remove('cache_by_id')
 
 		return self.build_context(ret, fields)
 
