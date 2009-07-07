@@ -304,13 +304,13 @@ class Location(SerObject):
 		for i in range(0, 6):
 			# FIXME: This is awkward -- why are both arrays needed?
 			n = self.local_directions_name[i]
-			l = self.local_directions[i](self)
 			if self.could_go(player, n):
+				l = self.local_directions[i](self)
 				uid = Action.make_id(self, "move_" + n)
 				cost = self.move_cost(player, l)
 				acts[uid] = Action(uid, caption="Move " + n.upper(),
 								   ap=cost,
-								   action=lambda d: player.move_to(self),
+								   action=lambda d: player.move_to(l.pos),
 								   group="move")
 
 	# Who's here?

@@ -96,13 +96,13 @@ class Player(Actor):
 		if isinstance(pos, Location):
 			log.warn("move_to() passed a Location, not a Position")
 			pos = pos.pos
-		self.pos = pos
+		self.position = pos
 
 	def teleport_to(self, pos):
 		if isinstance(pos, Location):
 			log.warn("teleport_to() passed a Location, not a Position")
 			pos = pos.pos
-		self.pos = pos
+		self.position = pos
 
 	####
 	# Actions
