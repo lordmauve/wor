@@ -118,6 +118,7 @@ class SerObject(object):
 			return
 
 		#log.debug("save " + self.ob_type() + str(self._id) + ": changed is " + str(self._changed_props))
+		#log.debug("Full dump: " + str(self.__dict__))
 
 		# The only time pickle() gets called is during save. We set up
 		# for that event by constructing a set of property names that
@@ -259,6 +260,7 @@ class SerObject(object):
 		# first. If it hasn't, something has gone terribly wrong, and
 		# we've probably not been called through self.save().
 		if not hasattr(self, '_pickle'):
+			log.error("Failure in pickle for " + self.ob_type() + " " + str(self._id))
 			# Panic! (See comment above)
 			raise AssertionError()
 
