@@ -6,11 +6,15 @@ import time
 
 from Database import DB
 from Actor import Actor
+from Location import Location
 from ItemContainer import ItemContainer
+
 from Items.Punch import Punch
+
 from Action import Action
 from SimpleTimedCounter import SimpleTimedCounter
 from Position import Position
+
 from Logger import log
 import Util
 import Context
@@ -89,9 +93,15 @@ class Player(Actor):
 	####
 	# Movement
 	def move_to(self, pos):
+		if isinstance(pos, Location):
+			log.warn("move_to() passed a Location, not a Position")
+			pos = pos.pos
 		self.pos = pos
 
 	def teleport_to(self, pos):
+		if isinstance(pos, Location):
+			log.warn("teleport_to() passed a Location, not a Position")
+			pos = pos.pos
 		self.pos = pos
 
 	####
