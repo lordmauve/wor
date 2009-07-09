@@ -149,6 +149,9 @@ class ItemContainer(OnLoad):
 
 		# Since items have a count of 1 by default, we can just 
 		# iterate through all of them, regardless of the 
+		#
+		# TODO: Figure out if there's a way to internalize this in 
+		#       Item
 		if itemclass.aggregate:
 			# Note that we can only have a single aggregate of a 
 			# given type per container
@@ -198,14 +201,19 @@ class ItemContainer(OnLoad):
 		self._changes.add(item._id)
 		
 	
-	def split(self, item_id, num_items):
+	def split(self, item, num_items):
 		"""Splits the given number of items from this item.  If this is 
 		   an aggregate, the split instance should be returned.  If 
 		   not, None will be returned"""
-		# Get the item in question.  
-		item = SerObject.load(item_id)
 		return item.split(num_items)
 
+	def split_or_remove(self, item, num_items):
+		split_item = self.split(item, num_items)
+		if split_item == None:
+			self.remove(item)
+		
+		return split_item
+	
 	def __get_first_item(self, itype):
 		item_id = iter(self._item_types[itype]).next()
 		item_class = Item.get_class(itype)

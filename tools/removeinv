@@ -1,0 +1,80 @@
+#!/usr/bin/python
+
+######
+# Remove items from a player's inventory
+
+import sys
+import getopt
+
+from Player import Player
+from Item import Item
+from Database import DB
+import GameUtil
+
+def usage():
+    print """Usage: removeinv [options] <player_name> <item_class>
+Options:
+\t-c, --count=<count>\tNumber of items to remove.  1 by default.
+\t-t, --target=<target container ID>\tTransfer the item(s) to the given container, instead of destroying them.
+\t-h, --help\t\tDisplay this message
+"""
+
+def remove_item(name, item_class_name, count, target_id):
+    """Removes count instances of the given item from the given player's inventory.  
+       Defined as such to simplify refactoring into a UI-driven class"""
+
+    # Get the player
+    p = Player.load_by_name(name)
+
+    # Try to split or remove the item.
+    item = p.inventory[item_class_name]           
+    split_item = p.inventory.split_or_remove(item, count)
+    
+    # Now just use item to hold the item we need to manipulate further
+    if split_item != None:
+        item = split_item
+        
+    # If a target was specified, load it and add the item to it
+    if target_id != 0: 
+        target_container = ItemContainer.load(target_id)
+        target_container.add(item)
+    else:
+        item.destroy()
+            
+    # TODO: insert something witty here.  If we were REALLY feeling ambitious, 
+    #       we could even have it pick a saying at random from a list 
+    p.message("A Sourceror appears and smacks you about the head and shoulders.  When your vision clears, the Sourceror (and one of your items) has vanished.", "rodney")
+    item_class = Item.get_class(item_class_name)
+    p.message("You lose " + str(count) + " " + item_class.name_for(count))
+
+    GameUtil.save()
+    GameUtil.flush_cache()
+    DB.commit()
+
+try:
+    optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?ct:', ['help', 'count=', 'target='])
+except getopt.GetoptError, err:
+    print str(err)
+    usage()
+    sys.exit(1)
+
+count = 1
+target_id = 0
+
+for opt, arg in optlist:
+    if opt in ('-h', '-?', '--help'):
+        usage()
+        sys.exit(0)
+    elif opt in ('-c', '--count'):
+        count = int(arg)
+    elif opt in ('-t', '--target'):
+        target_id = int(arg)
+    else:
+        usage()
+        sys.exit(0)
+
+if len(args) != 2:
+    usage()
+    sys.exit(1)
+
+remove_item(args[0], args[1], count, target_id)
