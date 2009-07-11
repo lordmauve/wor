@@ -6,7 +6,8 @@ import Image
 import ImageDraw
 import math
 
-SCALE=10
+import common
+
 PXSZ=2
 
 def usage():
@@ -16,6 +17,7 @@ Options:
 \t-f, --file=<name>\tPlot data from <name>
 \t-s, --scale=<s>\t\tUse a scale of <s>
 \t-p, --pixels=<n>\t\tDraw blocks <n> pixels wide
+\t-h, --hex\t\tRestrict to a hexagon
 
 File Options:
 \t-0, --zero\t\tZero value in data is zero in output;
@@ -69,7 +71,7 @@ for o, a in optlist:
 	elif o in ('-m', '--mask'):
 		fdata['mask'] = [float(x)/256.0 for x in a.split(',')]
 	elif o in ('-s', '--scale'):
-		SCALE = int(a)
+		common.SCALE = int(a)
 	elif o in ('-p', '--pixels'):
 		PXSZ = int(a)
 	elif o in ('-l', '--log'):
@@ -81,7 +83,7 @@ for o, a in optlist:
 if len(fdata) > 0:
 	files.append(fdata)
 
-MAX_X = (1<<SCALE)+1
+MAX_X = (1<<common.SCALE)+1
 
 # First, loop through all of the files, get coordinate ranges for all
 # inputs
@@ -121,6 +123,10 @@ for f in files:
 	params = f['data'].next()
 	print "Scaled", f['scale'](f['min']), f['scale'](f['max'])
 
+xz = int(round(MAX_X/3.0))
+yz = int(round(MAX_X/3.0))
+r = int(round(MAX_X/3.0))
+
 x = 0
 try:
 	while True:
@@ -129,6 +135,10 @@ try:
 			lines.append(f['data'].next().split())
 		y = 0
 		for data_slice in zip(*lines):
+			rad = max(abs(x-xz), abs(y-yz), abs(x+y-xz-yz))
+			if rad >= r:
+				y += 1
+				continue
 			rgb = [0.0, 0.0, 0.0]
 			
 			for v, f in zip(data_slice, files):

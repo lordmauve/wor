@@ -4,7 +4,8 @@ import sys
 from random import randrange, random, seed
 import getopt
 
-SCALE=10
+import common
+
 NCRATONS=30
 
 def usage():
@@ -28,14 +29,14 @@ for o, a in optlist:
 		usage()
 		sys.exit(0)
 	elif o in ('-s', '--scale'):
-		SCALE=int(a)
+		common.SCALE=int(a)
 	elif o in ('-n', '--number'):
 		NCRATONS=int(a)
 	else:
 		usage()
 		sys.exit(1)
 
-MAX_X=(1<<SCALE)+1
+MAX_X=(1<<common.SCALE)+1
 
 print MAX_X
 while NCRATONS > 0:

@@ -5,8 +5,9 @@ from random import randrange, random, seed
 import getopt
 import math
 
+import common
+
 FLIP=False
-SCALE=10
 SUBSET=1
 
 def usage():
@@ -36,7 +37,7 @@ for o, a in optlist:
 		usage()
 		sys.exit(0)
 	elif o in ('-s', '--scale'):
-		SCALE = int(a)
+		common.SCALE = int(a)
 	elif o in ('-b', '--blend'):
 		blend = True
 	elif o in ('-f', '--flip'):
@@ -59,8 +60,8 @@ for o, a in optlist:
 		usage()
 		sys.exit(1)
 
-MAX_X=(1<<SCALE)+1
-CRAGGINESS = 128.0 / (1<<SCALE)
+MAX_X=(1<<common.SCALE)+1
+CRAGGINESS = 128.0 / (1<<common.SCALE)
 
 if len(args) > 0:
 	usage()
@@ -77,44 +78,19 @@ def transform_coords(x, y, f):
 	y += f['oy']
 	return (x, y)
 
-def load_to_array(array, f):
-	ifile = open(f['file'], 'r')
-
-	# Read file parameters: size
-	bits = ifile.next().split(' ')
-	size = int(bits[0])
-	# ... and stride
-	stride = 1
-	if len(bits) > 1:
-		stride = int(bits[1])
-	sys.stderr.write(f['file'] + " stride = " + str(stride) + "\n")
-
-	# Loop through the file and read its parameters
-	x = 0
-	for line in ifile:
-		elts = line.split()
-		y = 0
-		for e in elts:
-			tx, ty = transform_coords(x, y, f)
-			if 0 <= tx <= MAX_X and 0 <= ty <= MAX_X-x:
-				array[tx][ty] = e
-			y += stride
-		x += stride
-	ifile.close()
-
 sys.stderr.write("Reading files\n")
 
 # Load the cragginess files
 for f in cfiles:
-	load_to_array(cragginess, f)
+	common.load_to_array(cragginess, f, transform_coords)
 
 # Load the skeleton files
 for f in sfiles:
-	load_to_array(height, f)
+	common.load_to_array(height, f, transform_coords)
 
 # Load the height files
 for f in hfiles:
-	load_to_array(height, f)
+	common.load_to_array(height, f, transform_coords)
 
 # Force everything to the right datatype
 for x in range(0, MAX_X):
@@ -125,7 +101,7 @@ for x in range(0, MAX_X):
 			cragginess[x][y] = float(cragginess[x][y])
 
 # Now do the midpoint division algorithm
-stride = 1 << SCALE
+stride = 1 << common.SCALE
 while stride >= SUBSET:
 	sys.stderr.write("Stride %d\n" % (stride))
 	xbit = True

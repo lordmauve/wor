@@ -4,9 +4,10 @@ import sys
 from random import randrange, random, seed
 import getopt
 
+import common
+
 FLIP=False
-SCALE=10
-MAX_X=(1<<SCALE)+1
+MAX_X=(1<<common.SCALE)+1
 
 def usage():
 	print """Usage: loc-cratons [options] [craton-options] -i <craton-file>

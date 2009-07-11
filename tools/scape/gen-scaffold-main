@@ -5,18 +5,19 @@ from random import randrange, random, seed
 import getopt
 import math
 
-SCALE=10
-PRESEED_SCALE=6
+import common
+
+PRESEED_SCALE=common.SCALE-4
 MAX_H=128
 
 def usage():
 	print """Usage: gen-scaffold [options]
 Options:
-\t-s, --scale=<n>\t\tScale to generate (2^n+1 hexes per side) (10)
-\t-k, --skip=<n>\t\tDistance (scale) between sample points (6)
+\t-s, --scale=<n>\t\tScale to generate (2^n+1 hexes per side) (%d)
+\t-k, --skip=<n>\t\tDistance (scale) between sample points (%d)
 
 Generates a set of fixed points to guide the construction of a fractal
-landscape."""
+landscape.""" % (common.SCALE, PRESEED_SCALE)
 
 try:
 	optlist, args = getopt.getopt(sys.argv[1:], 'h?s:k:', ['help', 'scale=', 'skip='])
@@ -30,24 +31,25 @@ for o, a in optlist:
 		usage()
 		sys.exit(0)
 	elif o in ('-s', '--scale'):
-		SCALE=int(a)
+		common.SCALE=int(a)
 	elif o in ('-k', '--skip'):
 		PRESEED_SCALE=int(a)
 	else:
 		usage()
 		sys.exit(1)
 
-MAX_X=(1<<SCALE)+1
+MAX_X=(1<<common.SCALE)+1
 PRESEED=1<<PRESEED_SCALE
 
 print MAX_X, PRESEED
 for x in range(0, MAX_X, PRESEED):
 	for y in range(0, MAX_X-x, PRESEED):
-		if y <= MAX_X/4:
-			print -3,
-		elif MAX_X/4 < y <= MAX_X*3/2:
-			shift = 1.0-math.fabs((y-MAX_X/2)/(MAX_X/4))
-			print randrange(0, int(MAX_H/3.0))+int((MAX_H*2.0/3.0)*shift),
+		if y <= MAX_X/6:
+			print int(10*(y - MAX_X/6)*(6.0/MAX_X)),
+		elif MAX_X/6 < y <= MAX_X/3:
+			offset = 1.0 - math.fabs(y-MAX_X/4.0)/(MAX_X/12.0)
+			offset *= MAX_H*0.6666
+			print randrange(int(offset), int(offset + MAX_H/3.0)),
 		else:
 			print randrange(0, int(MAX_H/3.0)),
 
