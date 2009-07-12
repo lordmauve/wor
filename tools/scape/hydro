@@ -1,0 +1,217 @@
+#!/usr/bin/python
+
+import sys
+from random import randrange, random, seed
+import getopt
+import math
+
+import common
+
+FLIP=False
+SUBSET=1
+
+def usage():
+	print """Usage: hydro [options] { [patch-options] -H <height-file> }
+Options:
+\t-s, --scale=<n>\t\tUse scale of <n> (10)
+\t-b, --blend\t\tBlend more smoothly
+\t-r, --height-out=<file>\t\tWrite resultant height field to <file>
+\t-w, --water-out=<file>\t\tWrite resultant water levels to <file>
+\t-t, --total-out=<file>\t\tWrite resultant cumulative water levels to <file>
+\t-R, --rainfall=<n>\t\tUse <n> units of rainfall each time
+\t-I, --iterations=<n>\t\tRun for <n> iterations of rainfall
+Patch-Options:
+\t-f, --flip\t\tTransform input by flipping about hypotenuse
+\t-o, --offset=<x>,<y>\tTranslate input file (after flipping)"""
+
+try:
+	optlist, args = getopt.gnu_getopt(
+		sys.argv[1:],
+		'h?fo:s:H:r:w:t:R:I:',
+		['help', 'scale=', 'flip', 'offset=', 'height=',
+		 'height-out=', 'water-out=', 'total-out=',
+		 'rainfall=', 'iterations='])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+blend = False
+fopts = { 'ox': 0, 'oy': 0 }
+hfiles = []
+hout = None
+wout = None
+tout = None
+rain_unit = 2.0
+iterations = 10
+
+for o, a in optlist:
+	if o in ('-h', '--help', '-?'):
+		usage()
+		sys.exit(0)
+	elif o in ('-s', '--scale'):
+		common.SCALE = int(a)
+	elif o in ('-f', '--flip'):
+		fopts['flip'] = True
+	elif o in ('-o', '--offset'):
+		fopts['ox'], fopts['oy'] = [ int(v) for v in a.split(',') ]
+	elif o in ('-H', '--height'):
+		fopts['file'] = a
+		hfiles.append(fopts)
+		fopts = { 'ox': 0, 'oy': 0 }
+	elif o in ('-r', '--height-out'):
+		hout = a
+	elif o in ('-w', '--water-out'):
+		wout = a
+	elif o in ('-t', '--total-out'):
+		tout = a
+	elif o in ('-R', '--rainfall'):
+		rain_unit = float(a)
+	elif o in ('-I', '--iterations'):
+		iterations = int(a)
+	else:
+		usage()
+		sys.exit(1)
+
+MAX_X=(1<<common.SCALE)+1
+
+if len(args) > 0:
+	usage()
+	sys.exit(1)
+
+if len(hfiles) <= 0:
+	usage()
+	sys.exit(1)
+
+height = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+newh   = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+water  = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+neww   = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+
+def transform_coords(x, y, f):
+	if 'flip' in f and f['flip']:
+		x = MAX_X-x
+		y = MAX_X-y
+	x += f['ox']
+	y += f['oy']
+	return (x, y)
+
+def get_downhill(x, y, height, water):
+	"""Return the set of hexes which are downhill of here"""
+	ret = []
+	thh = height[x][y] + water[x][y]
+	if x > 0:
+		if height[x-1][y] + water[x-1][y] < thh:
+			ret.append((x-1, y))
+		if height[x-1][y+1] + water[x-1][y+1] < thh:
+			ret.append((x-1, y+1))
+	if y > 0:
+		if height[x][y-1] + water[x][y-1] < thh:
+			ret.append((x, y-1))
+		if height[x+1][y-1] + water[x+1][y-1] < thh:
+			ret.append((x+1, y-1))
+	if x+y < MAX_X-1:
+		if height[x][y+1] + water[x][y+1] < thh:
+			ret.append((x, y+1))
+		if height[x+1][y] + water[x+1][y] < thh:
+			ret.append((x+1, y))
+	return ret
+
+def erosion(w, h0, h1):
+	"""How much erosion to do, with w water flowing from a height
+	h0 to h1"""
+	return min(w, abs(h0-h1))
+
+def flow(fx, fy, tx, ty, amount, height, water, newh, neww):
+	"""Flow amount of water from fx,fy to tx,ty. Handle erosion, too"""
+	neww[tx][ty] += amount
+	soil = erosion(amount, height[tx][ty], height[fx][fy])
+	if height[tx][ty] > height[fx][fy]:
+		newh[tx][ty] -= soil
+		newh[fx][fy] += soil
+	else:
+		newh[fx][fy] -= soil
+		newh[tx][ty] += soil
+
+def flow_step(height, water, newh, neww):
+	"""Compute a step of the water flow algorithm: water flows
+	downhill, using the level of terrain plus water to decide which
+	directions are downhill. Movements of water erode the higher of
+	the two hexes of underlying terrain."""
+
+	# Initialise the new arrays
+	for x in range(0, MAX_X):
+		for y in range(0, MAX_X-x):
+			newh[x][y] = height[x][y]
+			neww[x][y] = 0.0
+
+	total = 0.0
+			
+	# Flow the water
+	for x in range(0, MAX_X):
+		for y in range(0, MAX_X-x):
+			downhill = get_downhill(x, y, height, water)
+			tot_down = 0.0
+			thh = height[x][y] + water[x][y]
+			# Work out how much "down" there is, the mean height,
+			# and how much water we might shift elsewhere
+			for c in downhill:
+				tx, ty = c
+				tot_down += thh - (height[tx][ty] + water[tx][ty])
+			mean_height = thh - tot_down / (len(downhill)+1)
+			water_out = max(min(thh - mean_height, water[x][y]), 0)
+			
+			# Divide the flows between the destinations
+			for c in downhill:
+				tx, ty = c
+				diff = mean_height - (height[tx][ty] + water[tx][ty])
+				amount = max(0, water_out * diff / tot_down)
+				flow(x, y, tx, ty, amount, height, water, newh, neww)
+				total += amount
+				water_out -= amount
+			neww[x][y] += water_out
+
+	print "Amount flowed:", total
+	return total
+
+def rainfall(arr):
+	for x in range(0, MAX_X):
+		for y in range(0, MAX_X-x):
+			arr[x][y] += rain_unit
+
+sys.stderr.write("Reading files\n")
+
+# Load the height files
+for f in hfiles:
+	common.load_to_array(height, f, transform_coords)
+
+# Force everything to the right datatype
+for x in range(0, MAX_X):
+	for y in range(0, MAX_X-x):
+		if height[x][y] != None:
+			height[x][y] = int(float(height[x][y]))
+		water[x][y] = 0.0
+
+# Run some iterations of the algorithm
+while iterations > 0:
+	rainfall(water)
+	total = 300
+	while total > 200:
+		total = flow_step(height, water, newh, neww)
+		total = flow_step(newh, neww, height, water)
+	iterations -= 1
+
+sys.stderr.write("Writing file\n")
+
+def write_file(name, array):
+	if name != None:
+		f = open(name, "w")
+		f.write(str(MAX_X) + "\n")
+		for x in range(0, MAX_X, SUBSET):
+			for y in range(0, MAX_X-x, SUBSET):
+				f.write(str(array[x][y]) + " ")
+			f.write("\n")	
+
+write_file(hout, newh)
+write_file(wout, neww)
+#write_file(tout, totw)

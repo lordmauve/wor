@@ -6,5 +6,6 @@
 ./gen-scaffold-main >scaffold-main.txt
 ./loc-cratons -i cratons-main.txt >cragginess.txt
 ./loc-fractal -c cragginess.txt -k scaffold-main.txt >height.txt
-./hydro-rivers -H height.txt >rivers.txt
-./hydro-ponds -H height.txt -r rivers.txt >ponds.txt
+./hydro -r new-height.txt -w new-water.txt -H height.txt
+
+./plot -o water.png -f new-water.txt -0 -m 128,128,255
