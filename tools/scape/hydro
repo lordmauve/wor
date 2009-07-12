@@ -83,10 +83,7 @@ if len(hfiles) <= 0:
 	usage()
 	sys.exit(1)
 
-height = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
-newh   = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
-water  = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
-neww   = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+#######################
 
 def transform_coords(x, y, f):
 	if 'flip' in f and f['flip']:
@@ -179,6 +176,22 @@ def rainfall(arr):
 		for y in range(0, MAX_X-x):
 			arr[x][y] += rain_unit
 
+def write_file(name, array):
+	if name != None:
+		f = open(name, "w")
+		f.write(str(MAX_X) + "\n")
+		for x in range(0, MAX_X, SUBSET):
+			for y in range(0, MAX_X-x, SUBSET):
+				f.write(str(array[x][y]) + " ")
+			f.write("\n")	
+
+################################
+
+height = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+newh   = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+water  = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+neww   = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+
 sys.stderr.write("Reading files\n")
 
 # Load the height files
@@ -193,24 +206,18 @@ for x in range(0, MAX_X):
 		water[x][y] = 0.0
 
 # Run some iterations of the algorithm
+count = 0
 while iterations > 0:
 	rainfall(water)
 	total = 300
 	while total > 200:
 		total = flow_step(height, water, newh, neww)
 		total = flow_step(newh, neww, height, water)
+		count += 1
+		write_file("anim.%03d.txt" % count, water)
 	iterations -= 1
 
 sys.stderr.write("Writing file\n")
-
-def write_file(name, array):
-	if name != None:
-		f = open(name, "w")
-		f.write(str(MAX_X) + "\n")
-		for x in range(0, MAX_X, SUBSET):
-			for y in range(0, MAX_X-x, SUBSET):
-				f.write(str(array[x][y]) + " ")
-			f.write("\n")	
 
 write_file(hout, newh)
 write_file(wout, neww)
