@@ -13,6 +13,9 @@ def load_to_array(array, f, xfm):
 	if len(bits) > 1:
 		stride = int(bits[1])
 	sys.stderr.write(f['file'] + " stride = " + str(stride) + "\n")
+	
+	if array == None:
+		array = [ [ None for y in range(0, size-x) ] for x in range(0, size) ]
 
 	# Loop through the file and read its parameters
 	x = 0
@@ -21,8 +24,10 @@ def load_to_array(array, f, xfm):
 		y = 0
 		for e in elts:
 			tx, ty = xfm(x, y, f)
-			if 0 <= tx <= (1<<SCALE) and 0 <= ty <= (1<<SCALE)-x:
+			if 0 <= tx < size and 0 <= ty < size-x:
 				array[tx][ty] = e
 			y += stride
 		x += stride
 	ifile.close()
+
+	return (size, stride, array)
