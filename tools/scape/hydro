@@ -226,7 +226,8 @@ while iterations > 0:
 		total = flow_step(height, water, newh, neww)
 		total = flow_step(newh, neww, height, water)
 		count += 1
-		write_file("anim.%03d.txt" % count, water)
+		write_file("water.%03d.txt" % count, water)
+		write_file("height.%03d.txt" % count, height)
 	iterations -= 1
 
 sys.stderr.write("Writing file\n")
