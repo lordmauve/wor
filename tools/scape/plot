@@ -24,6 +24,7 @@ File Options:
 \t\t\t\t  scale maximum to fit
 \t-e, --even\t\tZero value in data is centre in output;
 \t\t\t\t  scale data to fit
+\t    --min-max=<n>,<m>\t\tScale data to min/max range of [<n>, <m>)
 
 \t-t, --threshold=<v>\tValues below <v> are plotted as a
 \t\t\t\t  different colour
@@ -37,7 +38,7 @@ Plots one or more input files.
 """
 
 try:
-	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:m:s:p:l', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'mask=', 'scale=', 'pixels=', 'log'])
+	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:m:s:p:l', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'mask=', 'scale=', 'pixels=', 'log', '=min-max'])
 except getopt.GetoptError, err:
 	print str(err)
 	usage()
@@ -76,6 +77,10 @@ for o, a in optlist:
 		PXSZ = int(a)
 	elif o in ('-l', '--log'):
 		fdata['log'] = True
+	elif o in ('--min-max'):
+		tmp = a.split(',')
+		fdata['min'] = float(tmp[0])
+		fdata['max'] = float(tmp[1])
 	else:
 		usage()
 		sys.exit(1)
@@ -107,10 +112,12 @@ for f in files:
 	if 'even' in f and f['even']:
 		maxv = max(-minv, maxv)
 		minv = -maxv
-
-	f['min'] = minv
-	f['max'] = maxv
-	rng = float(maxv-minv)
+	if 'min' not in f:
+		f['min'] = minv
+	if 'max' not in f:
+		f['max'] = maxv
+		
+	rng = float(f['max']-f['min'])
 	f['scale'] = lambda x: (x-f['min']) / float(f['max']-f['min'])
 	print f['name'], "min =", f['min'], "max =", f['max']
 
