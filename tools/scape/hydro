@@ -14,7 +14,6 @@ def usage():
 	print """Usage: hydro [options] { [patch-options] -H <height-file> }
 Options:
 \t-s, --scale=<n>\t\tUse scale of <n> (10)
-\t-b, --blend\t\tBlend more smoothly
 \t-r, --height-out=<file>\t\tWrite resultant height field to <file>
 \t-w, --water-out=<file>\t\tWrite resultant water levels to <file>
 \t-t, --total-out=<file>\t\tWrite resultant cumulative water levels to <file>
@@ -117,7 +116,7 @@ def get_downhill(x, y, height, water):
 def erosion(w, h0, h1):
 	"""How much erosion to do, with w water flowing from a height
 	h0 to h1"""
-	return min(w, abs(h0-h1))
+	return min(w, abs(h0-h1)) / 20.0
 
 def flow(fx, fy, tx, ty, amount, height, water, newh, neww):
 	"""Flow amount of water from fx,fy to tx,ty. Handle erosion, too"""
@@ -140,10 +139,11 @@ def flow_step(height, water, newh, neww):
 	for x in range(0, MAX_X):
 		for y in range(0, MAX_X-x):
 			newh[x][y] = height[x][y]
-			neww[x][y] = 0.0
+			neww[x][y] = water[x][y]
 
+	# Count the total amount of water moving in this iteration
 	total = 0.0
-			
+
 	# Flow the water
 	for x in range(0, MAX_X):
 		for y in range(0, MAX_X-x):
@@ -166,24 +166,36 @@ def flow_step(height, water, newh, neww):
 				flow(x, y, tx, ty, amount, height, water, newh, neww)
 				total += amount
 				water_out -= amount
-			neww[x][y] += water_out
+				neww[x][y] -= amount
 
 	print "Amount flowed:", total
+
+	complete_water = 0.0
+	for x in range(0, MAX_X):
+		for y in range(0, MAX_X-x):
+			complete_water += water[x][y]
+	print "Total water holdings:", complete_water
+	
 	return total
 
 def rainfall(arr):
+	"""Drop water on the landscape"""
 	for x in range(0, MAX_X):
 		for y in range(0, MAX_X-x):
 			arr[x][y] += rain_unit
 
 def write_file(name, array):
-	if name != None:
+	if name == '-':
+		f = sys.stdout
+	elif name != None:
 		f = open(name, "w")
+
+	if name != None:
 		f.write(str(MAX_X) + "\n")
 		for x in range(0, MAX_X, SUBSET):
 			for y in range(0, MAX_X-x, SUBSET):
 				f.write(str(array[x][y]) + " ")
-			f.write("\n")	
+			f.write("\n")
 
 ################################
 
@@ -209,8 +221,8 @@ for x in range(0, MAX_X):
 count = 0
 while iterations > 0:
 	rainfall(water)
-	total = 300
-	while total > 200:
+	total = 1e6
+	while total > 2000:
 		total = flow_step(height, water, newh, neww)
 		total = flow_step(newh, neww, height, water)
 		count += 1
