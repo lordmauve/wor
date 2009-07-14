@@ -47,5 +47,5 @@ for n in args:
 			minv = min(minv, v)
 			maxv = max(maxv, v)
 			
-print "minv=" + str(minv)
-print "maxv=" + str(maxv)
+print "minv=" + str(int(minv))
+print "maxv=" + str(int(maxv)+1)
