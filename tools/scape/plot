@@ -17,7 +17,7 @@ Options:
 \t-f, --file=<name>\tPlot data from <name>
 \t-s, --scale=<s>\t\tUse a scale of <s>
 \t-p, --pixels=<n>\t\tDraw blocks <n> pixels wide
-\t-h, --hex\t\tRestrict to a hexagon
+\t-H, --hex\t\tRestrict to a hexagon
 
 File Options:
 \t-0, --zero\t\tZero value in data is zero in output;
@@ -38,7 +38,7 @@ Plots one or more input files.
 """
 
 try:
-	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:m:s:p:l', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'mask=', 'scale=', 'pixels=', 'log', '=min-max'])
+	optlist, args = getopt.getopt(sys.argv[1:], 'h?o:f:0et:c:m:s:p:lH', ['help', 'output=', 'file=', 'zero', 'even', 'threshold=', 'threshold-colour=', 'mask=', 'scale=', 'pixels=', 'log', 'min-max=', 'hex'])
 except getopt.GetoptError, err:
 	print str(err)
 	usage()
@@ -49,6 +49,7 @@ files = []
 fdata_base = { 'mask': (255.0/256.0,255.0/256.0,255.0/256.0),
 			   'colour': (0.0, 0.0, 255.0) }
 fdata = dict(fdata_base)
+hex_restrict = False
 
 for o, a in optlist:
 	if o in ('-h', '--help', '-?'):
@@ -77,6 +78,8 @@ for o, a in optlist:
 		PXSZ = int(a)
 	elif o in ('-l', '--log'):
 		fdata['log'] = True
+	elif o in ('-H', '--hex'):
+		hex_restrict = True
 	elif o in ('--min-max'):
 		tmp = a.split(',')
 		fdata['min'] = float(tmp[0])
@@ -102,7 +105,7 @@ for f in files:
 		for e in elts:
 			e = float(e)
 			if 'log' in f and f['log']:
-				e = math.log(e)
+				e = math.log(e+1)
 			minv = min(minv, e)
 			maxv = max(maxv, e)
 	data.close()
@@ -114,8 +117,12 @@ for f in files:
 		minv = -maxv
 	if 'min' not in f:
 		f['min'] = minv
+		if 'log' in f and f['log']:
+			f['min'] = math.log(f['min']+1)
 	if 'max' not in f:
 		f['max'] = maxv
+		if 'log' in f and f['log']:
+			f['max'] = math.log(f['max']+1)
 		
 	rng = float(f['max']-f['min'])
 	f['scale'] = lambda x: (x-f['min']) / float(f['max']-f['min'])
@@ -143,7 +150,7 @@ try:
 		y = 0
 		for data_slice in zip(*lines):
 			rad = max(abs(x-xz), abs(y-yz), abs(x+y-xz-yz))
-			if rad >= r:
+			if hex_restrict and rad >= r:
 				y += 1
 				continue
 			rgb = [0.0, 0.0, 0.0]
@@ -156,7 +163,7 @@ try:
 					rgb[2] += f['colour'][2]
 				else:
 					if 'log' in f and f['log']:
-						v = math.log(v)
+						v = math.log(v+1)
 					scaled = f['scale'](v) * 255.0
 					rgb[0] += scaled * f['mask'][0]
 					rgb[1] += scaled * f['mask'][1]
