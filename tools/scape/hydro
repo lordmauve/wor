@@ -41,8 +41,8 @@ hfiles = []
 hout = None
 wout = None
 tout = None
-rain_unit = 2.0
-iterations = 10
+rain_unit = 0.3
+iterations = 2
 
 for o, a in optlist:
 	if o in ('-h', '--help', '-?'):
@@ -111,29 +111,47 @@ def get_downhill(x, y, height, water):
 			ret.append((x, y+1))
 		if height[x+1][y] + water[x+1][y] < thh:
 			ret.append((x+1, y))
-	return ret
+
+	minh = 0.0
+	minl = None
+	for l in ret:
+		x, y = l
+		h = height[x][y] + water[x][y]
+		if minl == None or minh < h:
+			minh = h
+			minl = l
+	if minl != None:
+		return [minl]
+	return []
 
 def erosion(w, h0, h1):
 	"""How much erosion to do, with w water flowing from a height
 	h0 to h1"""
-	if w < 1.0:
-		return 0.0
-
 	if h0 > h1:
-		return 0.0
+		# Possibly increase the erosion depending on the height of the
+		# water we're flowing into (lower height, more erosion).
+		return max(1.0, (h1-h0) / 10.0 * max(w, 5.0))
 	else:
-		return (h1-h0) / 10.0 * max(w, 5.0)
+		return 0.0
 
 def flow(fx, fy, tx, ty, amount, height, water, newh, neww):
 	"""Flow amount of water from fx,fy to tx,ty. Handle erosion, too"""
 	neww[tx][ty] += amount
 	soil = erosion(amount, height[tx][ty], height[fx][fy])
-	if height[tx][ty] > height[fx][fy]:
-		newh[tx][ty] -= soil
-		newh[fx][fy] += soil
-	else:
-		newh[fx][fy] -= soil
-		newh[tx][ty] += soil
+	newh[fx][fy] -= soil
+	#if height[tx][ty] > height[fx][fy]:
+	#	newh[tx][ty] -= soil
+	#	newh[fx][fy] += soil
+	#else:
+	#	newh[fx][fy] -= soil
+	#	newh[tx][ty] += soil
+
+def drain(x, y, w, h):
+	wl = w[x][y]
+	hl = h[x][y]
+	tot = wl + hl
+	drain_to = min(tot, 0.0)
+	w[x][y] = max(drain_to - hl, 0.0)
 
 def flow_step(height, water, newh, neww):
 	"""Compute a step of the water flow algorithm: water flows
@@ -177,9 +195,10 @@ def flow_step(height, water, newh, neww):
 	print "Amount flowed:", total
 
 	# Remove water from the edges of the map
-	for y in range(int(MAX_X/3.0), MAX_X):
-		neww[0][y] = 0.0
-		neww[MAX_X-y-1][y] = 0.0
+	for y in range(0, MAX_X):
+		drain(y, 0, neww, newh)
+		drain(0, y, neww, newh)
+		drain(MAX_X-y-1, y, neww, newh)
 
 	complete_water = 0.0
 	for x in range(0, MAX_X):
@@ -191,6 +210,7 @@ def flow_step(height, water, newh, neww):
 
 def rainfall(arr):
 	"""Drop water on the landscape"""
+	print "Rainfall"
 	for x in range(0, MAX_X):
 		for y in range(0, MAX_X-x):
 			arr[x][y] += rain_unit
@@ -226,19 +246,20 @@ for x in range(0, MAX_X):
 	for y in range(0, MAX_X-x):
 		if height[x][y] != None:
 			height[x][y] = int(float(height[x][y]))
-		water[x][y] = 0.0
+		# Set the water to meet the zero-level
+		water[x][y] = max(0.0, -height[x][y])
 
 # Run some iterations of the algorithm
 count = 0
 while iterations > 0:
 	rainfall(water)
 	total = 1e6
-	while total > 2000:
+	while total > 1:
 		total = flow_step(height, water, newh, neww)
 		total = flow_step(newh, neww, height, water)
 		count += 1
-		write_file("water.%03d.txt" % count, water)
-		write_file("height.%03d.txt" % count, height)
+		write_file("water.%04d.txt" % count, water)
+		write_file("height.%04d.txt" % count, height)
 	iterations -= 1
 
 sys.stderr.write("Writing file\n")

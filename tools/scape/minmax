@@ -43,7 +43,7 @@ for n in args:
 
 	for x in range(0, MAX_X):
 		for y in range(0, MAX_X-x):
-                	v = float(values[x][y])
+			v = float(values[x][y])
 			minv = min(minv, v)
 			maxv = max(maxv, v)
 			
