@@ -19,6 +19,7 @@ Options:
 \t-t, --total-out=<file>\t\tWrite resultant cumulative water levels to <file>
 \t-R, --rainfall=<n>\t\tUse <n> units of rainfall each time
 \t-I, --iterations=<n>\t\tRun for <n> iterations of rainfall
+\t-F, --flow=<n>\t\tDrop rain when fewer than <n> units of water flow
 Patch-Options:
 \t-f, --flip\t\tTransform input by flipping about hypotenuse
 \t-o, --offset=<x>,<y>\tTranslate input file (after flipping)"""
@@ -26,10 +27,10 @@ Patch-Options:
 try:
 	optlist, args = getopt.gnu_getopt(
 		sys.argv[1:],
-		'h?fo:s:H:r:w:t:R:I:',
+		'h?fo:s:H:r:w:t:R:I:F:',
 		['help', 'scale=', 'flip', 'offset=', 'height=',
 		 'height-out=', 'water-out=', 'total-out=',
-		 'rainfall=', 'iterations='])
+		 'rainfall=', 'iterations=', 'flow='])
 except getopt.GetoptError, err:
 	print str(err)
 	usage()
@@ -43,6 +44,7 @@ wout = None
 tout = None
 rain_unit = 0.3
 iterations = 2
+min_flow = 15.0
 
 for o, a in optlist:
 	if o in ('-h', '--help', '-?'):
@@ -68,6 +70,8 @@ for o, a in optlist:
 		rain_unit = float(a)
 	elif o in ('-I', '--iterations'):
 		iterations = int(a)
+	elif o in ('-F', '--flow'):
+		min_flow = float(a)
 	else:
 		usage()
 		sys.exit(1)
@@ -124,7 +128,7 @@ def get_downhill(x, y, height, water):
 		return [minl]
 	return []
 
-def erosion(w, h0, h1):
+def erosion(w, h1, h0):
 	"""How much erosion to do, with w water flowing from a height
 	h0 to h1"""
 	if h0 > h1:
@@ -254,7 +258,7 @@ count = 0
 while iterations > 0:
 	rainfall(water)
 	total = 1e6
-	while total > 1:
+	while total > min_flow:
 		total = flow_step(height, water, newh, neww)
 		total = flow_step(newh, neww, height, water)
 		count += 1
