@@ -1,0 +1,29 @@
+#!/usr/bin/python
+
+######
+# Generate a new (random) kirk name
+
+import StringUtil
+import Reference.Ordinal
+import Reference.Kirk 
+
+# If we want to be intuitive, we can call this method generate_kirk, but I 
+# couldn't resist the joke - DWB
+def schism():
+	"""Generate a new kirk at random.  Note that kirks take the format
+	   'The [ordinal] [option] [adjective] Church of Rodney, [adjective2]'
+	   Where each is an element from classes in content/ref_data (either 
+	   Ordinal.py or Kirk.py, as appropriate)"""
+	
+	# FIXME: There's probably a way to simplify the syntax here, but sleep 
+	#        calls...
+	ref_data = [
+		Reference.Ordinal.ordinals, 
+		Reference.Kirk.options, 
+		Reference.Kirk.adjective1s, 
+		Reference.Kirk.adjective2s]
+	return StringUtil.random_template("The %s %s %s Church of Rodney, %s", 
+	                                  ref_data)
+	
+new_kirk = schism()
+print "New kirk:  " + new_kirk
