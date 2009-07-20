@@ -4,8 +4,8 @@
 # Generate a new (random) kirk name
 
 import StringUtil
-import Reference.Ordinal
-import Reference.Kirk 
+from Reference.Ordinal import ordinals
+from Reference.Kirk import options, adjective1s, adjective2s
 
 # If we want to be intuitive, we can call this method generate_kirk, but I 
 # couldn't resist the joke - DWB
@@ -17,11 +17,7 @@ def schism():
 	
 	# FIXME: There's probably a way to simplify the syntax here, but sleep 
 	#        calls...
-	ref_data = [
-		Reference.Ordinal.ordinals, 
-		Reference.Kirk.options, 
-		Reference.Kirk.adjective1s, 
-		Reference.Kirk.adjective2s]
+	ref_data = [ordinals, options, adjective1s, adjective2s]
 	return StringUtil.random_template("The %s %s %s Church of Rodney, %s", 
 	                                  ref_data)
 	
