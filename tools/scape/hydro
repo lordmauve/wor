@@ -128,20 +128,22 @@ def get_downhill(x, y, height, water):
 		return [minl]
 	return []
 
-def erosion(w, h1, h0):
-	"""How much erosion to do, with w water flowing from a height
-	h0 to h1"""
+def erosion(w, h1, h0, w0, w1):
+	"""How much erosion to do, with w water flowing from a ground
+	height h0 to h1, and water height w0 to w1"""
 	if h0 > h1:
-		# Possibly increase the erosion depending on the height of the
-		# water we're flowing into (lower height, more erosion).
-		return max(1.0, (h1-h0) / 10.0 * max(w, 5.0))
+		if w > w1:
+			return max(2.0, (h0-h1) / 10.0 * max(w, 5.0))
 	else:
 		return 0.0
+
+	return 0.0
 
 def flow(fx, fy, tx, ty, amount, height, water, newh, neww):
 	"""Flow amount of water from fx,fy to tx,ty. Handle erosion, too"""
 	neww[tx][ty] += amount
-	soil = erosion(amount, height[tx][ty], height[fx][fy])
+	soil = erosion(amount, height[fx][fy], height[tx][ty], water[fx][fy], water[tx][ty])
+	eroded[fx][fy] += soil
 	newh[fx][fy] -= soil
 	#if height[tx][ty] > height[fx][fy]:
 	#	newh[tx][ty] -= soil
@@ -164,8 +166,8 @@ def flow_step(height, water, newh, neww):
 	the two hexes of underlying terrain."""
 
 	# Initialise the new arrays
-	for x in range(0, MAX_X):
-		for y in range(0, MAX_X-x):
+	for x in xrange(0, MAX_X):
+		for y in xrange(0, MAX_X-x):
 			newh[x][y] = height[x][y]
 			neww[x][y] = water[x][y]
 
@@ -173,8 +175,8 @@ def flow_step(height, water, newh, neww):
 	total = 0.0
 
 	# Flow the water
-	for x in range(0, MAX_X):
-		for y in range(0, MAX_X-x):
+	for x in xrange(0, MAX_X):
+		for y in xrange(0, MAX_X-x):
 			downhill = get_downhill(x, y, height, water)
 			tot_down = 0.0
 			thh = height[x][y] + water[x][y]
@@ -199,14 +201,14 @@ def flow_step(height, water, newh, neww):
 	print "Amount flowed:", total
 
 	# Remove water from the edges of the map
-	for y in range(0, MAX_X):
+	for y in xrange(0, MAX_X):
 		drain(y, 0, neww, newh)
 		drain(0, y, neww, newh)
 		drain(MAX_X-y-1, y, neww, newh)
 
 	complete_water = 0.0
-	for x in range(0, MAX_X):
-		for y in range(0, MAX_X-x):
+	for x in xrange(0, MAX_X):
+		for y in xrange(0, MAX_X-x):
 			complete_water += neww[x][y]
 	print "Total water holdings:", complete_water
 	
@@ -215,8 +217,8 @@ def flow_step(height, water, newh, neww):
 def rainfall(arr):
 	"""Drop water on the landscape"""
 	print "Rainfall"
-	for x in range(0, MAX_X):
-		for y in range(0, MAX_X-x):
+	for x in xrange(0, MAX_X):
+		for y in xrange(0, MAX_X-x):
 			arr[x][y] += rain_unit
 
 def write_file(name, array):
@@ -227,17 +229,18 @@ def write_file(name, array):
 
 	if name != None:
 		f.write(str(MAX_X) + "\n")
-		for x in range(0, MAX_X, SUBSET):
-			for y in range(0, MAX_X-x, SUBSET):
+		for x in xrange(0, MAX_X, SUBSET):
+			for y in xrange(0, MAX_X-x, SUBSET):
 				f.write(str(array[x][y]) + " ")
 			f.write("\n")
 
 ################################
 
-height = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
-newh   = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
-water  = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
-neww   = [ [ None for y in range(0, MAX_X-x) ] for x in range(0, MAX_X) ]
+height = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+newh   = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+water  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+neww   = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+eroded = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
 
 sys.stderr.write("Reading files\n")
 
@@ -246,12 +249,13 @@ for f in hfiles:
 	common.load_to_array(height, f, transform_coords)
 
 # Force everything to the right datatype
-for x in range(0, MAX_X):
-	for y in range(0, MAX_X-x):
+for x in xrange(0, MAX_X):
+	for y in xrange(0, MAX_X-x):
 		if height[x][y] != None:
 			height[x][y] = int(float(height[x][y]))
 		# Set the water to meet the zero-level
 		water[x][y] = max(0.0, -height[x][y])
+		eroded[x][y] = 0.0
 
 # Run some iterations of the algorithm
 count = 0
@@ -264,6 +268,12 @@ while iterations > 0:
 		count += 1
 		write_file("water.%04d.txt" % count, water)
 		write_file("height.%04d.txt" % count, height)
+		write_file("eroded.%04d.txt" % count, eroded)
+		
+		for x in xrange(0, MAX_X):
+			for y in xrange(0, MAX_X-x):
+				eroded[x][y] = 0.0
+
 	iterations -= 1
 
 sys.stderr.write("Writing file\n")
