@@ -1,0 +1,176 @@
+#!/usr/bin/python
+
+import sys
+from random import randrange, random, seed
+import getopt
+import math
+
+import common
+
+FLIP=False
+SUBSET=1
+
+def usage():
+	print """Usage: hydro [options] { [patch-options] -H <height-file> }
+Options:
+\t-s, --scale=<n>\t\tUse scale of <n> (10)
+Patch-Options:
+\t-f, --flip\t\tTransform input by flipping about hypotenuse
+\t-o, --offset=<x>,<y>\tTranslate input file (after flipping)"""
+
+try:
+	optlist, args = getopt.gnu_getopt(
+		sys.argv[1:],
+		'h?fo:s:H:',
+		['help', 'scale=', 'flip', 'offset=', 'height=' ])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
+
+blend = False
+fopts = { 'ox': 0, 'oy': 0 }
+hfiles = []
+
+for o, a in optlist:
+	if o in ('-h', '--help', '-?'):
+		usage()
+		sys.exit(0)
+	elif o in ('-s', '--scale'):
+		common.SCALE = int(a)
+	elif o in ('-f', '--flip'):
+		fopts['flip'] = True
+	elif o in ('-o', '--offset'):
+		fopts['ox'], fopts['oy'] = [ int(v) for v in a.split(',') ]
+	elif o in ('-H', '--height'):
+		fopts['file'] = a
+		hfiles.append(fopts)
+		fopts = { 'ox': 0, 'oy': 0 }
+	else:
+		usage()
+		sys.exit(1)
+
+MAX_X=(1<<common.SCALE)+1
+
+if len(args) > 0:
+	usage()
+	sys.exit(1)
+
+if len(hfiles) <= 0:
+	usage()
+	sys.exit(1)
+
+#######################
+
+def transform_coords(x, y, f):
+	if 'flip' in f and f['flip']:
+		x = MAX_X-x
+		y = MAX_X-y
+	x += f['ox']
+	y += f['oy']
+	return (x, y)
+
+def get_downhill(x, y, height):
+	"""Return the set of hexes which are downhill of here"""
+	ret = []
+	thh = height[x][y]
+	if x > 0:
+		if height[x-1][y] < thh:
+			ret.append((x-1, y))
+		if height[x-1][y+1] < thh:
+			ret.append((x-1, y+1))
+	if y > 0:
+		if height[x][y-1] < thh:
+			ret.append((x, y-1))
+		if height[x+1][y-1] < thh:
+			ret.append((x+1, y-1))
+	if x+y < MAX_X-1:
+		if height[x][y+1] < thh:
+			ret.append((x, y+1))
+		if height[x+1][y] < thh:
+			ret.append((x+1, y))
+
+	minh = 0.0
+	minl = None
+	for l in ret:
+		x, y = l
+		h = height[x][y]
+		if minl == None or minh < h:
+			minh = h
+			minl = l
+	if minl != None:
+		return minl
+	return None
+
+def write_file(name, array):
+	if name == '-':
+		f = sys.stdout
+	elif name != None:
+		f = open(name, "w")
+
+	if name != None:
+		f.write(str(MAX_X) + "\n")
+		for x in xrange(0, MAX_X, SUBSET):
+			for y in xrange(0, MAX_X-x, SUBSET):
+				f.write(str(array[x][y]) + " ")
+			f.write("\n")
+
+################################
+
+height = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+down   = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+drain  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+usage  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+block  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+
+sys.stderr.write("Reading files\n")
+
+# Load the height files
+for f in hfiles:
+	common.load_to_array(height, f, transform_coords)
+
+# Force everything to the right datatype
+for x in xrange(0, MAX_X):
+	for y in xrange(0, MAX_X-x):
+		if height[x][y] != None:
+			height[x][y] = int(float(height[x][y]))
+
+while True:
+	sinks = {}
+
+	# Work out which way is downhill
+	for x in xrange(0, MAX_X):
+		for y in xrange(0, MAX_X-x):
+			dh = get_downhill(x, y, height)
+			if dh == None:
+				sinks[(x<<16)+y] = None
+			down[x][y] = dh
+			usage[x][y] = 0
+
+	# Pick some "colours" for the ranges
+	for s in sinks.iterkeys():
+		sinks[s] = random()
+
+	# Work out where everything drains to
+	for x in xrange(0, MAX_X):
+		for y in xrange(0, MAX_X-x):
+			dist = 0
+			to = down[x][y]
+			drain = (x,y)
+			while to != None:
+				drain = to
+				usage[to[0]][to[1]] += 1
+				to = down[to[0]][to[1]]
+			block[x][y] = sinks[(drain[0]<<16)+drain[1]]
+
+	# For each drainage region (from the top), find the point where it
+	# drains into the next one, and drop it by "some", to represent
+	# erosion, if the difference isn't too small to care about. Ignore
+	# sinks where the difference is too small to care about.
+	pass
+
+sys.stderr.write("Writing file\n")
+
+write_file("usage.txt", usage)
+write_file("block.txt", block)
+#write_file(wout, neww)
