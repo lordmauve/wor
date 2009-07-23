@@ -121,6 +121,8 @@ for f in files:
 		if 'even' in f and f['even']:
 			maxv = max(-minv, maxv)
 			minv = -maxv
+		f['max'] = maxv
+		f['min'] = minv
 		
 	rng = float(f['max']-f['min'])
 	f['scale'] = lambda x: (x-f['min']) / float(f['max']-f['min'])
