@@ -90,12 +90,12 @@ def get_downhill(x, y, height):
 	ret = []
 	thh = height[x][y]
 	if x > 0:
-		if height[x-1][y] < thh:
+		if height[x-1][y] <= thh:
 			ret.append((x-1, y))
-		if height[x-1][y+1] < thh:
+		if height[x-1][y+1] <= thh:
 			ret.append((x-1, y+1))
 	if y > 0:
-		if height[x][y-1] < thh:
+		if height[x][y-1] <= thh:
 			ret.append((x, y-1))
 		if height[x+1][y-1] < thh:
 			ret.append((x+1, y-1))
@@ -110,7 +110,7 @@ def get_downhill(x, y, height):
 	for l in ret:
 		x, y = l
 		h = height[x][y]
-		if minl == None or minh < h:
+		if minl == None or minh <= h:
 			minh = h
 			minl = l
 	if minl != None:
@@ -211,6 +211,7 @@ for x in xrange(0, MAX_X):
 			height[x][y] = int(float(height[x][y]))
 
 for z in xrange(0, 40):
+	print "=== Processing for output", z
 	sinks = {}
 	down   = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
 	usage  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
@@ -243,21 +244,52 @@ for z in xrange(0, 40):
 		shed = None
 		while h != None:
 			shed = h
-			if block[shed[0]][shed[1]] != region:
+			# Jump out if we've found another region
+			if block[h[0]][h[1]] != region:
 				break
+			# Jump out if we've hit the edge of the map
+			if h[0] == 0 or h[1] == 0 or h[0]+h[1] == MAX_X-1:
+				break
+			# Get the next hex
 			h = region.fill_next_hex()
+			# Jump out with the higher position if we've moved downhill
+			if h != None and height[shed[0]][shed[1]] > height[h[0]][h[1]]:
+				break
 
 		#print "Edge found, into region", block[shed[0]][shed[1]]
 		# Now we've found it, mark it and follow downhill again
 		if shed != None:
 			region.overflow = shed
 			run_downhill(shed[0], shed[1], sinks, height, down, usage, block, usage[shed[0]][shed[1]])
+		region.colour = len(si)
 
+	processed = set()
 	# For each region, drop the overflow edge by a bit and go round again
 	for k, region in sinks.iteritems():
+		# Don't bother with things draining to the edge of the map
+		if region.x == 0 or region.y == 0 or region.x+region.y == MAX_X-1:
+			print "Ignoring region: drain at edge", region
+			continue
+		
 		h = region.overflow
-		print "Region is", region
-		print "  Overflow at", h
+		#if h[0] == 0 or h[1] == 0 or h[0]+h[1] == MAX_X-1:
+		#	print "Ignoring region: overflow at edge", region
+		#	continue
+
+		# Skip this overflow if it's too close to one we've already
+		# processed in this pass
+		skip = False
+		for p in processed:
+			dx = abs(p[0]-h[0])
+			dy = abs(p[1]-h[1])
+			if max(dx, dy, dx+dy) < 5:
+				skip = True
+				break
+		if skip:
+			continue
+
+		print "Region is", region, "=", height[region.x][region.y]
+		print "  Overflow at", h, "=", height[h[0]][h[1]]
 
 		#ring1 = get_neighbours(h[0], h[1])
 		#ring2 = set()
@@ -271,8 +303,9 @@ for z in xrange(0, 40):
 		#	height[n[0]][n[1]] -= 1
 		#for n in ring2:
 		#	height[n[0]][n[1]] -= 1
+		processed.add(h)
 
-	sys.stderr.write("Writing file\n")
+	sys.stderr.write("Writing file %d\n" % z)
 
 	write_file("height.%02d.txt" % z, lambda x,y: height[x][y])
 	write_file("usage.%02d.txt" % z, lambda x,y: usage[x][y])
