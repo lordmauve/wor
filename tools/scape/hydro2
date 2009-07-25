@@ -210,8 +210,10 @@ for x in xrange(0, MAX_X):
 		if height[x][y] != None:
 			height[x][y] = int(float(height[x][y]))
 
-for z in xrange(0, 40):
-	print "=== Processing for output", z
+z = 0
+work_done = True
+while work_done:
+	work_done = False
 	sinks = {}
 	down   = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
 	usage  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
@@ -264,11 +266,11 @@ for z in xrange(0, 40):
 		region.colour = len(si)
 
 	processed = set()
+	changed = 0
 	# For each region, drop the overflow edge by a bit and go round again
 	for k, region in sinks.iteritems():
 		# Don't bother with things draining to the edge of the map
 		if region.x == 0 or region.y == 0 or region.x+region.y == MAX_X-1:
-			print "Ignoring region: drain at edge", region
 			continue
 		
 		h = region.overflow
@@ -288,26 +290,29 @@ for z in xrange(0, 40):
 		if skip:
 			continue
 
-		print "Region is", region, "=", height[region.x][region.y]
-		print "  Overflow at", h, "=", height[h[0]][h[1]]
+		work_done = True
+		changed += 1
 
-		#ring1 = get_neighbours(h[0], h[1])
-		#ring2 = set()
-		#for n in ring1:
-		#	ring2 |= get_neighbours(n[0], n[1])
-		#ring2 -= ring1
-		#ring2 -= set((h))
+		ring1 = get_neighbours(h[0], h[1])
+		ring2 = set()
+		for n in ring1:
+			ring2 |= get_neighbours(n[0], n[1])
+		ring2 -= ring1
+		ring2 -= set((h))
 
-		height[h[0]][h[1]] -= 1
-		#for n in ring1:
-		#	height[n[0]][n[1]] -= 1
-		#for n in ring2:
-		#	height[n[0]][n[1]] -= 1
+		height[h[0]][h[1]] -= 3
+		for n in ring1:
+			height[n[0]][n[1]] -= 2
+		for n in ring2:
+			height[n[0]][n[1]] -= 1
 		processed.add(h)
 
 	sys.stderr.write("Writing file %d\n" % z)
+	sys.stderr.write("Made %d changes\n" % changed)
 
-	write_file("height.%02d.txt" % z, lambda x,y: height[x][y])
-	write_file("usage.%02d.txt" % z, lambda x,y: usage[x][y])
-	write_file("block.%02d.txt" % z, lambda x,y: block[x][y].colour)
+	write_file("height.%04d.txt" % z, lambda x,y: height[x][y])
+	write_file("usage.%04d.txt" % z, lambda x,y: usage[x][y])
+	write_file("block.%04d.txt" % z, lambda x,y: block[x][y].colour)
+	
+	z += 1
 #write_file(wout, neww)
