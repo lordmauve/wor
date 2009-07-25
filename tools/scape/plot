@@ -136,6 +136,7 @@ for f in files:
 	f['data'] = open(f['name'], 'r')
 	params = f['data'].next()
 	print "Scaled", f['scale'](f['min']), f['scale'](f['max'])
+	f['colour'] = [ float(i) for i in f['colour'] ]
 
 xz = int(round(MAX_X/3.0))
 yz = int(round(MAX_X/3.0))
