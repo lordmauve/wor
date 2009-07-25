@@ -70,6 +70,21 @@ def transform_coords(x, y, f):
 	y += f['oy']
 	return (x, y)
 
+def get_neighbours(x, y):
+	ret = set()
+
+	if x > 0:
+		ret.add((x-1, y))
+		ret.add((x-1, y+1))
+	if y > 0:
+		ret.add((x, y-1))
+		ret.add((x+1, y-1))
+	if x+y < MAX_X-1:
+		ret.add((x, y+1))
+		ret.add((x+1, y))
+
+	return ret
+
 def get_downhill(x, y, height):
 	"""Return the set of hexes which are downhill of here"""
 	ret = []
@@ -102,7 +117,17 @@ def get_downhill(x, y, height):
 		return minl
 	return None
 
-def write_file(name, array):
+def run_downhill(x, y, sinks, height, down, usage, block, inc):
+	dist = 0
+	to = down[x][y]
+	sink = (x, y)
+	while to != None:
+		sink = to
+		usage[to[0]][to[1]] += inc
+		to = down[to[0]][to[1]]
+	block[x][y] = sinks[sink]
+
+def write_file(name, fn):
 	if name == '-':
 		f = sys.stdout
 	elif name != None:
@@ -112,16 +137,66 @@ def write_file(name, array):
 		f.write(str(MAX_X) + "\n")
 		for x in xrange(0, MAX_X, SUBSET):
 			for y in xrange(0, MAX_X-x, SUBSET):
-				f.write(str(array[x][y]) + " ")
+				f.write(str(fn(x,y)) + " ")
 			f.write("\n")
 
-################################
+###############################
 
+# Height field
 height = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+# Which direction is down?
 down   = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
-drain  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+# How many hexes drain through this one?
 usage  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+# What's the sink that we belong to?
 block  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+
+###############################
+
+class Sink(object):
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
+		self.colour = random()
+		self.borders = get_neighbours(x, y)
+		self.underwater = set()
+		h = (x, y)
+		self.underwater.add(h)
+
+	def __repr__(self):
+		return "%d, %d" % (self.x, self.y)
+
+	def fill_next_hex(self):
+		# Fill up this lake until the next hex gets covered with water:
+		# Work out the next hex, first (at the end of the list)
+		#print "fill_next_hex for", self.x, self.y
+		borders = sorted(self.borders,
+						 lambda a,b: cmp(height[a[0]][a[1]],
+										 height[b[0]][b[1]])
+						 )
+		#print "Borders:", borders
+		#print "Underwater:", self.underwater
+		if len(borders) == 0:
+			return None
+		h = borders[0]
+		# Move that hex to the list of underwater hexes
+		self.borders.remove(h)
+		self.underwater.add(h)
+
+		# Extend the border hexes
+		nbrs = get_neighbours(h[0], h[1])
+		for n in nbrs.copy():
+			if n in self.underwater:
+				nbrs.remove(n)
+		self.borders |= nbrs
+		#print "Add neighbours:", self.borders
+		#print "Underwater:", self.underwater
+		#print "Returning hex:", h
+		#print
+
+		return h
+
+################################
 
 sys.stderr.write("Reading files\n")
 
@@ -135,42 +210,71 @@ for x in xrange(0, MAX_X):
 		if height[x][y] != None:
 			height[x][y] = int(float(height[x][y]))
 
-while True:
+for z in xrange(0, 40):
 	sinks = {}
+	down   = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+	usage  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
+	block  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
 
 	# Work out which way is downhill
 	for x in xrange(0, MAX_X):
 		for y in xrange(0, MAX_X-x):
 			dh = get_downhill(x, y, height)
 			if dh == None:
-				sinks[(x<<16)+y] = None
+				sinks[(x, y)] = Sink(x, y)
 			down[x][y] = dh
 			usage[x][y] = 0
-
-	# Pick some "colours" for the ranges
-	for s in sinks.iterkeys():
-		sinks[s] = random()
 
 	# Work out where everything drains to
 	for x in xrange(0, MAX_X):
 		for y in xrange(0, MAX_X-x):
-			dist = 0
-			to = down[x][y]
-			drain = (x,y)
-			while to != None:
-				drain = to
-				usage[to[0]][to[1]] += 1
-				to = down[to[0]][to[1]]
-			block[x][y] = sinks[(drain[0]<<16)+drain[1]]
+			run_downhill(x, y, sinks, height, down, usage, block, 1)
 
-	# For each drainage region (from the top), find the point where it
-	# drains into the next one, and drop it by "some", to represent
-	# erosion, if the difference isn't too small to care about. Ignore
-	# sinks where the difference is too small to care about.
-	pass
+	# For each drainage region (from the highest one), find the point
+	# where it drains into the next one, and follow it downhill again
+	si = sinks.keys()
+	si.sort(lambda a, b: cmp(height[a[0]][a[1]], height[b[0]][b[1]]),
+			reverse=True)
 
-sys.stderr.write("Writing file\n")
+	while len(si) > 0:
+		region = sinks[si.pop()]
+		#print "=== Working with region:", region
+		h = region.fill_next_hex()
+		shed = None
+		while h != None:
+			shed = h
+			if block[shed[0]][shed[1]] != region:
+				break
+			h = region.fill_next_hex()
 
-write_file("usage.txt", usage)
-write_file("block.txt", block)
+		#print "Edge found, into region", block[shed[0]][shed[1]]
+		# Now we've found it, mark it and follow downhill again
+		if shed != None:
+			region.overflow = shed
+			run_downhill(shed[0], shed[1], sinks, height, down, usage, block, usage[shed[0]][shed[1]])
+
+	# For each region, drop the overflow edge by a bit and go round again
+	for k, region in sinks.iteritems():
+		h = region.overflow
+		print "Region is", region
+		print "  Overflow at", h
+
+		#ring1 = get_neighbours(h[0], h[1])
+		#ring2 = set()
+		#for n in ring1:
+		#	ring2 |= get_neighbours(n[0], n[1])
+		#ring2 -= ring1
+		#ring2 -= set((h))
+
+		height[h[0]][h[1]] -= 1
+		#for n in ring1:
+		#	height[n[0]][n[1]] -= 1
+		#for n in ring2:
+		#	height[n[0]][n[1]] -= 1
+
+	sys.stderr.write("Writing file\n")
+
+	write_file("height.%02d.txt" % z, lambda x,y: height[x][y])
+	write_file("usage.%02d.txt" % z, lambda x,y: usage[x][y])
+	write_file("block.%02d.txt" % z, lambda x,y: block[x][y].colour)
 #write_file(wout, neww)
