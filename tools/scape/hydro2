@@ -90,12 +90,12 @@ def get_downhill(x, y, height):
 	ret = []
 	thh = height[x][y]
 	if x > 0:
-		if height[x-1][y] <= thh:
+		if height[x-1][y] < thh:
 			ret.append((x-1, y))
-		if height[x-1][y+1] <= thh:
+		if height[x-1][y+1] < thh:
 			ret.append((x-1, y+1))
 	if y > 0:
-		if height[x][y-1] <= thh:
+		if height[x][y-1] < thh:
 			ret.append((x, y-1))
 		if height[x+1][y-1] < thh:
 			ret.append((x+1, y-1))
@@ -105,12 +105,15 @@ def get_downhill(x, y, height):
 		if height[x+1][y] < thh:
 			ret.append((x+1, y))
 
+	#if 50 <= x <= 54 and 13 <= y <= 17:
+	#	print "At (%d, %d): neighbours are %s" % (x, y, str(ret))
+
 	minh = 0.0
 	minl = None
 	for l in ret:
 		x, y = l
 		h = height[x][y]
-		if minl == None or minh <= h:
+		if minl == None or h <= minh:
 			minh = h
 			minl = l
 	if minl != None:
@@ -118,14 +121,19 @@ def get_downhill(x, y, height):
 	return None
 
 def run_downhill(x, y, sinks, height, down, usage, block, inc):
+	wrt = (50 <= x <= 54 and 13 <= y <= 17)
+
 	dist = 0
 	to = down[x][y]
-	sink = (x, y)
+	sinkpos = (x, y)
 	while to != None:
-		sink = to
+		sinkpos = to
 		usage[to[0]][to[1]] += inc
+		if usage[to[0]][to[1]] > 100000:
+			print "Huge usage at", to, "leading to", down[to[0]][to[1]], "originating at", x, y
 		to = down[to[0]][to[1]]
-	block[x][y] = sinks[sink]
+	block[x][y] = sinks[sinkpos]
+	sinks[sinkpos].catchment.add(sinkpos)
 
 def write_file(name, fn):
 	if name == '-':
@@ -139,6 +147,74 @@ def write_file(name, fn):
 			for y in xrange(0, MAX_X-x, SUBSET):
 				f.write(str(fn(x,y)) + " ")
 			f.write("\n")
+
+def degroup(tsinks, down):
+	# Take the list of hexes in tsinks, and for each contiguous group,
+	# pick just one, and ensure that the rest all drain into it
+	
+	# Find all pairs of adjacent sinks that don't otherwise go
+	# anywhere and assemble an adjacency matrix
+	adj = {}
+	for h1 in tsinks:
+		for h2 in tsinks:
+			if h1 == h2:
+				continue
+			dx = h1[0]-h2[0]
+			dy = h1[1]-h2[1]
+			if ( (abs(dx) == 0 and abs(dy) == 1)
+				 or (abs(dx) == 1 and abs(dy) == 0)
+				 or (dx+dy == 0 and abs(dx) == 1) ):
+				if h1 not in adj:
+					adj[h1] = []
+				adj[h1].append(h2)
+				if h2 not in adj:
+					adj[h2] = []
+				adj[h2].append(h1)
+	#sys.stderr.write("Adjacency matrix: %d sinks are next to another\n" % len(adj))
+
+	# Compute the sink groups
+	groups = []
+	curgroup = set()
+	while len(adj) > 0:
+		removed = True # Ensure that we go around for at least one more loop
+		queue = [adj.iterkeys().next()]
+		while len(queue) > 0:
+			item = queue.pop()
+			curgroup.add(item)
+			if item in adj:
+				for h in adj[item]:
+					queue.append(h)
+				del adj[item]
+		groups.append(curgroup)
+		curgroup = set()
+
+	#sys.stderr.write("Groups are " + str(groups) + "\n")
+
+	# For each group, just pick one element, and dump the rest
+	# into that one
+	for g in groups:
+		s = g.pop()
+		for h in g:
+			down[h[0]][h[1]] = s
+			tsinks.remove(h)
+			#if 50 <= h[0] <= 54 and 13 <= h[1] <= 17:
+			#	print "Merging " + str(h) + " into " + str(s)
+
+	return tsinks
+
+def check_boundary(r, h, msg):
+	if height[h[0]][h[1]] > -75:
+		return
+	print msg, r
+	for dy in xrange(-2, 3):
+		for dx in xrange(-2, 3):
+			if max(abs(dx), abs(dy), abs(dx+dy)) > 2:
+				continue
+			x = h[0] + dx
+			y = h[1] + dy
+			print ("(%d, %d)" % (x, y)), height[x][y], block[x][y], down[x][y], "  |||  ",
+		print
+	sys.exit(0)
 
 ###############################
 
@@ -162,9 +238,11 @@ class Sink(object):
 		self.underwater = set()
 		h = (x, y)
 		self.underwater.add(h)
+		self.catchment = set()
+		self.overflow = None
 
 	def __repr__(self):
-		return "%d, %d" % (self.x, self.y)
+		return "%x @ (%d, %d)" % (id(self), self.x, self.y)
 
 	def fill_next_hex(self):
 		# Fill up this lake until the next hex gets covered with water:
@@ -185,9 +263,7 @@ class Sink(object):
 
 		# Extend the border hexes
 		nbrs = get_neighbours(h[0], h[1])
-		for n in nbrs.copy():
-			if n in self.underwater:
-				nbrs.remove(n)
+		nbrs -= self.underwater
 		self.borders |= nbrs
 		#print "Add neighbours:", self.borders
 		#print "Underwater:", self.underwater
@@ -219,16 +295,62 @@ while work_done:
 	usage  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
 	block  = [ [ None for y in xrange(0, MAX_X-x) ] for x in xrange(0, MAX_X) ]
 
-	# Work out which way is downhill
+	# Work out which way is downhill for each hex
+	tsinks = []
 	for x in xrange(0, MAX_X):
 		for y in xrange(0, MAX_X-x):
 			dh = get_downhill(x, y, height)
 			if dh == None:
-				sinks[(x, y)] = Sink(x, y)
+				tsinks.append((x, y))
 			down[x][y] = dh
 			usage[x][y] = 0
 
-	# Work out where everything drains to
+	# Deal with flows at the same height
+	removed = True
+	flip = True
+	degroup_now = True
+	while removed:
+		removed = False
+		tmp = []
+		# First, find all the obvious downhills we can
+		for h in tsinks[:]:
+			found = False
+			for n in get_neighbours(h[0], h[1]):
+				if height[n[0]][n[1]] != height[h[0]][h[1]]:
+					# Hexes should be at the same height
+					continue
+				if down[n[0]][n[1]] == None:
+					# If the neighbour is also a sink, ignore it
+					continue
+				if down[n[0]][n[1]] == h:
+					# If the neighbour drains here, ignore it
+					continue
+				removed = True
+				found = True
+				down[h[0]][h[1]] = n
+				break
+
+			if not found:
+				# We didn't find a downhill for this hex, so hang on
+				# to it for another pass
+				tmp.append(h)
+
+		#sys.stderr.write("Removed %d false sinks, leaving %d\n" % (len(tsinks)-len(tmp), len(tmp)))
+
+		if degroup_now:
+			degroup_now = False
+			tsinks = degroup(tmp, down)
+		else:
+			tsinks = tmp
+				
+	sys.stderr.write("%d sinks remaining\n" % len(tsinks))
+
+	# At this point, we now have a consistent map of drainage, with no
+	# loops.
+	for t in tsinks:
+		sinks[t] = Sink(t[0], t[1])
+
+	# Work out where each individual hex's water ends up in the end
 	for x in xrange(0, MAX_X):
 		for y in xrange(0, MAX_X-x):
 			run_downhill(x, y, sinks, height, down, usage, block, 1)
@@ -239,73 +361,72 @@ while work_done:
 	si.sort(lambda a, b: cmp(height[a[0]][a[1]], height[b[0]][b[1]]),
 			reverse=True)
 
+	overflows = set()
 	while len(si) > 0:
 		region = sinks[si.pop()]
 		#print "=== Working with region:", region
 		h = region.fill_next_hex()
 		shed = None
 		while h != None:
+			tmp = shed
 			shed = h
 			# Jump out if we've found another region
 			if block[h[0]][h[1]] != region:
+				check_boundary(region, h, "New hex in different region from " + str(tmp))
 				break
 			# Jump out if we've hit the edge of the map
 			if h[0] == 0 or h[1] == 0 or h[0]+h[1] == MAX_X-1:
+				#check_boundary(region, h, "Hit map edge from " + str(shed))
+				shed = None
 				break
-			# Get the next hex
+			# Get the next hex and keep the last one
 			h = region.fill_next_hex()
 			# Jump out with the higher position if we've moved downhill
 			if h != None and height[shed[0]][shed[1]] > height[h[0]][h[1]]:
+				check_boundary(region, h, "Moved downhill from " + str(shed))
 				break
 
 		#print "Edge found, into region", block[shed[0]][shed[1]]
-		# Now we've found it, mark it and follow downhill again
+		# Now we've found it, mark it
 		if shed != None:
-			region.overflow = shed
-			run_downhill(shed[0], shed[1], sinks, height, down, usage, block, usage[shed[0]][shed[1]])
+			overflows.add(shed)
 		region.colour = len(si)
 
-	processed = set()
 	changed = 0
 	# For each region, drop the overflow edge by a bit and go round again
-	for k, region in sinks.iteritems():
+	for h in overflows:
 		# Don't bother with things draining to the edge of the map
-		if region.x == 0 or region.y == 0 or region.x+region.y == MAX_X-1:
-			continue
-		
-		h = region.overflow
 		#if h[0] == 0 or h[1] == 0 or h[0]+h[1] == MAX_X-1:
-		#	print "Ignoring region: overflow at edge", region
 		#	continue
 
 		# Skip this overflow if it's too close to one we've already
 		# processed in this pass
-		skip = False
-		for p in processed:
-			dx = abs(p[0]-h[0])
-			dy = abs(p[1]-h[1])
-			if max(dx, dy, dx+dy) < 5:
-				skip = True
-				break
-		if skip:
-			continue
+		#skip = False
+		#for p in processed:
+		#	dx = abs(p[0]-h[0])
+		#	dy = abs(p[1]-h[1])
+		#	if max(dx, dy, dx+dy) < 5:
+		#	if 
+		#		skip = True
+		#		break
+		#if skip:
+		#	continue
 
 		work_done = True
 		changed += 1
 
-		ring1 = get_neighbours(h[0], h[1])
-		ring2 = set()
-		for n in ring1:
-			ring2 |= get_neighbours(n[0], n[1])
-		ring2 -= ring1
-		ring2 -= set((h))
+		#ring1 = get_neighbours(h[0], h[1])
+		#ring2 = set()
+		#for n in ring1:
+		#	ring2 |= get_neighbours(n[0], n[1])
+		#ring2 -= ring1
+		#ring2 -= set((h))
 
-		height[h[0]][h[1]] -= 3
-		for n in ring1:
-			height[n[0]][n[1]] -= 2
-		for n in ring2:
-			height[n[0]][n[1]] -= 1
-		processed.add(h)
+		height[h[0]][h[1]] -= 1
+		#for n in ring1:
+		#	height[n[0]][n[1]] -= 2
+		#for n in ring2:
+		#	height[n[0]][n[1]] -= 1
 
 	sys.stderr.write("Writing file %d\n" % z)
 	sys.stderr.write("Made %d changes\n" % changed)
