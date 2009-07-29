@@ -16,7 +16,7 @@ Options:
 \t-o, --output=<file>\tOutput file
 \t-f, --file=<name>\tPlot data from <name>
 \t-s, --scale=<s>\t\tUse a scale of <s>
-\t-p, --pixels=<n>\t\tDraw blocks <n> pixels wide
+\t-p, --pixels=<n>\tDraw blocks <n> pixels wide
 \t-H, --hex\t\tRestrict to a hexagon
 
 File Options:
@@ -24,11 +24,12 @@ File Options:
 \t\t\t\t  scale maximum to fit
 \t-e, --even\t\tZero value in data is centre in output;
 \t\t\t\t  scale data to fit
-\t    --min-max=<n>,<m>\t\tScale data to min/max range of [<n>, <m>)
+\t    --min-max=<n>,<m>\tScale data to min/max range of [<n>, <m>)
 
-\t-t, --threshold=<v>\tValues below <v> are plotted as a
+\t-t, --threshold=<v>[:<v2>[...]]
+\t\t\t\tValues below <v> are plotted as a
 \t\t\t\t  different colour
-\t-c, --threshold-colour=<r>,<g>,<b>
+\t-c, --threshold-colour=<r>,<g>,<b>[:<r2>,<g2>,<b2>[...]]
 \t\t\t\tColour to plot threshold values as
 
 \t-m, --mask=<r>,<g>,<b>\tPlot this file using the colour mask
@@ -47,7 +48,7 @@ except getopt.GetoptError, err:
 output = "plot.png"
 files = []
 fdata_base = { 'mask': (255.0/256.0,255.0/256.0,255.0/256.0),
-			   'colour': (0.0, 0.0, 255.0) }
+			   'colour': [[0.0, 0.0, 255.0]] }
 fdata = dict(fdata_base)
 hex_restrict = False
 
@@ -67,9 +68,10 @@ for o, a in optlist:
 	elif o in ('-e', '--even'):
 		fdata['even'] = True
 	elif o in ('-t', '--threshold'):
-		fdata['threshold'] = float(a)
+		fdata['threshold'] = [ float(x) for x in a.split(':') ]
 	elif o in ('-c', '--threshold-colour'):
-		fdata['colour'] = a.split(',')
+		fdata['colour'] = [ x.split(',') for x in a.split(':') ]
+		print fdata['colour']
 	elif o in ('-m', '--mask'):
 		fdata['mask'] = [float(x)/256.0 for x in a.split(',')]
 	elif o in ('-s', '--scale'):
@@ -136,7 +138,8 @@ for f in files:
 	f['data'] = open(f['name'], 'r')
 	params = f['data'].next()
 	print "Scaled", f['scale'](f['min']), f['scale'](f['max'])
-	f['colour'] = [ float(i) for i in f['colour'] ]
+	print f['colour']
+	f['colour'] = [ [ float(i) for i in c ] for c in f['colour'] ]
 
 xz = int(round(MAX_X/3.0))
 yz = int(round(MAX_X/3.0))
@@ -158,17 +161,21 @@ try:
 			
 			for v, f in zip(data_slice, files):
 				v = float(v)
-				if 'threshold' in f and v < f['threshold']:
-					rgb[0] += f['colour'][0]
-					rgb[1] += f['colour'][1]
-					rgb[2] += f['colour'][2]
-				else:
+				rgb_here = None
+				if 'threshold' in f:
+					for t, col in zip(f['threshold'], f['colour']):
+						if v < t:
+							rgb_here = col
+						
+				if rgb_here == None:
 					if 'log' in f and f['log']:
 						v = math.log(v+1)
 					scaled = f['scale'](v) * 255.0
-					rgb[0] += scaled * f['mask'][0]
-					rgb[1] += scaled * f['mask'][1]
-					rgb[2] += scaled * f['mask'][2]
+					rgb_here = [ scaled * f['mask'][i] for i in (0,1,2) ]
+
+				rgb[0] += rgb_here[0]
+				rgb[1] += rgb_here[1]
+				rgb[2] += rgb_here[2]
 
 			rgb = (int(rgb[0]), int(rgb[1]), int(rgb[2]))
 				
