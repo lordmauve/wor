@@ -14,6 +14,8 @@ def usage():
 \t[[craton-options] -i <craton-file> ... ]
 Options:
 \t-s, --scale=<n>\t\tUse scale of <n> (10)
+\t-b, --blend=<p>\t\tBlend when ratio of distances is less than <p> (1.0)
+\t\t\t\tUse values of p < 1.0
 Craton-Options:
 \t-f, --flip\t\tTransform input by flipping about hypotenuse
 \t-o, --offset=<x>,<y>\tTranslate input file (after flipping)
@@ -23,7 +25,7 @@ generates a file giving the cragginess for each point, based on the
 cragginess of the nearest craton."""
 
 try:
-	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?fi:o:', ['help', 'flip', 'input=', 'offset='])
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?b:fi:o:', ['help', 'blend=', 'flip', 'input=', 'offset='])
 except getopt.GetoptError, err:
 	print str(err)
 	usage()
@@ -31,11 +33,14 @@ except getopt.GetoptError, err:
 
 fopts = {}
 files = []
+blend = None
 
 for o, a in optlist:
 	if o in ('-h', '--help', '-?'):
 		usage()
 		sys.exit(0)
+	elif o in ('-b', '--blend'):
+		blend = 1.0/float(a)
 	elif o in ('-f', '--flip'):
 		fopts['flip']=True
 	elif o in ('-o', '--offset'):
@@ -54,35 +59,60 @@ if len(args) > 0:
 
 cratons = []
 
+# Load the file data
 for f in files:
 	cfile = open(f['file'], 'r')
 	size = cfile.next()
 	size = int(size)
 	for line in cfile:
-		x, y, craggy = line.split()
+		x, y, v = line.split()
 		x = int(x)
 		y = int(y)
-		craggy = float(craggy)
+		v = float(v)
 		if 'flip' in f and f['flip']:
 			x = int(size/2)-x
 			y = int(size/2)-y
 		if 'ox' in f and 'oy' in f:
 			x += f['ox']
 			y += f['oy']
-		cratons.append([x, y, craggy])
+		cratons.append([x, y, v])
 
 print MAX_X
 
+# Compute and write the file data
 for x in range(0, MAX_X):
 	for y in range(0, MAX_X-x):
-		closest = None
-		close_d = 1e8
+		closest = []
 		for c in cratons:
 			dx = c[0]-x
 			dy = c[1]-y
-			d = dx*dx + dy*dy
-			if d < close_d:
-				close_d = d
-				closest = c
-		print closest[2],
+			d = dx*dx + dx*dy + dy*dy
+			closest.append([d, x, y, c[2]])
+
+		# Get the list of nearby centres
+		closest.sort(lambda a, b: cmp(a[0], b[0]))
+		if blend == None:
+			print closest[0][3],
+		else:
+			mini = closest[0][0]
+			lim = mini * blend
+			closest = filter(lambda x: x[0] <= lim, closest)
+			if mini == 0.0:
+				mini = 1.0
+
+			tw = 0.0
+			for c in closest:
+				n = float(c[0]) / mini
+				c.append(n)
+				tw += blend-n
+			if tw == 0.0:
+				tw = 1.0
+
+			sv = 0.0
+			for c in closest:
+				d, x, y, v, n = c
+				sv += (blend-n) * v
+
+			print sv / tw,
+
 	print
