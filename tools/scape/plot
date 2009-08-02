@@ -128,7 +128,7 @@ for f in files:
 		
 	rng = float(f['max']-f['min'])
 	f['scale'] = lambda x: (x-f['min']) / float(f['max']-f['min'])
-	print f['name'], "min =", f['min'], "max =", f['max']
+	#print f['name'], "min =", f['min'], "max =", f['max']
 
 # Now go back and loop through them all again, and actually plot stuff
 img = Image.new("RGBA", (MAX_X*PXSZ, MAX_X*PXSZ))
@@ -137,8 +137,7 @@ draw = ImageDraw.Draw(img)
 for f in files:
 	f['data'] = open(f['name'], 'r')
 	params = f['data'].next()
-	print "Scaled", f['scale'](f['min']), f['scale'](f['max'])
-	print f['colour']
+	#print "Scaled", f['scale'](f['min']), f['scale'](f['max'])
 	f['colour'] = [ [ float(i) for i in c ] for c in f['colour'] ]
 
 xz = int(round(MAX_X/3.0))
