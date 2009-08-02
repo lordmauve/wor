@@ -364,6 +364,9 @@ while work_done:
 	overflows = set()
 	while len(si) > 0:
 		region = sinks[si.pop()]
+		# Regions at the very edge of the map don't get processed
+		if region.x == 0 or region.y == 0 or region.x+region.y == MAX_X-1:
+			continue
 		#print "=== Working with region:", region
 		h = region.fill_next_hex()
 		shed = None
@@ -372,18 +375,18 @@ while work_done:
 			shed = h
 			# Jump out if we've found another region
 			if block[h[0]][h[1]] != region:
-				check_boundary(region, h, "New hex in different region from " + str(tmp))
+				#check_boundary(region, h, "New hex in different region from " + str(tmp))
 				break
 			# Jump out if we've hit the edge of the map
 			if h[0] == 0 or h[1] == 0 or h[0]+h[1] == MAX_X-1:
 				#check_boundary(region, h, "Hit map edge from " + str(shed))
-				shed = None
+				#shed = None
 				break
 			# Get the next hex and keep the last one
 			h = region.fill_next_hex()
 			# Jump out with the higher position if we've moved downhill
 			if h != None and height[shed[0]][shed[1]] > height[h[0]][h[1]]:
-				check_boundary(region, h, "Moved downhill from " + str(shed))
+				#check_boundary(region, h, "Moved downhill from " + str(shed))
 				break
 
 		#print "Edge found, into region", block[shed[0]][shed[1]]
@@ -395,38 +398,9 @@ while work_done:
 	changed = 0
 	# For each region, drop the overflow edge by a bit and go round again
 	for h in overflows:
-		# Don't bother with things draining to the edge of the map
-		#if h[0] == 0 or h[1] == 0 or h[0]+h[1] == MAX_X-1:
-		#	continue
-
-		# Skip this overflow if it's too close to one we've already
-		# processed in this pass
-		#skip = False
-		#for p in processed:
-		#	dx = abs(p[0]-h[0])
-		#	dy = abs(p[1]-h[1])
-		#	if max(dx, dy, dx+dy) < 5:
-		#	if 
-		#		skip = True
-		#		break
-		#if skip:
-		#	continue
-
 		work_done = True
 		changed += 1
-
-		#ring1 = get_neighbours(h[0], h[1])
-		#ring2 = set()
-		#for n in ring1:
-		#	ring2 |= get_neighbours(n[0], n[1])
-		#ring2 -= ring1
-		#ring2 -= set((h))
-
 		height[h[0]][h[1]] -= 1
-		#for n in ring1:
-		#	height[n[0]][n[1]] -= 2
-		#for n in ring2:
-		#	height[n[0]][n[1]] -= 1
 
 	sys.stderr.write("Writing file %d\n" % z)
 	sys.stderr.write("Made %d changes\n" % changed)
