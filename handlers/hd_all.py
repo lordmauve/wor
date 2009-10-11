@@ -153,7 +153,7 @@ def api_handler_core(req):
 				return apache.HTTP_NOT_FOUND
 	except apache.SERVER_RETURN, ex:
 		# Catch and re-raise apache/mod_python exceptions here
-		raise ex
+		raise
 	except Exception, ex:
 		# Catch any other exception
 
@@ -178,9 +178,13 @@ def api_handler_core(req):
 def check_actor(req, fail=True):
 	"""Returns the actor ID for this request. If fail is True, and no
 	actor header was provided, throw an Apache error code."""
-	actor = req.headers_in['X-WoR-Actor']
-	if actor is list:
-		actor = actor[0]
+	
+	actor = None
+	
+	if 'X-WoR-Actor' in req.headers_in:
+		actor = req.headers_in['X-WoR-Actor']
+		if actor is list:
+			actor = actor[0]
 		
 	if actor == None:
 		# No X-WoR-Actor header defined: return 403 if asked
