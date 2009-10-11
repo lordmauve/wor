@@ -3,22 +3,51 @@
 
 import sys
 import os
-import re
+import traceback
 import Image
 import ImageDraw
 from mod_python import apache
 
+import Context
+from Database import DB
+import Logger
+
 #can't assign the full terrain directory until we have the "wor.root_path" PythonOption, accessable from the request object.
 TERRAIN_DIR=''
 
-#First shot at a handler will only take on the <server>/images/terrain/thingy.png requests
+#First shot at a handler will only take on the <server>/img/terrain/thingy.png requests
 def image_handler(req):
+	try:
+		Context.set_request_id()
+		return image_handler_core(req)
+	except apache.SERVER_RETURN, ex:
+		# Catch and re-raise apache/mod_python exceptions here
+		raise
+	except Exception, ex:
+		# Catch any other exception
+
+		# Set up a simple Infernal Server Error response 
+		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
+		req.write("There was an infernal server error. Please report this (with reference %s) to the admins.\n" % (Context.request_id))
+
+		# Get the details of the last exception
+		exlist = sys.exc_info()
+		# Get a list of text lines (possibly with embedded \n)
+		# describing the full backtrace
+		exdata = traceback.format_exception(exlist[0], exlist[1], exlist[2])
+		# Write those lines to the exception log
+		head = Logger.header % { 'stamp': Context.request_time, 'req': Context.request_id }
+		Logger.exception_log.error(head + ''.join(exdata))
+
+		# Return the Infernal Server Error
+		return apache.OK
+
+def image_handler_core(req):
 	pyOpts=req.get_options()
 	global TERRAIN_DIR
 	TERRAIN_DIR=os.path.join(pyOpts['wor.root_path'],'server_root','img','terrain')
 	components = req.uri.split('/')
-	sys.stderr.write( 'image_handler entered!  URL components:'+str(components)+'  TERRAIN_DIR:'+TERRAIN_DIR+'\n')
-	sys.stderr.flush()
+	Logger.log.debug('image_handler entered: URL components:'+str(components)+'  TERRAIN_DIR:'+TERRAIN_DIR)
 	if components.pop(0) != '':
 		# No leading slash -- something's screwy
 		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
@@ -36,36 +65,59 @@ def image_handler(req):
 		return apache.OK
 	terrain_file=components.pop(0)
 	
-	sys.stderr.write( 'file requested: '+terrain_file+'\n')
-	sys.stderr.flush()
+	Logger.log.debug('file requested: '+terrain_file)
 	
 	#if it's already there (and/or somebody's just asking for a base file), give it to 'em.
 	if os.path.isfile(os.path.join(TERRAIN_DIR,terrain_file)):
-		sys.stderr.write( 'just sending base file: '+terrain_file+'\n')
-		sys.stderr.flush()
+		Logger.log.debug('just sending base file: '+terrain_file)
 		req.sendfile(os.path.join(TERRAIN_DIR,terrain_file))
 		return apache.OK
 		
-	sys.stderr.write( 'didn\'t find file: '+terrain_file+'\n')
-	sys.stderr.flush()
+	Logger.log.debug('didn\'t find file: '+terrain_file)
 	
 	#generate the file.  For now, we'll only hand out completely-rendered files (plus any already-existing file).  Only open up the lower functions if there turns out to be some good reason for it.
 	#format: render-T1-terrain1.terrain2.terrain3-T2-terrain4.terrain5.terrain6-B-border-<F or B>.png for corners
 	#format: render-T-terrain1.terrain2.terrainN-B1-border1-B2-border2.png for hex body
-	#Many people, when looking at a problem, say 'Oh, I'll use regular expressions.'  Now they have two problems.  Hey, look!  I have two problems!  Hm.  Slightly-degenerate regex there, but fortunately filenames aren't insanely long, and the lazy search should take care of most of the CPU cycles.
-	if not re.match('render-T1-[^.]*?(\\.[^.]+?)*?-T2-[^.]*?(\\.[^.]+?)*?-B-[^.]+-[FB]\\.png|render-T-[^.]*?(\\.[^.]+?)*?-B1-[^.]+?-B2-[^.]+\\.png',terrain_file):
+	
+	# Break down the image name into separate components and check
+	# that it's sane
+	image_parts = terrain_file.split('-')
+	good_format = True
+
+	if image_parts[0] != "render":
+		good_format = False
+
+	if len(image_parts) == 7:
+		if image_parts[1] != "T":
+			good_format = False
+		if image_parts[3] != "B1":
+			good_format = False
+		if image_parts[5] != "B2":
+			good_format = False
+	elif len(image_parts) == 8:
+		if image_parts[1] != "T1":
+			good_format = False
+		if image_parts[3] != "T2":
+			good_format = False
+		if image_parts[5] != "B":
+			good_format = False
+		if image_parts[7][0] not in ("B", "F"):
+			good_format = False
+	else:
+		good_format = False
+	
+	if not good_format:
 		req.status = apache.HTTP_NOT_FOUND
 		req.write('Image: image likely not found')
 		return apache.OK
 		
-	if terrain_file[:10]=='render-T1-':
+	if image_parts[1] == "T1":
 		file=os.path.join(TERRAIN_DIR,render_corner(terrain_file))
-		sys.stderr.write('full OS path to rendered file:'+file+'\n')
-		sys.stderr.flush()
+		Logger.log.info('full OS path to rendered file:'+file)
 		req.sendfile(file)
 		return apache.OK
 		
-	elif terrain_file[:9]=='render-T-':
+	elif image_parts[1] == "T":
 		req.sendfile(os.path.join(TERRAIN_DIR,render_body(terrain_file)))
 		return apache.OK
 	
@@ -76,6 +128,8 @@ def image_handler(req):
 
 
 def render_corner(terrain_file):
+	"""Process the file name, and extract what needs to be rendered
+	for a hex corner image."""
 	t2_loc=terrain_file.find('-T2-')
 	top_location=terrain_file[10:t2_loc]
 	b_loc=terrain_file.find('-B-')
@@ -90,14 +144,15 @@ def render_corner(terrain_file):
 	return create_final_corner(top_location,bottom_location,is_forward_slash,border)
 
 def render_body(terrain_file):
+	"""Process the file name, and extract what needs to be rendered
+	for a hex body image"""
 	b1_loc=terrain_file.find('-B1-')
 	location=terrain_file[9:b1_loc] #location of the first character after "render-T-"
 	b2_loc=terrain_file.find('-B2-')
 	left_border=terrain_file[b1_loc+4:b2_loc]
 	end_loc=terrain_file.find('.png')
 	right_border=terrain_file[b2_loc+4:end_loc]
-	sys.stderr.write('render components for render_body: '+location+'  '+left_border+'   '+right_border+'\n')
-	sys.stderr.flush()
+	Logger.log.debug('render components for render_body: '+location+'  '+left_border+'   '+right_border)
 	return create_final_body(location,left_border,right_border)
 
 
@@ -114,8 +169,7 @@ def get_location_piece(stack,part):
 			file_name+='.'
 		file_name+=loc
 	file_name+='_'+part+'.png'
-	sys.stderr.write('get_location_piece filename: '+file_name+'\n')
-	sys.stderr.flush()
+	Logger.log.debug('get_location_piece filename: '+file_name)
 	if not os.path.isfile(os.path.join(TERRAIN_DIR,file_name)):
 		terrain=Image.new("RGBA",(1,1))
 		for loc in stack:
@@ -142,6 +196,8 @@ def get_terrain_piece(terrain,part):
 	return file_name
 	
 def split_terrain(terrain):
+	"""Take a full terrain image tile and fragment it into the five
+	pieces we can construct rendered images from""" 
 	if (terrain!='' and terrain!=None):
 		im=Image.open(os.path.join(TERRAIN_DIR,terrain+'.png'))
 		center_x=int(im.size[0]/2)
@@ -170,6 +226,8 @@ def split_terrain(terrain):
 		im.save(os.path.join(TERRAIN_DIR,"terrain__LR.png"))
 
 def create_final_corner(top_code, bottom_code, is_forward_slash, border_code):
+	"""Create a corner image, given the image names for the two
+	halves, plus that of the border on this edge"""
 	if is_forward_slash:
 		corner_type="F"
 		upper_type = "LR"
@@ -232,26 +290,38 @@ def get_border(border, part):
 			
 #assumption: your border image runs vertically, smack dab in the middle of the image.		
 def split_border(border):
-	im=Image.open(os.path.join(TERRAIN_DIR,border+'.png'))
-	#yes, it's more effort to maintain left & right separately.  But maybe you have a really fancy border that you don't want to be perfectly symmetrical?
-	left=im.copy();
-	right=left.copy()
-	left=im.transform(im.size,Image.AFFINE,(1,0,im.size[0]/2,0,1,0),Image.NEAREST)  #Don't need bicubic, we want to shift by an integer number of pixels.  Whether it's an integer or not.
-	right=im.transform(im.size,Image.AFFINE,(1,0,-im.size[0]/2,0,1,0),Image.NEAREST)  
-	lDraw=ImageDraw.Draw(left)
-	lDraw.rectangle((int(left.size[0]/2),0,left.size[0],left.size[1]),fill=(0,0,0,0))
-	rDraw=ImageDraw.Draw(right)
-	rDraw.rectangle((0,0,int(left.size[0]/2),left.size[1]),fill=(0,0,0,0))
-	left.save(os.path.join(TERRAIN_DIR,'border_'+border+'_L.png'))
-	right.save(os.path.join(TERRAIN_DIR,'border_'+border+'_R.png'))
+	if border != "" and border != None:
+		im=Image.open(os.path.join(TERRAIN_DIR,border+'.png'))
+		# Yes, it's more effort to maintain left & right separately.
+		# But maybe you have a really fancy border that you don't want
+		# to be perfectly symmetrical?
+		left=im.copy();
+		right=left.copy()
+		left=im.transform(im.size,Image.AFFINE,(1,0,im.size[0]/2,0,1,0),Image.NEAREST)  #Don't need bicubic, we want to shift by an integer number of pixels.  Whether it's an integer or not.
+		right=im.transform(im.size,Image.AFFINE,(1,0,-im.size[0]/2,0,1,0),Image.NEAREST)  
+		lDraw=ImageDraw.Draw(left)
+		lDraw.rectangle((int(left.size[0]/2),0,left.size[0],left.size[1]),fill=(0,0,0,0))
+		rDraw=ImageDraw.Draw(right)
+		rDraw.rectangle((0,0,int(left.size[0]/2),left.size[1]),fill=(0,0,0,0))
+		left.save(os.path.join(TERRAIN_DIR,'border_'+border+'_L.png'))
+		right.save(os.path.join(TERRAIN_DIR,'border_'+border+'_R.png'))
 	
-	#Only create the slashes if they don't already exist, because I don't like rotations if they can be avoided.
-	if (not os.path.isfile(os.path.join(TERRAIN_DIR,'border_'+border+'_F.png')) and not os.path.isfile(os.path.join(TERRAIN_DIR,'border_'+border+'_B.png'))):
-		slash=im.rotate(-60,Image.BILINEAR)
-		slash=slash.crop((int(slash.size[0]/2 - slash.size[1]*(3**.5)/4),int(slash.size[1]*.25),int(slash.size[0]/2 + slash.size[1]*(3**.5)/4),int(slash.size[1]*.75)))
-		slash.save(os.path.join(TERRAIN_DIR,'border_'+border+'_F.png'))
-		slash=slash.transpose(Image.FLIP_LEFT_RIGHT)
-		slash.save(os.path.join(TERRAIN_DIR,'border_'+border+'_B.png'))
+		#Only create the slashes if they don't already exist, because I don't like rotations if they can be avoided.
+		if (not os.path.isfile(os.path.join(TERRAIN_DIR,'border_'+border+'_F.png')) and not os.path.isfile(os.path.join(TERRAIN_DIR,'border_'+border+'_B.png'))):
+			slash=im.rotate(-60,Image.BILINEAR)
+			slash=slash.crop((int(slash.size[0]/2 - slash.size[1]*(3**.5)/4),int(slash.size[1]*.25),int(slash.size[0]/2 + slash.size[1]*(3**.5)/4),int(slash.size[1]*.75)))
+			slash.save(os.path.join(TERRAIN_DIR,'border_'+border+'_F.png'))
+			slash=slash.transpose(Image.FLIP_LEFT_RIGHT)
+			slash.save(os.path.join(TERRAIN_DIR,'border_'+border+'_B.png'))
+	else:
+		# Blank name: empty image -- generate them if they don't exist
+		im = Image.new("LA", (1, 1))
+		draw = ImageDraw.Draw(im)
+		draw.point((0, 0), fill = (0, 0))
+		im.save(os.path.join(TERRAIN_DIR, "border__L.png"))
+		im.save(os.path.join(TERRAIN_DIR, "border__R.png"))
+		im.save(os.path.join(TERRAIN_DIR, "border__F.png"))
+		im.save(os.path.join(TERRAIN_DIR, "border__B.png"))
 
 def create_final_body(terr_code, left_border, right_border):
 	file_name="render-T-"+terr_code+"-B1-"+left_border+"-B2-"+right_border+".png"
@@ -271,8 +341,9 @@ def create_final_body(terr_code, left_border, right_border):
 			left=left.resize(largest,Image.BICUBIC)
 		if (right.size<largest):
 			right=right.resize(largest,Image.BICUBIC)
-		
-		terr=Image.composite(left,terr,left)
-		terr=Image.composite(right,terr,right)
+
+		# FIXME: This throws a bad transparency mask
+		#terr=Image.composite(left,terr,left)
+		#terr=Image.composite(right,terr,right)
 		terr.save(os.path.join(TERRAIN_DIR,file_name))
 	return file_name
