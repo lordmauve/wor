@@ -15,6 +15,7 @@ class Location(SerObject):
 	cache_by_pos = {}
 
 	move_ap = 0
+	image_name = 'colin'
 
 	####
 	# Load the location
@@ -48,6 +49,9 @@ class Location(SerObject):
 			# Push the underlying location down
 			location = tmploc
 			row = cur.fetchone()
+
+		if location != None:
+			location._above = None
 
 		return location
 
@@ -179,9 +183,18 @@ class Location(SerObject):
 		else:
 			fields = [ ]
 
+		image_stack = []
+		for overlay in self.stack_layers():
+			log.debug("Overlay: locid = " + str(overlay._id))
+			image_stack = overlay.build_image_stack(image_stack)
+		ret['stack'] = '.'.join(image_stack)
+
 		for k in ( '_underneath', '_above', 'cache_by_id', 'cache_by_pos' ):
 			if k in fields:
-				fields.delete(k)
+				fields.remove(k)
+
+		ret['_underneath'] = str(self._underneath)
+		ret['_above'] = str(self._above)
 
 		return self.build_context(ret, fields)
 
@@ -189,7 +202,19 @@ class Location(SerObject):
 	####
 	# Basic properties
 	def power(self, name):
+		"""Return the value of the named power attribute"""
 		return getattr(self, name, 0)
+
+	def build_image_stack(self, image_stack):
+		"""Given the stack of images to render the terrain up to but
+		not including this overlay, return the image stack needed to
+		render the terrain including this overlay."""
+		if 'image_name' in self.__dict__:
+			image_stack.append(self.image_name)
+		return image_stack
+
+	def __str__(self):
+		return "[%s;%d]" % (str(self.pos), self.overlay)
 
 
 	def e(self):
@@ -201,6 +226,7 @@ class Location(SerObject):
 		return self.load_by_pos(pos)
 
 	def w(self):
+		"""Return the hex to the west of this one"""
 		if hasattr(self, 'warp_w'):
 			return self.load_by_pos(self.warp_w)
 		pos = copy.copy(self.pos)
@@ -208,6 +234,7 @@ class Location(SerObject):
 		return self.load_by_pos(pos)
 
 	def ne(self):
+		"""Return the hex to the north-east of this one"""
 		if hasattr(self, 'warp_ne'):
 			return self.load_by_pos(self.warp_ne)
 		pos = copy.copy(self.pos)
@@ -215,6 +242,7 @@ class Location(SerObject):
 		return self.load_by_pos(pos)
 
 	def nw(self):
+		"""Return the hex to the north-west of this one"""
 		if hasattr(self, 'warp_nw'):
 			return self.load_by_pos(self.warp_nw)
 		pos = copy.copy(self.pos)
@@ -223,6 +251,7 @@ class Location(SerObject):
 		return self.load_by_pos(pos)
 
 	def se(self):
+		"""Return the hex to the south-east of this one"""
 		if hasattr(self, 'warp_se'):
 			return self.load_by_pos(self.warp_se)
 		pos = copy.copy(self.pos)
@@ -231,6 +260,7 @@ class Location(SerObject):
 		return self.load_by_pos(pos)
 
 	def sw(self):
+		"""Return the hex to the south-west of this one"""
 		if hasattr(self, 'warp_sw'):
 			return self.load_by_pos(self.warp_se)
 		pos = copy.copy(self.pos)

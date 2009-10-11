@@ -74,9 +74,12 @@ def all_fields(obj):
 	fields = filter(lambda x: not isinstance(getattr(obj, x),
 											 types.MethodType),
 					fields)
+
 	# Filter out other unwanted bits
-	fields.remove('cache_by_name')
-	fields.remove('inventory')
+	for f in ('cache_by_name', 'inventory'):
+		if f in fields:
+			fields.remove(f)
+
 	return fields
 
 
