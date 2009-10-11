@@ -143,26 +143,17 @@ class Location(SerObject):
 	####
 	# Property access
 
-	# These reimplement the property access functions in SerObject.py,
-	# by walking down the stack in order until we hit the bottom or
-	# find the property that we asked for.
-	def __getitem__(self, key):
-		if key not in self.__dict__ and key[0] != '_':
-			if not self._demand_load_property(key):
-				if self._underneath != None:
-					return self._underneath.__getitem__(key)
-				else:
-					self.__dict__[key] = None
-		return self.__dict__[key]
-
+	# Walk down the stack in order until we hit the bottom or find the
+	# property that we asked for.
 	def __getattr__(self, key):
-		if key not in self.__dict__ and key[0] != '_':
-			if not self._demand_load_property(key):
-				if self._underneath != None:
-					return self._underneath.__getattr__(key)
-				else:
-					raise AttributeError, (key, self.__class__)
-		return self.__dict__[key]
+		try:
+			return SerObject.__getattribute__(self, key)
+		except AttributeError:
+			if self._underneath != None:
+				return self._underneath.__getattr__(key)
+
+		# This line is not reachable
+		raise AttributeError, (key, self.__class__)
 
 	def context_get(self):
 		"""Return a dictionary of properties of this object, given the
@@ -185,7 +176,6 @@ class Location(SerObject):
 
 		image_stack = []
 		for overlay in self.stack_layers():
-			log.debug("Overlay: locid = " + str(overlay._id))
 			image_stack = overlay.build_image_stack(image_stack)
 		ret['stack'] = '.'.join(image_stack)
 
@@ -209,8 +199,10 @@ class Location(SerObject):
 		"""Given the stack of images to render the terrain up to but
 		not including this overlay, return the image stack needed to
 		render the terrain including this overlay."""
-		if 'image_name' in self.__dict__:
+		try:
 			image_stack.append(self.image_name)
+		except AttributeError:
+			pass
 		return image_stack
 
 	def __str__(self):
