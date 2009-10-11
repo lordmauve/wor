@@ -7,6 +7,7 @@ function load_game()
 {
 	update_player_details();
 	update_player_actions();
+	update_map();
 	update_messages();
 }
 

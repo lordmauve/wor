@@ -12,6 +12,7 @@
 <script src='/js/item.js' type='text/javascript'></script>
 <script src='/js/messages.js' type='text/javascript'></script>
 <script src='/js/inventory.js' type='text/javascript'></script>
+<script src='/js/map.js' type='text/javascript'></script>
 <link rel='stylesheet' type='text/css' href='default.css'/>
 
 </head>
@@ -38,12 +39,12 @@
           <td>\</td>
         </tr>
         <!-- hex bodies for first row-->
-        <tr align="center" style="border:solid 0px">
+        <tr class="hex_body" style="border:solid 0px">
           <td colspan="2"></td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td>|</td>
+          <td colspan="2" id='map_b2_4'>body</td>
+          <td colspan="2" id='map_b2_3'>body</td>
+          <td colspan="2" id='map_b2_2'>body</td>
+          <td></td>
         </tr>
         <!-- hex corners; bottom of first row-->
         <tr class="hex_corner">
@@ -58,13 +59,13 @@
           <td>\</td>
         </tr>
         <!-- hex bodies for second row-->
-        <tr align="center">
+        <tr class="hex_body">
           <td></td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td>|</td>
+          <td colspan="2" id='map_b2_5'>body</td>
+          <td colspan="2" id='map_b1_2'>body</td>
+          <td colspan="2" id='map_b1_1'>body</td>
+          <td colspan="2" id='map_b2_1'>body</td>
+          <td></td>
         </tr>
         <!-- hex corners; bottom of second row-->
         <tr class="hex_corner">
@@ -80,13 +81,13 @@
           <td>\</td>
         </tr>
          <!-- hex bodies for third row-->
-        <tr align="center">
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td>|</td>
+        <tr class="hex_body">
+          <td colspan="2" id='map_b2_6'>body</td>
+          <td colspan="2" id='map_b1_3'>body</td>
+          <td colspan="2" id='map_b0_0'>body</td>
+          <td colspan="2" id='map_b1_0'>body</td>
+          <td colspan="2" id='map_b2_0'>body</td>
+          <td></td>
         </tr>
         <!-- hex corners; bottom of third row-->
         <tr class="hex_corner">
@@ -102,13 +103,13 @@
           <td>/</td>
         </tr>
         <!-- hex bodies for fourth row-->
-        <tr align="center">
+        <tr class="hex_body">
           <td></td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td>|</td>
+          <td colspan="2" id='map_b2_7'>body</td>
+          <td colspan="2" id='map_b1_4'>body</td>
+          <td colspan="2" id='map_b1_5'>body</td>
+          <td colspan="2" id='map_b2_11'>body</td>
+          <td></td>
         </tr>
         <!-- hex corners; bottom of fourth row-->
         <tr class="hex_corner">
@@ -123,12 +124,12 @@
           <td>/</td>
         </tr>
         <!-- hex bodies for fifth row-->
-        <tr align="center">
+        <tr class="hex_body">
           <td colspan="2"></td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td colspan="2">body</td>
-          <td>|</td>
+          <td colspan="2" id='map_b2_8'>body</td>
+          <td colspan="2" id='map_b2_9'>body</td>
+          <td colspan="2" id='map_b2_10'>body</td>
+          <td></td>
         </tr>
         <!-- bottom row's bottom corners -->
         <tr class="hex_corner">
