@@ -35,7 +35,7 @@ def location_handler(req, loc, components):
 
 def neighbourhood_handler(req, loc, components):
 	"""Handle a request for the neighbourhood of this location"""
-	if len(components) != 1:
+	if len(components) != 0:
 		return apache.HTTP_NOT_FOUND
 
 	if req.method != 'GET':
