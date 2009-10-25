@@ -189,26 +189,22 @@ class ImageRequest:
 
 		# This mask is full transparency at the top, so we use it for
 		# drawing the bottom half of the image
-		bottom_mask = Image.new("1", upper_body.get_image().size)
+		bottom_mask = Image.new("1", upper_body.get_image().size, 1)
 		md = ImageDraw.Draw(bottom_mask)
 		if self.edge_forward:
 			md.polygon( ((0, 0),
 						 (bottom_mask.size[0], 0),
 						 (0, bottom_mask.size[1])),
-						fill=1)
+						fill=0)
 		else:
 			md.polygon( ((0, 0),
 						 (bottom_mask.size[0], 0),
 						 (bottom_mask.size[0], bottom_mask.size[1])),
-						fill=1)
-
-		# This mask is the other half, used for drawing the top half
-		# of the image
-		top_mask = bottom_mask.transpose(Image.ROTATE_180)
+						fill=0)
 
 		# Construct our image and composite it together
 		image = Image.new("RGBA", upper_body.get_image().size)
-		image = upper_body.composite(image, top_mask)
+		image = upper_body.composite(image)
 		image = lower_body.composite(image, bottom_mask)
 
 		# Save the image and return it
