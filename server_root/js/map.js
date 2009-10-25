@@ -54,8 +54,11 @@ function load_neighbourhood(req)
 					if(loc.name == null)
 						loc.name = "";
 
+					var xy = rd_to_xy(r, d);
+					var x = xy[0];
+					var y = xy[1];
 					body.innerHTML = loc.name;
-					var image_name = "/img/terrain/render-T-";
+					var image_name = "/img/terrain/default/render-T-";
 					image_name += loc.stack;
 					image_name += "-B1--B2-";
 					image_name += ".png";
@@ -77,4 +80,40 @@ function load_neighbourhood(req)
 			}
 		}
 	}
+}
+
+function rd_to_xy(r, d)
+{
+	if(r == 0)
+		return Array(0, 0);
+
+	var sector = Math.floor(d / r);
+	var direction = 1;
+	if(sector >= 3)
+	{
+		sector -= 3;
+		direction = -1;
+	}
+	var distance = d % r;
+
+	var x = -9999;
+	var y = -9999;
+
+	switch(sector)
+	{
+		case 0:
+			x = direction * (r - distance);
+			y = direction * distance;
+			break;
+		case 1:
+			x = direction * -distance;
+			y = direction * r;
+			break;
+		case 2:
+			x = direction * -r;
+			y = direction * (r - distance);
+			break;
+	}
+
+	return Array(x, y);
 }

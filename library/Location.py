@@ -15,7 +15,7 @@ class Location(SerObject):
 	cache_by_pos = {}
 
 	move_ap = 0
-	image_name = 'colin'
+	image_name = 'ferns.blob'
 
 	####
 	# Load the location

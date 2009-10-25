@@ -98,3 +98,14 @@ def set_request_id():
 	request_time = time.time()
 	request_sequence = request_sequence + 1
 	request_id = str(os.getpid()) + "." + str(request_sequence)
+
+####
+# Server configuration
+terrain_dir = ""
+
+def set_server_config(config):
+	global terrain_dir
+	terrain_dir = os.path.join(config['wor.root_path'],
+							   'server_root',
+							   'img',
+							   'terrain')
