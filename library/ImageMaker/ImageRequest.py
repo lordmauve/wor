@@ -112,9 +112,7 @@ class ImageRequest:
 			good_format = False
 
 		if not good_format:
-			req.status = apache.HTTP_NOT_FOUND
-			req.write('Image: image likely not found')
-			raise apache.SERVER_RETURN
+			raise apache.HTTP_NOT_FOUND
 
 		self.is_body = (len(image_parts) == 7)
 
