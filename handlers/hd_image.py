@@ -22,6 +22,8 @@ def image_handler(req):
 	except apache.SERVER_RETURN, ex:
 		# Catch and re-raise apache/mod_python exceptions here
 		raise
+	except apache.HTTP_NOT_FOUND, ex:
+		raise
 	except IOError, ex:
 		# IOErrors in this code are generally going to be simple
 		# file-not-found errors
