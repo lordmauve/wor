@@ -29,7 +29,8 @@ class ImageRequest:
 					 [ Context.terrain_dir, self.set_path ]) == Context.terrain_dir ):
 			req.status = apache.HTTP_NOT_FOUND
 			req.write('Image set not found')
-			raise apache.SERVER_RETURN			
+			Logger.log.info("Image set not found: " + self.set_path)
+			raise apache.SERVER_RETURN
 
 	def get_image(self):
 		"""Return the full path name of the requested file for this
@@ -80,10 +81,12 @@ class ImageRequest:
 
 		# Do a check for correct format
 		if image_parts[0] not in ("body", "edge"):
-			raise apache.HTTP_NOT_FOUND
+			Logger.log.info("Unknown leading name part: " + image_parts[0])
+			raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
 
 		if len(image_parts) % 2 != 1:
-			raise apache.HTTP_NOT_FOUND
+			Logger.log.info("Unexpected number of name parts")
+			raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
 
 		self.is_body = (image_parts[0] == "body")
 		if self.is_body:
@@ -98,7 +101,8 @@ class ImageRequest:
 		while(i < len(image_parts)-1):
 			# More sanity-checking
 			if image_parts[i] not in allowed_list:
-				raise apache.HTTP_NOT_FOUND
+				Logger.log.info("Image part not allowed here: " + image_parts[i])
+				raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
 			# Store the components
 			self.request_parts[image_parts[i]] = image_parts[i+1].split('.')
 			i += 2
@@ -106,6 +110,7 @@ class ImageRequest:
 	def _check_cache(self, file_name):
 		"""Check whether the item is in the local cache"""
 		# FIXME: Handle web caching control headers here, too
+		Logger.log.debug("Looking for canonical file: " + file_name)
 		if os.path.isfile(file_name):
 			Logger.log.debug("Sending cached file: " + file_name)
 			return True
@@ -120,15 +125,6 @@ class ImageRequest:
 		# Borders must exist
 		# FIXME
 
-		# Canonicalise the file name
-		file_name = "body-T-" + body.base_name() \
-					+ "-B0-" \
-					+ "-B3-" \
-					+ ".png"
-		file_name = os.path.join(self.set_path, "cache", file_name)
-		if self._check_cache(file_name):
-			return file_name
-
 		# Get the components we need
 		body = HexComponent(
 			self.set,
@@ -142,6 +138,15 @@ class ImageRequest:
 		#	self.set,
 		#	self.request_parts["B0"],
 		#	Part.EDGE_R)
+
+		# Canonicalise the file name
+		file_name = "body-T-" + body.base_name() \
+					+ "-B0-" \
+					+ "-B3-" \
+					+ ".png"
+		file_name = os.path.join(self.set_path, "cache", file_name)
+		if self._check_cache(file_name):
+			return file_name
 
 		# Paste it all together
 		image = Image.new("RGBA", body.get_image().size)
@@ -160,12 +165,15 @@ class ImageRequest:
 		if ("B" in self.request_parts
 			and ("B1" in self.request_parts
 				 or "B2" in self.request_parts)):
-			raise apache.HTTP_NOT_FOUND
+			Logger.log.info("B used with one of B1 and B2")
+			raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
 		# D must be present and have a single F or R following
 		if len(self.request_parts["D"]) != 1:
-			raise apache.HTTP_NOT_FOUND
-		if self.request_parts["D"] not in ("F", "R"):
-			raise apache.HTTP_NOT_FOUND				
+			Logger.log.info("D parameter does not have exactly one dotted part")
+			raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
+		if self.request_parts["D"][0] not in ("F", "R"):
+			Logger.log.info("D parameter is neither F nor R")
+			raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND				
 
 		# Hang on to direction
 		self.edge_forward = (self.request_parts["D"][0] == "F")
@@ -184,6 +192,15 @@ class ImageRequest:
 			lower_side = Part.HEX_UL
 			direction = "F"
 
+		upper_body = HexComponent(
+			self.set,
+			self.request_parts["T1"],
+			upper_side)
+		lower_body = HexComponent(
+			self.set,
+			self.request_parts["T2"],
+			lower_side)
+
 		# Canonicalise the filename and check the cache
 		file_name = "edge-T1-" + upper_body.base_name() \
 					+ "-T2-" + lower_body.base_name() \
@@ -194,15 +211,6 @@ class ImageRequest:
 		file_name = os.path.join(self.set_path, "cache", file_name)
 		if self._check_cache(file_name):
 			return file_name
-
-		upper_body = HexComponent(
-			self.set,
-			self.request_parts["T1"],
-			upper_side)
-		lower_body = HexComponent(
-			self.set,
-			self.request_parts["T2"],
-			lower_side)
 
 		# This mask is full transparency at the top, so we use it for
 		# drawing the bottom half of the image
