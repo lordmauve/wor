@@ -2,6 +2,7 @@
 
 import os.path
 import Image
+import ImageChops
 
 import Logger
 import Context
