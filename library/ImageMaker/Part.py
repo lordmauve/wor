@@ -42,7 +42,7 @@ class Part(object):
 			self._pil_image = Image.open(component_name)
 		return self._pil_image
 
-	def composite(self, destination, mask = None):
+	def composite(self, destination, user_mask = None):
 		"""Composite ourselves into the destination image, generating
 		all cached components as needed"""
 		Logger.log.debug("Compositing " + self.base_name())
@@ -51,15 +51,35 @@ class Part(object):
 		if destination.size != im.size:
 			im.resize(destination.size, BICUBIC)
 
-		if mask == None:
-			for band in zip(im.getbands(), im.split()):
-				if band[0] == "A":
-					Logger.log.debug("Found transparency layer")
-					mask = band[1]
+		# Find any alpha layer in the image
+		transp = None
+		for band in zip(im.getbands(), im.split()):
+			if band[0] == "A":
+				Logger.log.debug("Found transparency layer")
+				transp = band[1]
 
-		if mask == None:
-			Logger.log.debug("Using flat mask")
-			mask = Image.new("1", im.size, 1)
+		# Decide what blending we will be doing
+		if user_mask == None:
+			if transp == None:
+				# We have no concept of transparency at all -- use a
+				# flat setting
+				Logger.log.debug("Using flat mask")
+				mask = Image.new("1", im.size, 1)
+			else:
+				# We have a transparency but no user mask
+				mask = transp
+		else:
+			if transp == None:
+				# We have a mask but no transparency -- use the user's
+				# mask
+				mask = user_mask
+			else:
+				# If we have both a supplied mask and our own
+				# transparency, use both -- where either is
+				# transparent, set transparency (could use
+				# ImageChops.multiply() instead?)
+				mask = ImageChops.darker(user_mask.convert("L"),
+										 transp.convert("L"))
 
 		return Image.composite(im, destination, mask)
 

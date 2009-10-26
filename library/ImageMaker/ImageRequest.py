@@ -37,16 +37,6 @@ class ImageRequest:
 
 		Logger.log.debug("File requested: " + self.requested_file_name)
 
-		# If it's already there (and/or somebody's just asking for a
-		# base file), give it to 'em.
-		# FIXME: Also check cache control headers here
-		expected_path = os.path.join(self.set_path, "cache", self.requested_file_name)
-		if os.path.isfile(expected_path):
-			Logger.log.debug("Sending cached file: " + self.requested_file_name)
-			return expected_path
-		
-		Logger.log.debug("Didn't find file: " + self.requested_file_name)
-	
 		# Generate the file.  For now, we'll only hand out
 		# completely-rendered files (plus any already-existing file).
 		# Only open up the lower functions if there turns out to be
@@ -89,49 +79,55 @@ class ImageRequest:
 		self.image_format = last_part[-1]
 
 		# Do a check for correct format
-		if image_parts[0] != "render":
-			good_format = False
-
-		if len(image_parts) == 7:
-			if image_parts[1] != "T":
-				good_format = False
-			if image_parts[3] != "B1":
-				good_format = False
-			if image_parts[5] != "B2":
-				good_format = False
-		elif len(image_parts) == 8:
-			if image_parts[1] != "T1":
-				good_format = False
-			if image_parts[3] != "T2":
-				good_format = False
-			if image_parts[5] != "B":
-				good_format = False
-			if image_parts[7][0] not in ("B", "F"):
-				good_format = False
-		else:
-			good_format = False
-
-		if not good_format:
+		if image_parts[0] not in ("body", "edge"):
 			raise apache.HTTP_NOT_FOUND
 
-		self.is_body = (len(image_parts) == 7)
+		if len(image_parts) % 2 != 1:
+			raise apache.HTTP_NOT_FOUND
+
+		self.is_body = (image_parts[0] == "body")
+		if self.is_body:
+			allowed_list = ("T", "B0", "B3")
+		else:
+			allowed_list = ("T1", "T2", "B", "B1", "B2", "D")
 
 		# Read the request details into a hash for easy retrieval,
 		# constructing the image components we need
 		self.request_parts = {}
 		i = 1
 		while(i < len(image_parts)-1):
+			# More sanity-checking
+			if image_parts[i] not in allowed_list:
+				raise apache.HTTP_NOT_FOUND
+			# Store the components
 			self.request_parts[image_parts[i]] = image_parts[i+1].split('.')
 			i += 2
-		# Direction, for edge pieces
-		if not self.is_body:
-			self.edge_forward = (image_parts[7][0] == "F")
+
+	def _check_cache(self, file_name):
+		"""Check whether the item is in the local cache"""
+		# FIXME: Handle web caching control headers here, too
+		if os.path.isfile(file_name):
+			Logger.log.debug("Sending cached file: " + file_name)
+			return True
+		Logger.log.debug("Didn't find file: " + self.requested_file_name + " canonicalised at " + file_name)
+		return False
 
 	def _process_body(self):
 		"""Process the request as a hex body"""
-		# Do some sanity checks
+		# Do some sanity checks: T must exist -- if not, create it
 		if "T" not in self.request_parts:
 			self.request_parts["T"] = []
+		# Borders must exist
+		# FIXME
+
+		# Canonicalise the file name
+		file_name = "body-T-" + body.base_name() \
+					+ "-B0-" \
+					+ "-B3-" \
+					+ ".png"
+		file_name = os.path.join(self.set_path, "cache", file_name)
+		if self._check_cache(file_name):
+			return file_name
 
 		# Get the components we need
 		body = HexComponent(
@@ -140,11 +136,11 @@ class ImageRequest:
 			Part.CENTRE)
 		#left = EdgeComponent(
 		#	self.set,
-		#	self.request_parts["B1"],
+		#	self.request_parts["B3"],
 		#	Part.EDGE_L)
 		#right = EdgeComponent(
 		#	self.set,
-		#	self.request_parts["B2"],
+		#	self.request_parts["B0"],
 		#	Part.EDGE_R)
 
 		# Paste it all together
@@ -152,17 +148,29 @@ class ImageRequest:
 		image = body.composite(image)
 		#image = left.composite(image)
 		#image = right.composite(image)
-		
-		file_name = "render-T-" + body.base_name() \
-					+ "-B1-" \
-					+ "-B2-" \
-					+ ".png"
-		file_name = os.path.join(Context.terrain_dir, self.set, "cache", file_name)
+
+		# The cache name is in canonical order
 		image.save(file_name)
 		return file_name
 
 	def _process_edge(self):
 		"""Process the request as an edge piece"""
+		# More sanity-checks:
+		# B1, B2 are incompatible with B
+		if ("B" in self.request_parts
+			and ("B1" in self.request_parts
+				 or "B2" in self.request_parts)):
+			raise apache.HTTP_NOT_FOUND
+		# D must be present and have a single F or R following
+		if len(self.request_parts["D"]) != 1:
+			raise apache.HTTP_NOT_FOUND
+		if self.request_parts["D"] not in ("F", "R"):
+			raise apache.HTTP_NOT_FOUND				
+
+		# Hang on to direction
+		self.edge_forward = (self.request_parts["D"][0] == "F")
+
+		# We must have T1 and T2 defined -- if not, create some empties
 		if "T1" not in self.request_parts:
 			self.request_parts["T1"] = []
 		if "T2" not in self.request_parts:
@@ -175,6 +183,17 @@ class ImageRequest:
 			upper_side = Part.HEX_LR
 			lower_side = Part.HEX_UL
 			direction = "F"
+
+		# Canonicalise the filename and check the cache
+		file_name = "edge-T1-" + upper_body.base_name() \
+					+ "-T2-" + lower_body.base_name() \
+					+ "-B1-" \
+					+ "-B2-" \
+					+ "-D-" + direction \
+					+ ".png"
+		file_name = os.path.join(self.set_path, "cache", file_name)
+		if self._check_cache(file_name):
+			return file_name
 
 		upper_body = HexComponent(
 			self.set,
@@ -206,12 +225,6 @@ class ImageRequest:
 		image = lower_body.composite(image, bottom_mask)
 
 		# Save the image and return it
-		file_name = "render-T1-" + upper_body.base_name() \
-					+ "-T2-" + lower_body.base_name() \
-					+ "-B-" \
-					+ "-" + direction \
-					+ ".png"
-		file_name = os.path.join(Context.terrain_dir, self.set, "cache", file_name)
 		image.save(file_name)
 		return file_name
 
