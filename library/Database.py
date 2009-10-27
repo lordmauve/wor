@@ -1,8 +1,12 @@
 #######
 # Underlying database storage
 
+import time
 import psycopg2
 import DBAuth
+
+import sys
+import traceback
 
 DB = psycopg2.connect(host = DBAuth.host,
 					  database = DBAuth.name,
@@ -23,19 +27,29 @@ from Logger import log, exception_log
 # function with the right parameters.
 def retry_process(process):
 	complete = False
-	while not complete:
+	attempts = 5
+	ret = False
+	while not complete and attempts > 0:
 		xact = DB.cursor()
 
-		xact.execute("BEGIN TRANSACTION")
-		ret = process()
-		xact.execute("COMMIT")
-		complete = True
-		# FIXME: This doesn't actually throw any exceptions if there's
-		# a collision. Instead, the second process to get to the
-		# locked record hangs until the first process commits. When
-		# the first process commits (or rolls back), the second
-		# process may _attempt_ to update. This needs more think --
-		# possibly explicit locking. Talk to gdb/rph about what we can
-		# do?
+		try:
+			ret = process()
+			DB.commit()
+			complete = True
+		except Exception, ex:
+			log.debug("Exception!: " + str(type(ex)))
+			msg = traceback.format_exception(*(sys.exc_info()))
+			log.error(''.join(msg))
+			attempts -= 1
+			DB.rollback()
+			time.sleep(5)
+			
+		# FIXME: This doesn't necessarily throw any exceptions if
+		# there's a collision. Instead, the second process to get to
+		# the locked record hangs until the first process
+		# commits. When the first process commits (or rolls back), the
+		# second process may _attempt_ to update. This needs more
+		# think -- possibly explicit locking. Talk to gdb/rph about
+		# what we can do?
 
 	return ret
