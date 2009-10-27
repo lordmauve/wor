@@ -1,6 +1,19 @@
 /////////////
 // Map-drawing functions
 
+// Create the logger
+var log = log4javascript.getLogger(); 
+
+// Create a PopUpAppender with default options
+var popUpAppender = new log4javascript.PopUpAppender();
+
+// Change the desired configuration options
+popUpAppender.setFocusPopUp(true);
+popUpAppender.setNewestMessageAtTop(true);
+
+// Add the appender to the logger
+log.addAppender(popUpAppender);
+
 function update_map()
 {
 	basic_ajax_get("/location/neighbourhood", load_neighbourhood);
@@ -48,21 +61,121 @@ function load_neighbourhood(req)
 				for(var d = 0; d < locations[r].length; d++)
 				{
 					loc = locations[r][d];
-					body = document.getElementById("map_b" + r + "_" + d);
-					if(body == null)
-						continue;
-					if(loc.name == null)
-						loc.name = "";
-
 					var xy = rd_to_xy(r, d);
 					var x = xy[0];
 					var y = xy[1];
+
+					log.debug("Setting location xy = (" + x + ", " + y + "), rd = [" + r + ", " + d + "]")
+
+					var body = document.getElementById("map_b" + x + "_" + y);
+					if(body == null)
+					{
+						log.debug("Skipping non-present hex: map_b" + x + "_" + y);
+						continue;
+					}
+					if(loc.name == null)
+						loc.name = "";
+
+					var rd = xy_to_rd(x, y);
+
 					body.innerHTML = loc.name;
-					var image_name = "/img/terrain/default/render-T-";
-					image_name += loc.stack;
-					image_name += "-B1--B2-";
+
+					// Set the hex body image
+					var locstack = loc.stack;
+
+					if(locstack == null)
+						locstack = "";
+
+					var image_name = "/img/terrain/default/body";
+					image_name += "-T-" + loc.stack;
 					image_name += ".png";
 					body.style.backgroundImage = "url(\"" + image_name + "\")";
+
+					// Set the images above the body
+					if(y >= 0)
+					{
+						var elt_name = "map_e" + x + "_" + y + "_n";
+						var edge = document.getElementById(elt_name + "e");
+						if(edge == null)
+							log.debug("Skipping missing edge: " + elt_name + "e");
+						else
+						{
+							var rd = xy_to_rd(x-1, y+1);
+							var nbr = locations[rd[0]][rd[1]];
+
+							var nbrstack = nbr.stack;
+							if(nbrstack == null)
+								nbrstack = "";
+
+							var image_name = "/img/terrain/default/edge-D-R";
+							image_name += "-T1-" + nbrstack;
+							image_name += "-T2-" + locstack;
+							image_name += ".png";
+							edge.style.backgroundImage = "url(\"" + image_name + "\")";
+						}
+
+						edge = document.getElementById(elt_name + "w");
+						if(edge == null)
+							log.debug("Skipping missing edge: " + elt_name + "w");
+						else
+						{
+							var rd = xy_to_rd(x, y+1);
+							var nbr = locations[rd[0]][rd[1]];
+
+							var nbrstack = nbr.stack;
+							if(nbrstack == null)
+								nbrstack = "";
+
+							var image_name = "/img/terrain/default/edge-D-F";
+							image_name += "-T1-" + nbrstack;
+							image_name += "-T2-" + locstack;
+							image_name += ".png";
+							edge.style.backgroundImage = "url(\"" + image_name + "\")";
+						}
+					}
+
+					// Set the images below the body
+					if(y <= 0)
+					{
+						var elt_name = "map_e" + x + "_" + y + "s";
+						var edge = document.getElementById(elt_name + "e");
+						if(edge == null)
+							log.debug("Skipping missing edge: " + elt_name + "e");
+						else
+						{
+							var rd = xy_to_rd(x, y-1);
+							var nbr = locations[rd[0]][rd[1]];
+
+							var nbrstack = nbr.stack;
+							if(nbrstack == null)
+								nbrstack = "";
+
+							var image_name = "/img/terrain/default/body";
+							image_name += "-T1-" + locstack;
+							image_name += "-T2-" + nbrstack;
+							image_name += ".png";
+							edge.style.backgroundImage = "url(\"" + image_name + "\")";
+						}
+
+						edge = document.getElementById(elt_name + "w");
+						if(edge == null)
+							log.debug("Skipping missing edge: " + elt_name + "e");
+						else
+						{
+							var rd = xy_to_rd(x+1, y-1);
+							var nbr = locations[rd[0]][rd[1]];
+
+							var nbrstack = nbr.stack;
+							if(nbrstack == null)
+								nbrstack = "";
+							
+							var image_name = "/img/terrain/default/body";
+							image_name += "-T1-" + locstack;
+							image_name += "-T2-" + nbrstack;
+							image_name += ".png";
+							edge.style.backgroundImage = "url(\"" + image_name + "\")";
+						}
+					}
 				}
 			}
 		}
@@ -116,4 +229,28 @@ function rd_to_xy(r, d)
 	}
 
 	return Array(x, y);
+}
+
+function xy_to_rd(x, y)
+{
+	if(x == 0 && y == 0)
+		return Array(0, 0);
+
+	var r = Math.max(Math.abs(x), Math.max(Math.abs(y), Math.abs(x+y)));
+
+	// Handle the six sectors separately
+	if(x > 0 && y >= 0)
+		d = y;
+	else if(y > 0 && (x == 0 || -x < y))
+		d = r - x;
+	else if(y > 0)
+		d = 3*r - y;
+	else if(x < 0 && y <= 0)
+		d = 3*r - y;
+	else if(y < 0 && (x == 0 || x < -y))
+		d = 4*r + x;
+	else
+		d = 6*r + y;
+
+	return Array(r, d);
 }
