@@ -54,10 +54,12 @@ def parse_input(req):
 	while True:
 		# Get the next line of input
 		line = req.readline()
+		if line == '': # EOF
+			break
 		# Remove the trailing /n and/or /r
 		line = line.rstrip('\n\r')
-		if line == '':
-			break
+		if line == '': # Empty line
+			continue
 
 		# Process the input
 		if line[0] == '-':
