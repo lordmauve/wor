@@ -51,7 +51,7 @@ class Part(object):
 		
 		im = self.get_image()
 		if destination.size != im.size:
-			im.resize(destination.size, BICUBIC)
+			im.resize(destination.size, Image.BICUBIC)
 
 		# Find any alpha layer in the image
 		transp = None
