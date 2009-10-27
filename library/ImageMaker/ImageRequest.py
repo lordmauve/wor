@@ -8,6 +8,7 @@ from mod_python import apache
 
 import Logger
 import Context
+import Util
 from HexFragment import HexFragment
 from EdgeFragment import EdgeFragment
 from HexComponent import HexComponent
@@ -23,15 +24,7 @@ class ImageRequest:
 		self.set_path = \
 			os.path.normpath(
 				os.path.join(Context.terrain_dir, self.set))
-		# Check that we haven't gone outside the main terrain directory
-		if not ( os.path.isdir(self.set_path)
-				 and os.path.commonprefix(
-					 [ Context.terrain_dir, self.set_path ]) == Context.terrain_dir ):
-			req.status = apache.HTTP_NOT_FOUND
-			req.write('Image set not found')
-			Logger.log.info("Image set not found: " + self.set_path)
-			raise apache.SERVER_RETURN
-
+			
 	def get_image(self):
 		"""Return the full path name of the requested file for this
 		object, constructing it if necessary."""
@@ -52,18 +45,6 @@ class ImageRequest:
 		else:
 			# It's an edge piece
 			return self._process_edge()
-
-		#if image_parts[1] == "T1":
-		#	file=os.path.join(Context.terrain_dir, render_corner(terrain_set, terrain_file))
-		#	Logger.log.info('full OS path to rendered file:'+file)
-		#	req.sendfile(file)
-		#elif image_parts[1] == "T":
-		#	req.sendfile(os.path.join(Context.terrain_dir, render_body(terrain_set, terrain_file)))
-		#else:
-		#	req.status=apache.HTTP_NOT_FOUND
-		#	req.write('Image: unsupported image type.')
-		#return apache.OK
-
 
 	def _get_request_components(self):
 		"""Break down the requested file name into components."""
