@@ -137,7 +137,7 @@ function load_neighbourhood(req)
 					// Set the images below the body
 					if(y <= 0)
 					{
-						var elt_name = "map_e" + x + "_" + y + "s";
+						var elt_name = "map_e" + x + "_" + y + "_s";
 						var edge = document.getElementById(elt_name + "e");
 						if(edge == null)
 							log.debug("Skipping missing edge: " + elt_name + "e");
@@ -150,7 +150,7 @@ function load_neighbourhood(req)
 							if(nbrstack == null)
 								nbrstack = "";
 
-							var image_name = "/img/terrain/default/body";
+							var image_name = "/img/terrain/default/body-D-R";
 							image_name += "-T1-" + locstack;
 							image_name += "-T2-" + nbrstack;
 							image_name += ".png";
@@ -159,7 +159,7 @@ function load_neighbourhood(req)
 
 						edge = document.getElementById(elt_name + "w");
 						if(edge == null)
-							log.debug("Skipping missing edge: " + elt_name + "e");
+							log.debug("Skipping missing edge: " + elt_name + "w");
 						else
 						{
 							var rd = xy_to_rd(x+1, y-1);
@@ -169,7 +169,7 @@ function load_neighbourhood(req)
 							if(nbrstack == null)
 								nbrstack = "";
 							
-							var image_name = "/img/terrain/default/body";
+							var image_name = "/img/terrain/default/body-D-R";
 							image_name += "-T1-" + locstack;
 							image_name += "-T2-" + nbrstack;
 							image_name += ".png";
