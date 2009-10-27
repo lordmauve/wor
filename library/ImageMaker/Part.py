@@ -23,9 +23,10 @@ class Part(object):
 	EDGE_B = 8
 	NAMES = [ 'M', 'UR', 'UL', 'LL', 'LR', 'L', 'R', 'F', 'B' ]
 
-	def __init__(self, image_set):
-		self.set = image_set
-		self.set_path = os.path.join(Context.terrain_dir, image_set)
+	def __init__(self, meta):
+		self.meta = meta
+		self.set = meta["image-set"]
+		self.set_path = os.path.join(Context.terrain_dir, self.set)
 		self._pil_image = None
 
 	def get_image(self):

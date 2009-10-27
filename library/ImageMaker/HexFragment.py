@@ -10,8 +10,8 @@ from ImageFragment import ImageFragment
 class HexFragment(ImageFragment):
 	header = "hex"
 
-	def __init__(self, image_set, image, part):
-		super(HexFragment, self).__init__(image_set, image)
+	def __init__(self, meta, image, part):
+		super(HexFragment, self).__init__(meta, image)
 		self.part = part
 
 	def _make_part(self, component_name):

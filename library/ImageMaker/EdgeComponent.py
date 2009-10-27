@@ -9,8 +9,8 @@ from EdgeFragment import EdgeFragment
 class EdgeComponent(Component):
 	header = "edge"
 	
-	def __init__(self, image_set, stack, part):
-		super(EdgeComponent, self).__init__(image_set, stack)
+	def __init__(self, meta, stack, part):
+		super(EdgeComponent, self).__init__(meta, stack)
 		self.part = part
 
 	def _make_part(self, component_name):

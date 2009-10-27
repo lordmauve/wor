@@ -16,8 +16,9 @@ from EdgeComponent import EdgeComponent
 from Part import Part
 
 class ImageRequest:
-	def __init__(self, image_set, image):
-		self.set = image_set
+	def __init__(self, image_meta, image):
+		self.meta = image_meta
+		self.set = image_meta["image-set"]
 		self.requested_file_name = image
 
 		# Set the base path for the terrain set
@@ -108,7 +109,7 @@ class ImageRequest:
 
 		# Get the components we need
 		body = HexComponent(
-			self.set,
+			self.meta,
 			self.request_parts["T"],
 			Part.CENTRE)
 		#left = EdgeComponent(
@@ -130,7 +131,11 @@ class ImageRequest:
 			return file_name
 
 		# Paste it all together
-		image = Image.new("RGBA", body.get_image().size)
+		hgt = self.meta["image-height"]
+		hstr = self.meta["stride-height"]
+		
+		image_size = ( self.meta["image-width"], 2*hstr - hgt )
+		image = Image.new("RGBA", image_size)
 		image = body.composite(image)
 		#image = left.composite(image)
 		#image = right.composite(image)
@@ -149,6 +154,9 @@ class ImageRequest:
 			Logger.log.info("B used with one of B1 and B2")
 			raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
 		# D must be present and have a single F or R following
+		if "D" not in self.request_parts:
+			Logger.log.info("D parameter not present")
+			raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND			
 		if len(self.request_parts["D"]) != 1:
 			Logger.log.info("D parameter does not have exactly one dotted part")
 			raise apache.SERVER_RETURN, apache.HTTP_NOT_FOUND
@@ -174,11 +182,11 @@ class ImageRequest:
 			direction = "F"
 
 		upper_body = HexComponent(
-			self.set,
+			self.meta,
 			self.request_parts["T1"],
 			upper_side)
 		lower_body = HexComponent(
-			self.set,
+			self.meta,
 			self.request_parts["T2"],
 			lower_side)
 
@@ -195,21 +203,24 @@ class ImageRequest:
 
 		# This mask is full transparency at the top, so we use it for
 		# drawing the bottom half of the image
-		bottom_mask = Image.new("1", upper_body.get_image().size, 1)
+		hgt = self.meta["image-height"]
+		hstr = self.meta["stride-height"]
+		image_size = ( self.meta["image-width"]/2, hgt - hstr )
+		bottom_mask = Image.new("1", image_size, 1)
 		md = ImageDraw.Draw(bottom_mask)
 		if self.edge_forward:
 			md.polygon( ((0, 0),
-						 (bottom_mask.size[0], 0),
-						 (0, bottom_mask.size[1])),
+						 (image_size[0], 0),
+						 (0, image_size[1])),
 						fill=0)
 		else:
 			md.polygon( ((0, 0),
-						 (bottom_mask.size[0], 0),
-						 (bottom_mask.size[0], bottom_mask.size[1])),
+						 (image_size[0], 0),
+						 (image_size[0], image_size[1])),
 						fill=0)
 
 		# Construct our image and composite it together
-		image = Image.new("RGBA", upper_body.get_image().size)
+		image = Image.new("RGBA", image_size)
 		image = upper_body.composite(image)
 		image = lower_body.composite(image, bottom_mask)
 

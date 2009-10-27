@@ -10,14 +10,14 @@ from HexFragment import HexFragment
 class HexComponent(Component):
 	header = "hex"
 	
-	def __init__(self, image_set, stack, part):
-		super(HexComponent, self).__init__(image_set, stack)
+	def __init__(self, meta, stack, part):
+		super(HexComponent, self).__init__(meta, stack)
 		self.part = part
 
 	def _make_part(self, component_name):
 		Logger.log.debug("Building hex component for " + self.base_name())
 		# Get the fragments we need to put ourself together
-		fragments = [ HexFragment(self.set, name, self.part)
+		fragments = [ HexFragment(self.meta, name, self.part)
 					  for name in self.stack ]
 
 		# Get the base image size we should be using from the first

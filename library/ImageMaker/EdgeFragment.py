@@ -6,8 +6,8 @@ from ImageFragment import ImageFragment
 class EdgeFragment(ImageFragment):
 	header = "edge"
 	
-	def __init__(self, image_set, image, part):
-		super(ImageFragment, self).__init__(self, image_set, image)
+	def __init__(self, meta, image, part):
+		super(ImageFragment, self).__init__(self, meta, image)
 		self.part = part
 
 	def _make_part(self):

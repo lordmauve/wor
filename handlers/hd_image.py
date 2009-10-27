@@ -91,7 +91,7 @@ def image_handler_core(req):
 		#  Deliver up base files (direct from the base directory?)
 		pass
 	else:
-		image_request = ImageRequest(terrain_set, terrain_file)
+		image_request = ImageRequest(meta, terrain_file)
 		req.sendfile(image_request.get_image())
 
 	return apache.OK
