@@ -1,0 +1,26 @@
+#: Author details
+author: WoR development team
+
+#: Image metrics
+#: The width of the base hex
+image-width: 200
+
+#: The height of the full image of a base hex
+#: Default: 4/3 of the image width
+image-height: 200
+
+#: The y-distance from one point on a hex to the same point in the row above
+#: Default: 3/4 of the image-height
+stride-height: 150
+
+#: The position of the points for the inner border mask
+#: The four side points, in pixels inwards from the edge, and towards
+#: the centre line from the corner
+#: Default: 10% of the image size, at 60°
+border-mask-side: 25,15
+# The top and bottom points, in pixels inwards from the corner
+#: Default: 10% of the image size
+border-mask-top: 29
+
+#: The acceptable scales of images
+image-scales: 200,150,100,75,50,35,25,16,8
