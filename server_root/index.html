@@ -7,6 +7,7 @@
       xml:lang="en">
 <head>
 <title>World of Rodney</title>
+<script src='/js/log4javascript.js' type='text/javascript'></script>
 <script src='/js/main.js' type='text/javascript'></script>
 <script src='/js/player.js' type='text/javascript'></script>
 <script src='/js/item.js' type='text/javascript'></script>
@@ -31,59 +32,59 @@
         <!-- top hex corners of top row -->
         <tr class="hex_corner">
           <td colspan="2" style="border:solid 0px"></td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
+          <td id='map_e-2_2_nw'>/</td>
+          <td id='map_e-2_2_ne'>\</td>
+          <td id='map_e-1_2_nw'>/</td>
+          <td id='map_e-1_2_ne'>\</td>
+          <td id='map_e0_2_nw'>/</td>
+          <td id='map_e0_2_ne'>\</td>
         </tr>
         <!-- hex bodies for first row-->
         <tr class="hex_body" style="border:solid 0px">
           <td colspan="2"></td>
-          <td colspan="2" id='map_b2_4'>body</td>
-          <td colspan="2" id='map_b2_3'>body</td>
-          <td colspan="2" id='map_b2_2'>body</td>
+          <td colspan="2" id='map_b-2_2'>body</td>
+          <td colspan="2" id='map_b-1_2'>body</td>
+          <td colspan="2" id='map_b0_2'>body</td>
           <td></td>
         </tr>
         <!-- hex corners; bottom of first row-->
         <tr class="hex_corner">
           <td></td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
+          <td id='map_e-2_1_nw'>/</td>
+          <td id='map_e-2_1_ne'>\</td>
+          <td id='map_e-1_1_nw'>/</td>
+          <td id='map_e-1_1_ne'>\</td>
+          <td id='map_e0_1_nw'>/</td>
+          <td id='map_e0_1_ne'>\</td>
+          <td id='map_e1_1_nw'>/</td>
+          <td id='map_e1_1_ne'>\</td>
         </tr>
         <!-- hex bodies for second row-->
         <tr class="hex_body">
           <td></td>
-          <td colspan="2" id='map_b2_5'>body</td>
-          <td colspan="2" id='map_b1_2'>body</td>
+          <td colspan="2" id='map_b-2_1'>body</td>
+          <td colspan="2" id='map_b-1_1'>body</td>
+          <td colspan="2" id='map_b0_1'>body</td>
           <td colspan="2" id='map_b1_1'>body</td>
-          <td colspan="2" id='map_b2_1'>body</td>
           <td></td>
         </tr>
         <!-- hex corners; bottom of second row-->
         <tr class="hex_corner">
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
+          <td id='map_e-2_0_nw'>/</td>
+          <td id='map_e-2_0_ne'>\</td>
+          <td id='map_e-1_0_nw'>/</td>
+          <td id='map_e-1_0_ne'>\</td>
+          <td id='map_e0_0_nw'>/</td>
+          <td id='map_e0_0_ne'>\</td>
+          <td id='map_e1_0_nw'>/</td>
+          <td id='map_e1_0_ne'>\</td>
+          <td id='map_e2_0_nw'>/</td>
+          <td id='map_e2_0_ne'>\</td>
         </tr>
          <!-- hex bodies for third row-->
         <tr class="hex_body">
-          <td colspan="2" id='map_b2_6'>body</td>
-          <td colspan="2" id='map_b1_3'>body</td>
+          <td colspan="2" id='map_b-2_0'>body</td>
+          <td colspan="2" id='map_b-1_0'>body</td>
           <td colspan="2" id='map_b0_0'>body</td>
           <td colspan="2" id='map_b1_0'>body</td>
           <td colspan="2" id='map_b2_0'>body</td>
@@ -91,55 +92,55 @@
         </tr>
         <!-- hex corners; bottom of third row-->
         <tr class="hex_corner">
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
+          <td id='map_e-2_0_se'>\</td>
+          <td id='map_e-1_0_sw'>/</td>
+          <td id='map_e-1_0_se'>\</td>
+          <td id='map_e0_0_sw'>/</td>
+          <td id='map_e0_0_se'>\</td>
+          <td id='map_e1_0_sw'>/</td>
+          <td id='map_e1_0_se'>\</td>
+          <td id='map_e2_0_sw'>/</td>
+          <td id='map_e2_0_se'>\</td>
+          <td id='map_e3_0_sw'>/</td>
         </tr>
         <!-- hex bodies for fourth row-->
         <tr class="hex_body">
           <td></td>
-          <td colspan="2" id='map_b2_7'>body</td>
-          <td colspan="2" id='map_b1_4'>body</td>
-          <td colspan="2" id='map_b1_5'>body</td>
-          <td colspan="2" id='map_b2_11'>body</td>
+          <td colspan="2" id='map_b-1_-1'>body</td>
+          <td colspan="2" id='map_b0_-1'>body</td>
+          <td colspan="2" id='map_b1_-1'>body</td>
+          <td colspan="2" id='map_b2_-1'>body</td>
           <td></td>
         </tr>
         <!-- hex corners; bottom of fourth row-->
         <tr class="hex_corner">
           <td></td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
+          <td id='map_e-1_-1_se'>\</td>
+          <td id='map_e0_-1_sw'>/</td>
+          <td id='map_e0_-1_se'>\</td>
+          <td id='map_e1_-1_sw'>/</td>
+          <td id='map_e1_-1_se'>\</td>
+          <td id='map_e2_-1_sw'>/</td>
+          <td id='map_e2_-1_se'>\</td>
+          <td id='map_e3_-1_sw'>/</td>
         </tr>
         <!-- hex bodies for fifth row-->
         <tr class="hex_body">
           <td colspan="2"></td>
-          <td colspan="2" id='map_b2_8'>body</td>
-          <td colspan="2" id='map_b2_9'>body</td>
-          <td colspan="2" id='map_b2_10'>body</td>
+          <td colspan="2" id='map_b0_-2'>body</td>
+          <td colspan="2" id='map_b1_-2'>body</td>
+          <td colspan="2" id='map_b2_-2'>body</td>
           <td></td>
         </tr>
         <!-- bottom row's bottom corners -->
         <tr class="hex_corner">
           <td colspan="2"></td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
-          <td>\</td>
-          <td>/</td>
+          <td id='map_e0_-2_se'>\</td>
+          <td id='map_e1_-2_se'>/</td>
+          <td id='map_e1_-2_se'>\</td>
+          <td id='map_e2_-2_se'>/</td>
+          <td id='map_e2_-2_se'>\</td>
+          <td id='map_e3_-2_se'>/</td>
         </tr>
       
       </table>
