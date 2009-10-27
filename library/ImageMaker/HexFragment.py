@@ -3,6 +3,7 @@ pieces"""
 
 import os.path
 import Image
+import ImageDraw
 
 from Part import Part
 from ImageFragment import ImageFragment
