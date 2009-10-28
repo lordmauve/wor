@@ -22,7 +22,10 @@ class HexComponent(Component):
 
 		# Get the base image size we should be using from the first
 		# image fragment
-		size = fragments[0].get_image().size
+		if len(fragments) == 0:
+			size = (1,1)
+		else:
+			size = fragments[0].get_image().size
 		Logger.log.debug("Image size is " + str(size))
 		
 		# Create a base image
