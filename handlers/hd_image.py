@@ -27,6 +27,16 @@ def image_handler(req):
 	except IOError, ex:
 		# IOErrors in this code are generally going to be simple
 		# file-not-found errors
+
+		# Get the details of the last exception
+		exlist = sys.exc_info()
+		# Get a list of text lines (possibly with embedded \n)
+		# describing the full backtrace
+		exdata = traceback.format_exception(exlist[0], exlist[1], exlist[2])
+		# Write those lines to the exception log
+		head = Logger.header % { 'stamp': Context.request_time, 'req': Context.request_id }
+		Logger.exception_log.error(head + ''.join(exdata))
+		
 		return apache.HTTP_NOT_FOUND
 	except Exception, ex:
 		# Catch any other exception
