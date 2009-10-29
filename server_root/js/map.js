@@ -109,6 +109,8 @@ function load_neighbourhood(req)
 								var nbr = locations[rd[0]][rd[1]];
 								nbrstack = nbr.stack;
 							}
+							if(nbrstack == null)
+								nbrstack = "";
 
 							var image_name = "/img/terrain/default/edge-D-F";
 							image_name += "-T1-" + nbrstack;
@@ -131,6 +133,8 @@ function load_neighbourhood(req)
 								var nbr = locations[rd[0]][rd[1]];
 								nbrstack = nbr.stack;
 							}
+							if(nbrstack == null)
+								nbrstack = "";
 
 							var image_name = "/img/terrain/default/edge-D-R";
 							image_name += "-T1-" + nbrstack;
@@ -158,8 +162,6 @@ function load_neighbourhood(req)
 								var nbr = locations[rd[0]][rd[1]];
 								nbrstack = nbr.stack;
 							}
-
-							var nbrstack = nbr.stack;
 							if(nbrstack == null)
 								nbrstack = "";
 
@@ -184,8 +186,6 @@ function load_neighbourhood(req)
 								var nbr = locations[rd[0]][rd[1]];
 								nbrstack = nbr.stack;
 							}
-
-							var nbrstack = nbr.stack;
 							if(nbrstack == null)
 								nbrstack = "";
 							
