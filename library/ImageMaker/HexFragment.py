@@ -40,9 +40,7 @@ class HexFragment(ImageFragment):
 			# Blank string==boring, transparent image, suitable for
 			# edge hexes that have nothing beyond them.  Generate it
 			# if it doesn't exist yet.
-			im=Image.new("LA",(1,1))
-			draw=ImageDraw.Draw(im)
-			draw.point((0,0),fill=(0,0))
+			im = Image.new("LA", (1, 1), (128, 255))
 			im.save(self._cache_path(self.header + "__UL"))
 			im.save(self._cache_path(self.header + "__UR"))
 			im.save(self._cache_path(self.header + "__M"))
