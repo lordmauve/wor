@@ -3,15 +3,15 @@ author: WoR development team
 
 #: Image metrics
 #: The width of the base hex
-image-width: 200
+image-width: 100
 
 #: The height of the full image of a base hex
 #: Default: 4/3 of the image width
-image-height: 200
+image-height: 100
 
 #: The y-distance from one point on a hex to the same point in the row above
 #: Default: 3/4 of the image-height
-stride-height: 150
+stride-height: 75
 
 #: The position of the points for the inner border mask
 #: The four side points, in pixels inwards from the edge, and towards
