@@ -19,17 +19,17 @@ table.top_level table td {
 }
 
 tr.hex_corner {
-	height: 50px;
+	height: 25px;
 	text-align: center
 }
 
 tr.hex_body {
-	height: 100px;
+	height: 50px;
 	text-align: center
 }
 
 tr.hex_corner td {
-	width: 100px;
+	width: 50px;
 	margin: 0px;
 	padding: 0px;
 }
