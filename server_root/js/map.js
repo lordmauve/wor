@@ -14,6 +14,8 @@ popUpAppender.setNewestMessageAtTop(true);
 // Add the appender to the logger
 log.addAppender(popUpAppender);
 
+var DISPLAY_RANGE = 2;
+
 function update_map()
 {
 	basic_ajax_get("/location/neighbourhood", load_neighbourhood);
@@ -95,42 +97,48 @@ function load_neighbourhood(req)
 					if(y >= 0)
 					{
 						var elt_name = "map_e" + x + "_" + y + "_n";
-						var edge = document.getElementById(elt_name + "e");
-						if(edge == null)
-							log.debug("Skipping missing edge: " + elt_name + "e");
-						else
-						{
-							var rd = xy_to_rd(x-1, y+1);
-							var nbr = locations[rd[0]][rd[1]];
-
-							var nbrstack = nbr.stack;
-							if(nbrstack == null)
-								nbrstack = "";
-
-							var image_name = "/img/terrain/default/edge-D-R";
-							image_name += "-T1-" + nbrstack;
-							image_name += "-T2-" + locstack;
-							image_name += ".png";
-							edge.style.backgroundImage = "url(\"" + image_name + "\")";
-						}
-
-						edge = document.getElementById(elt_name + "w");
+						var edge = document.getElementById(elt_name + "w");
 						if(edge == null)
 							log.debug("Skipping missing edge: " + elt_name + "w");
 						else
 						{
-							var rd = xy_to_rd(x, y+1);
-							var nbr = locations[rd[0]][rd[1]];
-
-							var nbrstack = nbr.stack;
-							if(nbrstack == null)
-								nbrstack = "";
+							var rd = xy_to_rd(x-1, y+1);
+							var nbrstack = "";
+							if(rd[0] <= DISPLAY_RANGE)
+							{
+								var nbr = locations[rd[0]][rd[1]];
+								nbrstack = nbr.stack;
+							}
 
 							var image_name = "/img/terrain/default/edge-D-F";
 							image_name += "-T1-" + nbrstack;
 							image_name += "-T2-" + locstack;
 							image_name += ".png";
 							edge.style.backgroundImage = "url(\"" + image_name + "\")";
+							//edge.innerHTML = "(" + (x-1) + ", " + (y+1) + ")<br/>(" + x + ", " + y + ")";
+							//edge.innerHTML = nbrstack + "<br/>" + locstack;
+						}
+
+						edge = document.getElementById(elt_name + "e");
+						if(edge == null)
+							log.debug("Skipping missing edge: " + elt_name + "e");
+						else
+						{
+							var rd = xy_to_rd(x, y+1);
+							var nbrstack = "";
+							if(rd[0] <= DISPLAY_RANGE)
+							{
+								var nbr = locations[rd[0]][rd[1]];
+								nbrstack = nbr.stack;
+							}
+
+							var image_name = "/img/terrain/default/edge-D-R";
+							image_name += "-T1-" + nbrstack;
+							image_name += "-T2-" + locstack;
+							image_name += ".png";
+							edge.style.backgroundImage = "url(\"" + image_name + "\")";
+							//edge.innerHTML = "(" + x + ", " + (y+1) + ")<br/>(" + x + ", " + y + ")";
+							//edge.innerHTML = nbrstack + "<br/>" + locstack;
 						}
 					}
 
@@ -138,42 +146,56 @@ function load_neighbourhood(req)
 					if(y <= 0)
 					{
 						var elt_name = "map_e" + x + "_" + y + "_s";
-						var edge = document.getElementById(elt_name + "e");
+						var edge = document.getElementById(elt_name + "w");
 						if(edge == null)
-							log.debug("Skipping missing edge: " + elt_name + "e");
+							log.debug("Skipping missing edge: " + elt_name + "w");
 						else
 						{
 							var rd = xy_to_rd(x, y-1);
-							var nbr = locations[rd[0]][rd[1]];
+							var nbrstack = "";
+							if(rd[0] <= DISPLAY_RANGE)
+							{
+								var nbr = locations[rd[0]][rd[1]];
+								nbrstack = nbr.stack;
+							}
 
 							var nbrstack = nbr.stack;
 							if(nbrstack == null)
 								nbrstack = "";
 
-							var image_name = "/img/terrain/default/body-D-R";
+							var image_name = "/img/terrain/default/edge-D-R";
 							image_name += "-T1-" + locstack;
 							image_name += "-T2-" + nbrstack;
 							image_name += ".png";
 							edge.style.backgroundImage = "url(\"" + image_name + "\")";
+							//edge.innerHTML = "(" + x + ", " + y + ")<br/>(" + x + ", " + (y-1) + ")";
+							//edge.innerHTML = locstack + "<br/>" + nbrstack;
 						}
 
-						edge = document.getElementById(elt_name + "w");
+						edge = document.getElementById(elt_name + "e");
 						if(edge == null)
-							log.debug("Skipping missing edge: " + elt_name + "w");
+							log.debug("Skipping missing edge: " + elt_name + "e");
 						else
 						{
 							var rd = xy_to_rd(x+1, y-1);
-							var nbr = locations[rd[0]][rd[1]];
+							var nbrstack = "";
+							if(rd[0] <= DISPLAY_RANGE)
+							{
+								var nbr = locations[rd[0]][rd[1]];
+								nbrstack = nbr.stack;
+							}
 
 							var nbrstack = nbr.stack;
 							if(nbrstack == null)
 								nbrstack = "";
 							
-							var image_name = "/img/terrain/default/body-D-R";
+							var image_name = "/img/terrain/default/edge-D-F";
 							image_name += "-T1-" + locstack;
 							image_name += "-T2-" + nbrstack;
 							image_name += ".png";
 							edge.style.backgroundImage = "url(\"" + image_name + "\")";
+							//edge.innerHTML = "(" + x + ", " + y + ")<br/>(" + (x+1) + ", " + (y-1) + ")";
+							//edge.innerHTML = locstack + "<br/>" + nbrstack;
 						}
 					}
 				}
