@@ -4,6 +4,7 @@ requester/maker interface"""
 import os.path
 import Image
 import ImageDraw
+import ImageChops
 from mod_python import apache
 
 import Logger
@@ -218,11 +219,14 @@ class ImageRequest:
 						 (image_size[0], 0),
 						 (image_size[0], image_size[1])),
 						fill=0)
+		top_mask = ImageChops.invert(bottom_mask)
 
 		# Construct our image and composite it together
-		image = Image.new("RGBA", image_size)
-		image = upper_body.composite(image)
+		image = Image.new("RGBA", image_size, (255, 255, 255, 255))
+		Logger.log.debug("Request: starting compositing")
+		image = upper_body.composite(image, top_mask)
 		image = lower_body.composite(image, bottom_mask)
+		Logger.log.debug("Request: finished compositing")
 
 		# Save the image and return it
 		image.save(file_name)
