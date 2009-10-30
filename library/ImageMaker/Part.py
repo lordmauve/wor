@@ -85,8 +85,8 @@ class Part(object):
 				# transparent, set transparency (could use
 				# ImageChops.multiply() instead?)
 				Logger.log.debug("Using combination mask")
-				mask = ImageChops.darker(user_mask.convert("L"),
-										 transp.convert("L"))
+				mask = ImageChops.multiply(user_mask.convert("L"),
+										   transp.convert("L"))
 
 		name = os.tmpnam() + ".png"
 		Logger.log.debug("Saving mask as: " + name)
