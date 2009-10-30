@@ -1,5 +1,6 @@
 """Base for all image parts"""
 
+import os
 import os.path
 import Image
 import ImageChops
@@ -47,7 +48,7 @@ class Part(object):
 	def composite(self, destination, user_mask = None):
 		"""Composite ourselves into the destination image, generating
 		all cached components as needed"""
-		Logger.log.debug("Compositing " + self.base_name())
+		Logger.log.debug("Compositing '" + self.base_name() + "' at level " + self.__class__.__name__)
 		
 		im = self.get_image()
 		if destination.size != im.size:
@@ -70,19 +71,26 @@ class Part(object):
 				mask = Image.new("1", im.size, 1)
 			else:
 				# We have a transparency but no user mask
+				Logger.log.debug("Using existing transparency")
 				mask = transp
 		else:
 			if transp == None:
 				# We have a mask but no transparency -- use the user's
 				# mask
+				Logger.log.debug("Using provided mask")
 				mask = user_mask
 			else:
 				# If we have both a supplied mask and our own
 				# transparency, use both -- where either is
 				# transparent, set transparency (could use
 				# ImageChops.multiply() instead?)
+				Logger.log.debug("Using combination mask")
 				mask = ImageChops.darker(user_mask.convert("L"),
 										 transp.convert("L"))
+
+		name = os.tmpnam() + ".png"
+		Logger.log.debug("Saving mask as: " + name)
+		mask.save(name)
 
 		return Image.composite(im, destination, mask)
 
