@@ -169,6 +169,7 @@ function act_response(req)
 			update_player_details();
 			update_player_actions();
 			update_messages();
+			update_map();
 		}
 		else
 		{
