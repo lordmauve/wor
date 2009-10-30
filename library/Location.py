@@ -16,7 +16,7 @@ class Location(SerObject):
 	cache_by_id = {}
 	cache_by_pos = {}
 
-	move_ap = 0
+	move_ap = 1
 	image_name = 'colin'
 
 	####
@@ -269,55 +269,61 @@ class Location(SerObject):
 		"""Return the hex to the right of this one, according to the
 		given player"""
 		if who == None: who = Context.context
+		start = 0
 		if who.power('flipped'):
-			return self.directions[(6+who.power('rotated')) % 6](self)
-		else:
-			return self.directions[(0+who.power('rotated')) % 6](self)
+			start = 6 - start
+		idx = (start + who.power('rotated')) % 6
+		return self.directions[idx](self)
 
 	def ur(self, who=None):
 		"""Return the hex to the upper right of this one, according to the
 		given player"""
 		if who == None: who = Context.context
+		start = 1
 		if who.power('flipped'):
-			return self.directions[(5+who.power('rotated')) % 6](self)
-		else:
-			return self.directions[(1+who.power('rotated')) % 6](self)
+			start = 6 - start
+		idx = (start + who.power('rotated')) % 6
+		return self.directions[idx](self)
 
 	def ul(self, who=None):
 		"""Return the hex to the upper left of this one, according to the
 		given player"""
 		if who == None: who = Context.context
+		start = 2
 		if who.power('flipped'):
-			return self.directions[(4+who.power('rotated')) % 6](self)
-		else:
-			return self.directions[(2+who.power('rotated')) % 6](self)
+			start = 6 - start
+		idx = (start + who.power('rotated')) % 6
+		return self.directions[idx](self)
 
 	def l(self, who=None):
 		"""Return the hex to the left of this one, according to the
 		given player"""
 		if who == None: who = Context.context
+		start = 3
 		if who.power('flipped'):
-			return self.directions[(3+who.power('rotated')) % 6](self)
-		else:
-			return self.directions[(3+who.power('rotated')) % 6](self)
+			start = 6 - start
+		idx = (start + who.power('rotated')) % 6
+		return self.directions[idx](self)
 
 	def ll(self, who=None):
 		"""Return the hex to the lower left of this one, according to the
 		given player"""
 		if who == None: who = Context.context
+		start = 4
 		if who.power('flipped'):
-			return self.directions[(2+who.power('rotated')) % 6](self)
-		else:
-			return self.directions[(4+who.power('rotated')) % 6](self)
+			start = 6 - start
+		idx = (start + who.power('rotated')) % 6
+		return self.directions[idx](self)
 
 	def lr(self, who=None):
 		"""Return the hex to the lower right of this one, according to the
 		given player"""
 		if who == None: who = Context.context
+		start = 5
 		if who.power('flipped'):
-			return self.directions[(1+who.power('rotated')) % 6](self)
-		else:
-			return self.directions[(5+who.power('rotated')) % 6](self)
+			start = 6 - start
+		idx = (start + who.power('rotated')) % 6
+		return self.directions[idx](self)
 
 	local_directions = [ r, ur, ul, l, ll, lr ]
 	local_directions_name = [ 'r', 'ur', 'ul', 'l', 'll', 'lr' ]
