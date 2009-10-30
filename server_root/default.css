@@ -18,17 +18,22 @@ table.top_level table td {
 	border: 0px none;
 }
 
-tr.hex_corner {
+table#map {
+	border-collapse: collapse;
+	border: none 0px;
+}
+
+table#map tr.hex_corner {
 	height: 25px;
 	text-align: center
 }
 
-tr.hex_body {
+table#map tr.hex_body {
 	height: 50px;
 	text-align: center
 }
 
-tr.hex_corner td {
+table#map tr.hex_corner td {
 	width: 50px;
 	margin: 0px;
 	padding: 0px;
