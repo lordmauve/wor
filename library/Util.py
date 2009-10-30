@@ -80,3 +80,12 @@ def parse_input(req):
 class WorError(Exception):
 	"""Base Exception for all WOR code.  Subclass if needed"""
 	pass
+
+def no_d(f):
+	"""Generate a new function whose first parameter is discarded. Can
+	be used for the case when we create a partial function for use in
+	an action, but the target function that is specialised doesn't
+	take a d parameter at all."""
+	def wrapped(*args, **keywords):
+		return f(*(args[1:]), **keywords)
+	return wrapped

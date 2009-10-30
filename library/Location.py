@@ -2,9 +2,11 @@
 # A location
 
 import copy
+import functools
 from Database import DB
 from SerObject import SerObject
 from Action import Action
+from Util import no_d
 from Logger import log
 import Context
 import types
@@ -330,9 +332,13 @@ class Location(SerObject):
 				l = self.local_directions[i](self)
 				uid = Action.make_id(self, "move_" + n)
 				cost = self.move_cost(player, l)
+
+				# Create the action function
+				a = no_d(functools.partial(player.move_to, l.pos))
+				# Create the action itself
 				acts[uid] = Action(uid, caption="Move " + n.upper(),
 								   ap=cost,
-								   action=lambda d: player.move_to(l.pos),
+								   action=a,
 								   group="move")
 
 	# Who's here?
