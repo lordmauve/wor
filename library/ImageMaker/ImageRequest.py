@@ -219,7 +219,15 @@ class ImageRequest:
 						 (image_size[0], 0),
 						 (image_size[0], image_size[1])),
 						fill=0)
+		# FIXME: Why does this next line not invert the mask properly?
 		top_mask = ImageChops.invert(bottom_mask)
+
+		name = os.tmpnam() + ".png"
+		Logger.log.debug("Saving top mask as: " + name)
+		top_mask.save(name)
+		name = os.tmpnam() + ".png"
+		Logger.log.debug("Saving bottom mask as: " + name)
+		bottom_mask.save(name)
 
 		# Construct our image and composite it together
 		image = Image.new("RGBA", image_size, (255, 255, 255, 255))
