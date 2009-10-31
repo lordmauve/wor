@@ -23,7 +23,7 @@ class TriggerCountdown(Trigger):
 			return
 		diff = old - new
 		newval = self.parent[self.targetkey] + diff * self.increment
-		self.parent[self.targetkey] = max(0, newval)
-		if newval == 0:
+		self.parent[self.targetkey] = max(self.minimum, newval)
+		if newval == self.minimum:
 			for t in self.cleanup:
 				t.unregister()
