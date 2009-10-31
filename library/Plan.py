@@ -2,6 +2,7 @@
 
 import math
 from Logger import log
+import Action
 
 plans = []
 
@@ -68,7 +69,7 @@ class Plan(object):
 		total = int(total)
 		# Test that we can actually make it
 		if not self.can_be_made(who, total):
-			return False
+			return Action.FAIL
 
 		# Take the AP
 		# See http://worldofrodney.org/index.php/Dev:Low-level_Infrastructure#Build_system
@@ -81,13 +82,14 @@ class Plan(object):
 			who.take_items(iname, quant*total)
 
 		# Test for success, and potentially fail here
+		# FIXME: Make success() return the number of duplicates that were
+		# actually made, instead.
 		if not self.success(self, who, total):
-			return False
+			return Action.FAIL
 
 		# Add the results
 		for iname, quant in self.makes.iteritems():
 			who.add_items(iname, quant*total)
 		
 		# Run the postcondition
-		return self.postcondition(self, who, total)
-		
+		self.postcondition(self, who, total)

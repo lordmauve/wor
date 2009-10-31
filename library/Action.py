@@ -1,11 +1,14 @@
 ######
 # An action: something that the user can be invited to do
 
+FAIL = -1
+
 class Action(object):
-	def __init__(self, uid, caption="Use", ap=1,
+	def __init__(self, uid, actor, caption="Use", ap=1,
 				 action=lambda d: None,
 				 group="none", html=None, parameters=[]):
 		self.uid = uid
+		self.actor = actor
 		self.caption = caption
 		self.ap = ap
 		self.action = action
@@ -27,7 +30,10 @@ class Action(object):
 		return ret
 
 	def perform(self, data):
-		return self.action(data)
+		rv = self.action(data)
+		if not rv:
+			self.actor.ap.value -= self.ap
+		return rv
 
 	@staticmethod
 	def make_id(object, act):

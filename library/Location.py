@@ -342,7 +342,7 @@ class Location(SerObject):
 				# Create the action function
 				a = no_d(functools.partial(player.move_to, l.pos))
 				# Create the action itself
-				acts[uid] = Action(uid, caption="Move " + n.upper(),
+				acts[uid] = Action(uid, player, caption="Move " + n.upper(),
 								   ap=cost,
 								   action=a,
 								   group="move")

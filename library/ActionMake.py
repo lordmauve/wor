@@ -8,7 +8,7 @@ class ActionMake(Action):
 	def __init__(self, player, item, plan):
 		uid = Action.make_id(item, plan.name)
 		super(ActionMake, self).__init__(
-			uid, caption="Make",
+			uid, player, caption="Make",
 			ap=plan.ap, group="build"
 			)
 		
@@ -31,7 +31,7 @@ class ActionMake(Action):
 		self.html += self.make_button_for()
 
 	def build(self, data):
-		self.plan.make(self.player, data[self.uid + '_quantity'])
+		return self.plan.make(self.player, data[self.uid + '_quantity'])
 
 	def objectlist(self, hash):
 		"""Return a well-formatted string describing the set of items
