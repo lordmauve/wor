@@ -75,8 +75,7 @@ class Player(Actor):
 		self.align = align
 		# Start at 120AP, get one more every 6 minutes (240 per day),
 		# maximum 240.
-		# FIXME: Add "actor" and "power" values to this class
-		self.ap = SimpleTimedCounter(self, 120, 360, 240)
+		self.ap_counter = SimpleTimedCounter(self, 120, 360, 240)
 		self.hp = 300
 		self.maxhp = 300
 		self.inventory = ItemContainer(self, "inventory")
@@ -89,6 +88,22 @@ class Player(Actor):
 		fields = [ 'is_zombie' ]
 
 		return self.build_context(ret, fields)
+
+	####
+	# AP handling
+
+	# Python 2.6:
+	# @property
+	def __ap_getter(self):
+		"""Action points"""
+		return self.ap_counter.value
+
+	# Python 2.6:
+	# @ap.setter
+	def __ap_setter(self, value):
+		self.ap_counter.value = value
+
+	ap = property(__ap_getter, __ap_setter)
 
 	####
 	# Movement
@@ -110,7 +125,7 @@ class Player(Actor):
 		"""Create and return a hash of all possible actions this
 		player might perform"""
 		acts = {}
-		if self.ap.value <= 0:
+		if self.ap <= 0:
 			# No actions are possible at negative AP
 			return acts
 		
@@ -182,7 +197,7 @@ class Player(Actor):
 		else:
 			self.message("You say 'Boo!'")
 			self.message(self.name + ": Boo!", "sound")
-		self.ap.value -= 1
+		self.ap -= 1
 
 	####
 	# Event handlers
