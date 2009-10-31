@@ -127,7 +127,7 @@ class Player(Actor):
 		# FIXME: Remove this
 		if Util.match_id(action_id, self, "sayboo"):
 			uid = Action.make_id(self, "sayboo")
-			acts[uid] = Action(uid, caption="Say Boo",
+			acts[uid] = Action(uid, self, caption="Say Boo",
 							   action=lambda d: self.say_boo(),
 							   group="player")
 
@@ -136,7 +136,7 @@ class Player(Actor):
 			uid = Action.make_id(self, "changeitem")
 			act_html = "Use item <input id='%s_id' size='3' />. " % uid
 			acts[uid] = Action(
-				uid, caption="Change", ap=0, group="inventory",
+				uid, self, caption="Change", ap=0, group="inventory",
 				action=lambda d: self.change_item_action(d),
 				html=act_html, parameters=['id']
 				)

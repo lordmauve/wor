@@ -169,7 +169,7 @@ class Actor(SerObject):
 			
 			uid = Action.make_id(self, "attack")
 			acts[uid] = Action(
-				uid, caption="Attack", ap=1, group="outsider",
+				uid, self, caption="Attack", ap=1, group="outsider",
 				action=lambda: player.attack(self)
 				)
 
