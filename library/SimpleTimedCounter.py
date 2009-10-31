@@ -20,15 +20,20 @@ class SimpleTimedCounter(OnLoad, Triggerable):
 
 	def on_load(self):
 		diff = time.time() - self.last
-		if diff < 0:
+		if diff < 0: # Bail out if we've gone backwards
 			return
 
 		increments = int(diff / self.interval)
-		if increments <= 0:
+		if increments <= 0: # Bail out if we're less than interval
+                            # seconds from the last update
 			return
 
 		if self.value < self.maximum:
-			self.value += max(self.maximum, increments * self.increment)
+			new_v = self.value + increments * self.increment
+		new_v = min(new_v, self.maximum)
+		new_v = max(new_v, self.minimum)
+		self.value = new_v
+		
 		self.last += increments * self.interval
 
 	def context_get(self):
