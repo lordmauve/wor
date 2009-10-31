@@ -6,6 +6,9 @@ from OnLoad import OnLoad
 from Triggerable import Triggerable
 
 class SimpleTimedCounter(OnLoad, Triggerable):
+	"""This class counts a value in increments of
+	<code>increment</code>, every <code>interval</code> seconds, with
+	maximum and minimum allowed values."""
 	# FIXME: Add "power" property so that we can modify the interval
 	# properly? (Or punt to a different class?)
 	def __init__(self, parent, value, interval, maximum, minimum=0, increment=1, last=time.time()):
