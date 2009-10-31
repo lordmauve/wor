@@ -4,6 +4,13 @@ def usage():
 	print """Usage: addclass { <playername> | -i <actorid> } <propertyname> <classname> [class-parameters...]
 Add a complete class to an actor object.
 
+Class parameters may be a string, integer or float, or one of the
+special cases:
+
+\t:c\t\tThe current player/actor
+\t:p<n>\t\tActor number <n>
+\t:P<name>\t\tPlayer name <name>
+
 Options:
 \t-i, --id=<n>\t\tModify actor number <id>
 """
@@ -15,17 +22,7 @@ from Player import Player
 from Actor import Actor
 from Alignment import Alignment
 from Database import DB
-
-def retype(value):
-	"""Converts the string value into an int, float or string"""
-	try:
-		r = int(value)
-	except:
-		try:
-			r = float(value)
-		except:
-			r = str(value)
-	return r
+import Util
 
 
 try:
@@ -64,9 +61,10 @@ classname = args[1]
 module = __import__(classname, globals(), locals(), [], -1)
 cls = module.__dict__[classname]
 
-params = [ retype(x) for x in args[2:] ]
+params = [ Util.retype(x, p) for x in args[2:] ]
 obj = cls(*params)
-p[args[0]] = obj
+
+setattr(p, args[0], obj)
 p.save()
 
 DB.commit()
