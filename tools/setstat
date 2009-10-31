@@ -9,6 +9,7 @@ import getopt
 from Player import Player
 from Alignment import Alignment
 from Database import DB
+import Util
 
 def usage():
 	print """Usage: setstat [options] { <playername> | -i <actorid> } <propertyname> <value>
@@ -17,18 +18,11 @@ Options:
 \t-n, --int\t\tForce value to integer
 \t-f, --float\t\tForce value to float
 \t-s, --string\t\tForce value to string
+\t-o, --object\t\tForce value to an object identifier:
+\t\t\t\t\t:c\tThe current player
+\t\t\t\t\t:p<n>\tThe player/actor with ID <n>
+\t\t\t\t\t:P<name>\tThe player with name <name>
 """
-
-def retype(value):
-	"""Converts the string value into an int, float or string"""
-	try:
-		r = int(value)
-	except:
-		try:
-			r = float(value)
-		except:
-			r = str(value)
-	return r
 
 try:
 	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?i:nfs', ['help', 'id=', 'int', 'float', 'string'])
@@ -52,6 +46,8 @@ for o, a in optlist:
 		typ = float
 	elif o in ('-s', '--string'):
 		typ = str
+	elif o in ('-o', '--object'):
+		typ = None
 	else:
 		usage()
 		sys.exit(0)
@@ -72,7 +68,7 @@ if p == None:
 # Convert the string parameter from the command line to an appropriate
 # type
 if typ == None:
-	value = retype(args[1])
+	value = Util.retype(args[1])
 else:
 	value = typ(args[1])
 

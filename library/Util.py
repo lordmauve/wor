@@ -89,3 +89,27 @@ def no_d(f):
 	def wrapped(*args, **keywords):
 		return f(*(args[1:]), **keywords)
 	return wrapped
+
+def retype(value, current=None):
+	"""Converts the string value into an int, float or string, or uses
+	one of the special parameters to convert to a FCO. Special
+	parameters are:
+	:c			The value of the "current" parameter
+	:p<n>		Player/actor number <n>
+	:P<name>	Player with name <name>
+	"""
+	if value == ":c":
+		return current
+	elif value[0:2] == ":p":
+		return Actor.load(int(value[2:]))
+	elif value[0:2] == ":P":
+		return Player.load_by_name(value[2:])
+		
+	try:
+		r = int(value)
+	except:
+		try:
+			r = float(value)
+		except:
+			r = str(value)
+	return r
