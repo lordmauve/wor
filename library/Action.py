@@ -32,7 +32,7 @@ class Action(object):
 	def perform(self, data):
 		rv = self.action(data)
 		if not rv:
-			self.actor.ap.value -= self.ap
+			self.actor.ap -= self.ap
 		return rv
 
 	@staticmethod

@@ -75,7 +75,7 @@ class Plan(object):
 		# See http://worldofrodney.org/index.php/Dev:Low-level_Infrastructure#Build_system
 		benefit10 = self.ap10 / (10 * self.ap)
 		benefit_all = math.pow(benefit10, math.log10(total))
-		who.ap.value -= int(total * self.ap * benefit_all)
+		who.ap -= int(total * self.ap * benefit_all)
 
 		# Take the materials
 		for iname, quant in self.materials.iteritems():
