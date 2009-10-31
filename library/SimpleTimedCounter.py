@@ -3,12 +3,14 @@
 
 import time
 from OnLoad import OnLoad
+from Triggerable import Triggerable
 
-class SimpleTimedCounter(OnLoad):
+class SimpleTimedCounter(OnLoad, Triggerable):
 	# FIXME: Add "power" property so that we can modify the interval
 	# properly? (Or punt to a different class?)
 	def __init__(self, parent, value, interval, maximum, minimum=0, increment=1, last=time.time()):
-		super(SimpleTimedCounter, self).__init__(parent)
+		OnLoad.__init__(self, parent)
+		Triggerable.__init__(self)
 		self.value = value
 		self.interval = interval
 		self.minimum = minimum
