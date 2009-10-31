@@ -1,6 +1,9 @@
 /////////////
 // Map-drawing functions
 
+// FIXME: Move this initialisation of the logging infrastructure to
+// another file.
+
 // Create the logger
 var log = log4javascript.getLogger(); 
 
@@ -13,6 +16,10 @@ popUpAppender.setNewestMessageAtTop(true);
 
 // Add the appender to the logger
 log.addAppender(popUpAppender);
+
+// Disable all logging
+// FIXME: Make this dependent on a player stat
+log4javascript.setEnabled(false);
 
 var DISPLAY_RANGE = 2;
 
@@ -217,6 +224,7 @@ function load_neighbourhood(req)
 	}
 }
 
+// Convert [r, d] "polar" coordinates to an internal (x, y) pair
 function rd_to_xy(r, d)
 {
 	if(r == 0)
@@ -253,6 +261,7 @@ function rd_to_xy(r, d)
 	return Array(x, y);
 }
 
+// Convert internal cartesian (x, y) coordinates to an [r, d] pair.
 function xy_to_rd(x, y)
 {
 	if(x == 0 && y == 0)
@@ -261,16 +270,22 @@ function xy_to_rd(x, y)
 	var r = Math.max(Math.abs(x), Math.max(Math.abs(y), Math.abs(x+y)));
 
 	// Handle the six sectors separately
+	// 0° to 60°
 	if(x > 0 && y >= 0)
 		d = y;
+	// 60° to 120°
 	else if(y > 0 && (x == 0 || -x < y))
 		d = r - x;
+	// 120° to 180°
 	else if(y > 0)
 		d = 3*r - y;
+	// 180° to 240°
 	else if(x < 0 && y <= 0)
 		d = 3*r - y;
+	// 240° to 300°
 	else if(y < 0 && (x == 0 || x < -y))
 		d = 4*r + x;
+	// 300° to 360°
 	else
 		d = 6*r + y;
 
