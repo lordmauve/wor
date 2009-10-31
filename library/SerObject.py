@@ -4,6 +4,7 @@
 
 from Database import DB
 from Logger import log, exception_log
+from Triggerable import Triggerable
 import pickle
 import pickletools
 import copy
@@ -13,7 +14,7 @@ import types
 
 ####
 # A serialisable object
-class SerObject(object):
+class SerObject(Triggerable):
 	####
 	# Loading the object by ID from the database
 	@classmethod
@@ -343,42 +344,17 @@ class SerObject(object):
 
 	def __setattr__(self, key, value):
 		"""Used to set a value via obj.key = value"""
+		Triggerable.__setattr__(self, key, value)
 		if key[0] != '_':
-			# Get the original value of the attribute
-			old = 0
-			if key in self.__dict__:
-				old = self.__dict__[key]
-			# Set the new value of the attribute
-			self.__dict__[key] = value
-			# Call the triggers
-			self.__call_triggers(key, old, value)
 			self._changed = True
 			self._changed_props.add(key)
-		else:
-			# Set the new value of the attribute
-			self.__dict__[key] = value
-
-	def __call_triggers(self, key, old, new):
-		"""Iterate through the triggers, if there are any"""
-		for t in self.value_triggers.get(key, []):
-			t.change(key, old, new)
-
-	def register_trigger(self, trigger, key):
-		"""Called by a Trigger to register it with us as interested in
-		particular value change events"""
-		if key not in self.value_triggers:
-			self.value_triggers[key] = []
-		self.value_triggers[key].append(trigger)
-
-	def unregister_trigger(self, trigger, key):
-		"""Called by a trigger to unregister itself"""
-		self.value_triggers[key].remove(trigger)
 
 	####
 	# Construction
 	def __init__(self):
 		# Create a new record in the database for this object and get
 		# its ID
+		Triggerable.__init__(self)
 		cur = DB.cursor()
 		cur.execute('SELECT nextval(\'' + self._table +'_id_seq\');')
 		row = cur.fetchone()
@@ -387,7 +363,6 @@ class SerObject(object):
 					+ ' (id, state) VALUES (%(id)s, NULL)',
 					{ 'id': self._id })
 		self._setup()
-		self.value_triggers = {}
 
 	def _setup(self):
 		"""Called after __init__ or after load()"""
