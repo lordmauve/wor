@@ -107,7 +107,7 @@ class Actor(SerObject):
 		if auth == Context.ADMIN:
 			fields = Context.all_fields(self)
 		elif auth == Context.OWNER:
-			fields = [ 'ap', 'name', 'hp', 'holding' ]
+			fields = [ 'ap', 'ap_counter', 'name', 'hp', 'maxhp', 'holding' ]
 		elif auth == Context.STRANGER_VISIBLE:
 			fields = [ 'name' ]
 		else:
