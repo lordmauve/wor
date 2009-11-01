@@ -287,19 +287,32 @@ class SerObject(Triggerable):
 		We maintain a list of all the properties that we have already
 		sought and not found."""
 
+		# FIXME: Test speed difference between all these lookups of
+		# object.__getattribute__, and caching it as oga =
+		# object.__getattribute__
+
 		#log.debug("__getattribute__: " + str(key))
 
 		# If it's a "special" property, use the normal access method
 		if key[0] == '_':
-			#log.debug(" ... special property")
+			#log.debug(" ... " + key + " special property")
 			return object.__getattribute__(self, key)
 		
 		# We look in the current object's dictionary first. If it's
 		# there, we return it
 		mydict = object.__getattribute__(self, "__dict__")
 		if key in mydict:
-			#log.debug(" ... in dictionary: " + str(mydict[key]))
+			#log.debug(" ... " + key + " in dictionary: " + str(mydict[key]))
 			return mydict[key]
+
+		# FIXME: Peek in the class hierarchy first and see if it's
+		# there and a callable (bound method?). If so, we can return
+		# the callable directly. This will prevent DB lookups on
+		# method calls. It will also prevent assignment of callables
+		# to objects, but that's OK because we don't support
+		# serialising them anyway, so we'd have to assign them to _foo
+		# names to avoid killing the serialiser, and therefore we'd
+		# never get this far in this method when accessing them.
 		
 		# If it's not there, we check to see whether it's a property
 		# we've tried to load before and failed
@@ -312,19 +325,19 @@ class SerObject(Triggerable):
 			if object.__getattribute__(self, "_demand_load_property")(key):
 				# We've found a property in the DB, so we can return
 				# it
-				#log.debug(" ... found")
+				#log.debug(" ... " + key + " found")
 				return mydict[key]
 			else:
 				# We didn't find it in the DB, so set a failure on the
 				# key
-				#log.debug(" ... missed")
+				#log.debug(" ... " + key + " missed")
 				failed.add(key)
 				
 		# At this point, we know it's not in the object dictionary,
 		# and it's not in the DB, so if it's anywhere, it's in the
 		# class hierarchy as a class property. So we go looking for
 		# it in the class hierarchy.
-		#log.debug(" ... going upstream")
+		#log.debug(" ... " + key + " going upstream")
 		return object.__getattribute__(self, key)
 
 	def _demand_load_property(self, key):
