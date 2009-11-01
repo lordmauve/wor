@@ -26,7 +26,7 @@ function load_basic_player(req)
 
 			panel = "<table><tr>";
 			panel += "<td class='header'><b>" + player.name + "</b></td>";
-			panel += "<td class='header'>AP " + player['ap.value'] + "/" + player['ap.maximum'] + "</td>";
+			panel += "<td class='header'>AP " + player['ap'] + "/" + player['ap_counter.maximum'] + "</td>";
 			panel += "<td class='header'>HP " + player.hp + "/" + player.maxhp + "</td>";
 			panel += "</tr></table>";
 
