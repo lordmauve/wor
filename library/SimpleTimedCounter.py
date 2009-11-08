@@ -31,8 +31,7 @@ class SimpleTimedCounter(OnLoad, Triggerable):
                             # seconds from the last update
 			return
 
-		if self.value < self.maximum:
-			new_v = self.value + increments * self.increment
+		new_v = self.value + increments * self.increment
 		new_v = min(new_v, self.maximum)
 		new_v = max(new_v, self.minimum)
 		self.value = new_v
