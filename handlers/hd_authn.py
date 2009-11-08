@@ -5,12 +5,15 @@ import sys
 import os
 import os.path
 import posixpath
+import time
 from mod_python import apache, util, Session
 from openid.store import filestore
 from openid.consumer import consumer
+from openid.extensions import sreg
 
 import Context
 import Logger
+import Account
 
 store = None
 
@@ -77,6 +80,12 @@ def verify_core(req):
 
 	if request == None:
 		raise Exception("No OpenID services found for " + account)
+
+	# We request some other details from them, too, so that we can use
+	# them in the account.
+	sreg_request = sreg.SRegRequest(
+		required = ['nickname', 'email'], optional = ['fullname', 'timezone'])
+	request.addExtension(sreg_request)
 
 	# Start the authN process
 	trust_root = req.construct_url("")
@@ -185,12 +194,24 @@ def process_core(req):
 			message += ("  This is an i-name, and its persistent ID is %s"
 						% (info.endpoint.canonicalID,))
 
-		# FIXME: We should check here whether the account exists, and
-		# drop the user into a character-creation screen
+		# FIXME: We should check here whether the account exists. If
+		# it doesn't, we need to create the account using SREG data,
+		# and drop the user into a character-creation screen. If it
+		# does exist, we should drop them into the game UI, in
+		# "character-selection" mode.
+		accid = Account.get_id_from_name(display_identifier)
+		if accid == None:
+			# Then there's no corresponding account: create one
+			pass
 
-		# We generate a random string to use as a session key, and
-		# store that for the account's session
-		req.headers_out['X-WoR-Session-Key'] = random_value(16)
+		# We generate a random string to use as a session key, store
+		# that locally for the account's session, and push it up to
+		# the browser for temporary storage while it loads the game
+		# interface.
+		key = random_value(16)
+		req.headers_out['X-WoR-Session-Key'] = key
+		Account.set_session_key(accid, key)
+		req.write("""<html><head><title>WoR</title><script src="/js/redirect.js" type="text/javascript"/></head><body onload="load_game(%{url}s);"></body></html>""" % ("http://game.worldofrodney.org/",))
 
 		return apache.OK
 			
