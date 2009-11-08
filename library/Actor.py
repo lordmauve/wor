@@ -12,6 +12,7 @@ from Logger import log
 from Location import Location
 from Action import Action
 from Database import DB
+from TriggerLatchDown import TriggerLatchDown
 
 class Actor(SerObject):
 	# We have our own DB table and caching scheme for Actors
