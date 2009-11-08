@@ -2,8 +2,7 @@
 # An aggregate item
 
 from Item import Item
-import Logger
-from Logger import log
+import DBLogger
 import Util
 
 class AggregateItem(Item):
@@ -26,7 +25,7 @@ class AggregateItem(Item):
 
 			# FIXME: the log_item_event table appears to be 
 			#        nonexistent atm
-			#Logger.log_item_event(Logger.ITEM_MERGE)
+			#DBLogger.log_item_event(DBLogger.ITEM_MERGE)
 			return True
 		else:
 			raise WorError("Incompatible types ("
@@ -61,5 +60,5 @@ class AggregateItem(Item):
 			self.count -= num_items
 
 			# Log the split
-			Logger.log_item_event(ITEM_SPLIT)
+			DBLogger.log_item_event(DBLogger.ITEM_SPLIT)
 			return new_obj
