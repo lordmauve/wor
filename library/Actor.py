@@ -20,7 +20,7 @@ class Actor(SerObject):
 	cache_by_id = {}
 
 	# Define constants for scaling the to-hit function
-	TO_HIT_SCALAR = 100
+	TO_HIT_SCALE = 100
 	TO_HIT_MIN = 0.05
 	TO_HIT_MAX = 0.95
 
