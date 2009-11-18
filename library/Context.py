@@ -26,6 +26,14 @@ STRANGER_VISIBLE = 4
 # Default access, given to everyone else: entity invisible
 STRANGER_INVISIBLE = 5
 
+def visible(ctx):
+	if ( ctx == ADMIN
+		 or ctx == OWNER
+		 or ctx == FRIEND_VISIBLE
+		 or ctx == STRANGER_VISIBLE ):
+		return True
+	return False
+
 def authz_actor(actor):
 	"""Return the degree of data that can be returned w.r.t. the
 	current context."""
