@@ -13,6 +13,7 @@ class Grass(Location):
 		self.max_height = 3
 		self.growth_period = 60*60*24*7 # Grow one unit a week
 		self.next_growth = time.time()
+		# FIXME: Add an onload method to check for grass growth
 
 	def description(self, player):
 		if self.grass_height == 3:
