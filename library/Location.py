@@ -164,15 +164,16 @@ class Location(SerObject):
 				'id': str(self._id) }
 
 		auth = Context.authz_location(self)
-		if auth == Context.ADMIN:
-			fields = Context.all_fields(self)
+		if Context.visible(auth):
 			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
-		elif auth == Context.OWNER:
-			fields = [ 'name' ]
-			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
-		elif auth == Context.STRANGER_VISIBLE:
-			fields = [ 'name' ]
-			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
+			ret['description'] = self.description(Context.context)
+
+			if auth == Context.ADMIN:
+				fields = Context.all_fields(self)
+			elif auth == Context.OWNER:
+				fields = [ 'name' ]
+			elif auth == Context.STRANGER_VISIBLE:
+				fields = [ 'name' ]
 		else:
 			fields = [ ]
 
