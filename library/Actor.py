@@ -12,7 +12,8 @@ from Logger import log
 from Location import Location
 from Action import Action
 from Database import DB
-from TriggerLatchDown import TriggerLatchDown
+from TriggerDeath import TriggerDeath
+
 
 class Actor(SerObject):
 	# We have our own DB table and caching scheme for Actors
@@ -34,7 +35,7 @@ class Actor(SerObject):
 		self.hp = 1
 
 		# When HP passes zero, going down, call the dead() function
-		hp_trigger = TriggerLatchDown(self, 'hp', lambda: self.dead())
+		hp_trigger = TriggerDeath(self)
 
 	def _save_indices(self):
 		inds = super(Actor, self)._save_indices()
@@ -275,8 +276,6 @@ class Actor(SerObject):
 
 		if not victim.is_combative(self, first_strike):
 			return False
-
-		# FIXME: Spend the AP
 
 		weapon = self.held_item()
 		weapon.pre_attack(victim)
