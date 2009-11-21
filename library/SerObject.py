@@ -364,7 +364,6 @@ class SerObject(Triggerable):
 	def __init__(self):
 		# Create a new record in the database for this object and get
 		# its ID
-		Triggerable.__init__(self)
 		cur = DB.cursor()
 		cur.execute('SELECT nextval(\'' + self._table +'_id_seq\');')
 		row = cur.fetchone()
@@ -373,6 +372,7 @@ class SerObject(Triggerable):
 					+ ' (id, state) VALUES (%(id)s, NULL)',
 					{ 'id': self._id })
 		self._setup()
+		Triggerable.__init__(self)
 
 	def _setup(self):
 		"""Called after __init__ or after load()"""
