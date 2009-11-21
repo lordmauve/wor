@@ -19,7 +19,7 @@ def get_location_piece(stack,part):
 	file_name="location_"
 	is_first=True
 	for loc in stack:
-		if loc.terrain != None:
+		if loc.terrain is not None:
 			if not is_first:
 				is_first=false
 			else:

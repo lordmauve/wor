@@ -31,7 +31,7 @@ def remove_item(name, item_class_name, count, target_id):
     split_item = p.inventory.split_or_remove(item, count)
     
     # Now just use item to hold the item we need to manipulate further
-    if split_item != None:
+    if split_item is not None:
         item = split_item
         
     # If a target was specified, load it and add the item to it

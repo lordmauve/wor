@@ -41,13 +41,13 @@ Context.context = Context.ADMIN_CTX
 
 if len(args) == 1:
 	p = Player.load_by_name(args[0], allprops=True)
-elif aid != None:
+elif aid is not None:
 	p = Actor.load(aid, allprops=True)
 else:
 	usage()
 	sys.exit(1)
 
-if p == None:
+if p is None:
 	print "Player not found"
 	sys.exit(1)
 

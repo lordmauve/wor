@@ -166,7 +166,7 @@ try:
 						if v < t:
 							rgb_here = col
 						
-				if rgb_here == None:
+				if rgb_here is None:
 					if 'log' in f and f['log']:
 						v = math.log(v+1)
 					scaled = f['scale'](v) * 255.0

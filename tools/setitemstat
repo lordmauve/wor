@@ -48,13 +48,13 @@ if len(args) != 3:
 iid = int(args.pop(0))
 item = Item.load(iid)
 
-if item == None:
+if item is None:
     print "Item not found"
     sys.exit(3)
 
 # Convert the string parameter from the command line to an appropriate
 # type
-if typ == None:
+if typ is None:
 	value = Util.retype(args[1])
 else:
 	value = typ(args[1])

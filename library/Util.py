@@ -36,10 +36,10 @@ def info_key_length(info):
 def match_id(actid, obj, uid=None):
 	"""Say whether the split-up action descriptor actid matches the
 	object and action name. If actid is None, match anything."""
-	if actid == None:
+	if actid is None:
 		return True
 			
-	if uid == None:
+	if uid is None:
 		return (actid[0] == obj.ob_type()
 				and actid[1] == obj._id)
 		

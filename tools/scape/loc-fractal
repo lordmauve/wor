@@ -95,9 +95,9 @@ for f in hfiles:
 # Force everything to the right datatype
 for x in range(0, MAX_X):
 	for y in range(0, MAX_X-x):
-		if height[x][y] != None:
+		if height[x][y] is not None:
 			height[x][y] = int(float(height[x][y]))
-		if cragginess[x][y] != None:
+		if cragginess[x][y] is not None:
 			cragginess[x][y] = float(cragginess[x][y])
 
 # Now do the midpoint division algorithm
@@ -111,7 +111,7 @@ while stride >= SUBSET:
 		maxy = MAX_X - x
 		for y in range(0, maxy, stride):
 			ybit = not ybit
-			if height[x][y] != None:
+			if height[x][y] is not None:
 				continue
 			#sys.stderr.write( "Calculating " + str(x) + ", " + str(y) + "\n")
 			tot = 0.0

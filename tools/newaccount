@@ -47,7 +47,7 @@ if len(args) != 1:
 	usage()
 	sys.exit(1)
 
-if password == None:
+if password is None:
 	valid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=+,.<>:;!$%^&*()?/"
 	password = ""
 	f = open("/dev/urandom", "r")

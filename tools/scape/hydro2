@@ -113,10 +113,10 @@ def get_downhill(x, y, height):
 	for l in ret:
 		x, y = l
 		h = height[x][y]
-		if minl == None or h <= minh:
+		if minl is None or h <= minh:
 			minh = h
 			minl = l
-	if minl != None:
+	if minl is not None:
 		return minl
 	return None
 
@@ -126,7 +126,7 @@ def run_downhill(x, y, sinks, height, down, usage, block, inc):
 	dist = 0
 	to = down[x][y]
 	sinkpos = (x, y)
-	while to != None:
+	while to is not None:
 		sinkpos = to
 		usage[to[0]][to[1]] += inc
 		if usage[to[0]][to[1]] > 100000:
@@ -138,10 +138,10 @@ def run_downhill(x, y, sinks, height, down, usage, block, inc):
 def write_file(name, fn):
 	if name == '-':
 		f = sys.stdout
-	elif name != None:
+	elif name is not None:
 		f = open(name, "w")
 
-	if name != None:
+	if name is not None:
 		f.write(str(MAX_X) + "\n")
 		for x in xrange(0, MAX_X, SUBSET):
 			for y in xrange(0, MAX_X-x, SUBSET):
@@ -283,7 +283,7 @@ for f in hfiles:
 # Force everything to the right datatype
 for x in xrange(0, MAX_X):
 	for y in xrange(0, MAX_X-x):
-		if height[x][y] != None:
+		if height[x][y] is not None:
 			height[x][y] = int(float(height[x][y]))
 
 z = 0
@@ -300,7 +300,7 @@ while work_done:
 	for x in xrange(0, MAX_X):
 		for y in xrange(0, MAX_X-x):
 			dh = get_downhill(x, y, height)
-			if dh == None:
+			if dh is None:
 				tsinks.append((x, y))
 			down[x][y] = dh
 			usage[x][y] = 0
@@ -319,7 +319,7 @@ while work_done:
 				if height[n[0]][n[1]] != height[h[0]][h[1]]:
 					# Hexes should be at the same height
 					continue
-				if down[n[0]][n[1]] == None:
+				if down[n[0]][n[1]] is None:
 					# If the neighbour is also a sink, ignore it
 					continue
 				if down[n[0]][n[1]] == h:
@@ -370,7 +370,7 @@ while work_done:
 		#print "=== Working with region:", region
 		h = region.fill_next_hex()
 		shed = None
-		while h != None:
+		while h is not None:
 			tmp = shed
 			shed = h
 			# Jump out if we've found another region
@@ -385,13 +385,13 @@ while work_done:
 			# Get the next hex and keep the last one
 			h = region.fill_next_hex()
 			# Jump out with the higher position if we've moved downhill
-			if h != None and height[shed[0]][shed[1]] > height[h[0]][h[1]]:
+			if h is not None and height[shed[0]][shed[1]] > height[h[0]][h[1]]:
 				#check_boundary(region, h, "Moved downhill from " + str(shed))
 				break
 
 		#print "Edge found, into region", block[shed[0]][shed[1]]
 		# Now we've found it, mark it
-		if shed != None:
+		if shed is not None:
 			overflows.add(shed)
 		region.colour = len(si)
 

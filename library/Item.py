@@ -82,7 +82,7 @@ class Item(SerObject):
 	
 	def owner(self):
 		"""Return the owner of this object, loading it if necessary"""
-		if self._owner == None:
+		if self._owner is None:
 			# Get the module for the right type of object, loading the class
 			mod = __import__(self.owner_type, globals(), locals(), [self.owner_type], -1)
 			# Get a handle on the class itself

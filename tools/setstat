@@ -56,18 +56,18 @@ if len(args) < 2 or len(args) > 3:
 	usage()
 	sys.exit(2)
 
-if aid != None:
+if aid is not None:
 	p = Actor.load(aid)
 else:
 	p = Player.load_by_name(args.pop(0))
 
-if p == None:
+if p is None:
     print "Player not found"
     sys.exit(3)
 
 # Convert the string parameter from the command line to an appropriate
 # type
-if typ == None:
+if typ is None:
 	value = Util.retype(args[1])
 else:
 	value = typ(args[1])

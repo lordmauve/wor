@@ -40,18 +40,18 @@ class Location(SerObject):
 					)
 		row = cur.fetchone()
 		location = None
-		while row != None:
+		while row is not None:
 			# Load the overlay
 			tmploc = cls._load_from_row(row, allprops)
 			# Set up a doubly-linked list
 			tmploc._underneath = location
-			if location != None:
+			if location is not None:
 				location._above = tmploc
 			# Push the underlying location down
 			location = tmploc
 			row = cur.fetchone()
 
-		if location != None:
+		if location is not None:
 			location._above = None
 
 		return location
@@ -94,7 +94,7 @@ class Location(SerObject):
 		"""Return the bottom Location of the stack that this Location
 		lives in."""
 		loc = self
-		while loc._underneath != None:
+		while loc._underneath is not None:
 			loc = loc._underneath
 		return loc
 	
@@ -102,7 +102,7 @@ class Location(SerObject):
 		"""Return the top Location of the stack that this Location
 		lives in."""
 		loc = self
-		while loc._above != None:
+		while loc._above is not None:
 			loc = loc._above
 		return loc
 	
@@ -110,7 +110,7 @@ class Location(SerObject):
 		"""Unhook this location (overlay) from the stack, and remove
 		it from the database."""
 		self._underneath._above = self._above
-		if self._above != None:
+		if self._above is not None:
 			self._above._underneath = self._underneath
 		self._deleted = True
 
@@ -127,7 +127,7 @@ class Location(SerObject):
 		"""Generator function to iterate through the stack from the
 		bottom upwards"""
 		loc = self.stack_bottom()
-		while loc != None:
+		while loc is not None:
 			yield loc
 			loc = loc._above
 
@@ -135,7 +135,7 @@ class Location(SerObject):
 		"""Generator function to iterate through the stack from the
 		top down"""
 		loc = self.stack_top()
-		while loc != None:
+		while loc is not None:
 			yield loc
 			loc = loc._underneath
 
@@ -148,7 +148,7 @@ class Location(SerObject):
 		try:
 			return SerObject.__getattribute__(self, key)
 		except AttributeError:
-			if self._underneath != None:
+			if self._underneath is not None:
 				return self._underneath.__getattr__(key)
 
 		# This line is not reachable
@@ -252,7 +252,7 @@ class Location(SerObject):
 	def r(self, who=None):
 		"""Return the hex to the right of this one, according to the
 		given player"""
-		if who == None: who = Context.context
+		if who is None: who = Context.context
 		start = 0
 		if who.power('flipped'):
 			start = 6 - start
@@ -262,7 +262,7 @@ class Location(SerObject):
 	def ur(self, who=None):
 		"""Return the hex to the upper right of this one, according to the
 		given player"""
-		if who == None: who = Context.context
+		if who is None: who = Context.context
 		start = 1
 		if who.power('flipped'):
 			start = 6 - start
@@ -272,7 +272,7 @@ class Location(SerObject):
 	def ul(self, who=None):
 		"""Return the hex to the upper left of this one, according to the
 		given player"""
-		if who == None: who = Context.context
+		if who is None: who = Context.context
 		start = 2
 		if who.power('flipped'):
 			start = 6 - start
@@ -282,7 +282,7 @@ class Location(SerObject):
 	def l(self, who=None):
 		"""Return the hex to the left of this one, according to the
 		given player"""
-		if who == None: who = Context.context
+		if who is None: who = Context.context
 		start = 3
 		if who.power('flipped'):
 			start = 6 - start
@@ -292,7 +292,7 @@ class Location(SerObject):
 	def ll(self, who=None):
 		"""Return the hex to the lower left of this one, according to the
 		given player"""
-		if who == None: who = Context.context
+		if who is None: who = Context.context
 		start = 4
 		if who.power('flipped'):
 			start = 6 - start
@@ -302,7 +302,7 @@ class Location(SerObject):
 	def lr(self, who=None):
 		"""Return the hex to the lower right of this one, according to the
 		given player"""
-		if who == None: who = Context.context
+		if who is None: who = Context.context
 		start = 5
 		if who.power('flipped'):
 			start = 6 - start
@@ -341,7 +341,7 @@ class Location(SerObject):
 					+ " WHERE x=%(x)s AND y=%(y)s AND layer=%(layer)s",
 					self.pos.as_dict())
 		row = cur.fetchone()
-		while row != None:
+		while row is not None:
 			ret.append(row[0])
 			row = cur.fetchone()
 			
@@ -350,7 +350,7 @@ class Location(SerObject):
 	def could_go(self, player, direction):
 		# FIXME: Add support for edge conditions
 		loc = getattr(self, direction)(self)
-		if loc == None:
+		if loc is None:
 			return False
 		return True
 

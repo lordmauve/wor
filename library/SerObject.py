@@ -37,7 +37,7 @@ class SerObject(Triggerable):
 			exception_log.info("Database exception:" + str(dbex) + "\n")
 			return None
 
-		if row == None:
+		if row is None:
 			return None
 
 		obj = cls._load_from_row(row, allprops)
@@ -60,7 +60,7 @@ class SerObject(Triggerable):
 							{ 'id': row[0] }
 							)
 				prop = cur.fetchone()
-				while prop != None:
+				while prop is not None:
 					obj._set_prop_from_row(prop)
 					prop = cur.fetchone()
 			except psycopg2.Error, dbex:
@@ -139,7 +139,7 @@ class SerObject(Triggerable):
 				continue
 
 			# Ignore/delete properties which are None
-			if self.__dict__[key] == None:
+			if self.__dict__[key] is None:
 				cur.execute('DELETE FROM ' + self._table + '_properties'
 							+ ' WHERE ' + self._table + '_id=%(id)s'
 							+ '   AND key=%(key)s',
@@ -346,7 +346,7 @@ class SerObject(Triggerable):
 					{ 'id': self._id,
 					  'key': key })
 		row = cur.fetchone()
-		if row != None:
+		if row is not None:
 			self._set_prop_from_row(row)
 			return True
 		else:
@@ -415,7 +415,7 @@ class SerObject(Triggerable):
 				# If it doesn't, don't worry
 				pass
 			else:
-				if v == None:
+				if v is None:
 					pass
 				if k in ret:
 					pass

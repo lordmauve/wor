@@ -71,7 +71,7 @@ def api_handler_core(req):
 						+ "   AND account.username = %(username)s",
 						{ 'username': account })
 			row = cur.fetchone()
-			while row != None:
+			while row is not None:
 				req.write("id:%d\n" % row[0])
 				req.write("name:%s\n" % row[1])
 				req.write("-\n")
@@ -90,7 +90,7 @@ def api_handler_core(req):
 		else:
 			act_id = check_actor(req)
 			Context.context = Player.load(act_id)
-			if Context.context == None:
+			if Context.context is None:
 				req.status = apache.HTTP_FORBIDDEN
 				req.write("No context found for actor id " + str(act_id))
 				return apache.OK
@@ -186,7 +186,7 @@ def check_actor(req, fail=True):
 		if actor is list:
 			actor = actor[0]
 		
-	if actor == None:
+	if actor is None:
 		# No X-WoR-Actor header defined: return 403 if asked
 		if fail:
 			req.write("No actor defined\nCheck your headers\n\n")

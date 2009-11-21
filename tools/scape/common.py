@@ -14,7 +14,7 @@ def load_to_array(array, f, xfm):
 		stride = int(bits[1])
 	sys.stderr.write(f['file'] + " stride = " + str(stride) + "\n")
 	
-	if array == None:
+	if array is None:
 		array = [ [ None for y in range(0, size-x) ] for x in range(0, size) ]
 
 	# Loop through the file and read its parameters

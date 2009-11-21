@@ -41,7 +41,7 @@ class Part(object):
 		if not os.path.isfile(component_name):
 			self._pil_image = self._make_part(component_name)
 		# Do we have this cached in this object?
-		if self._pil_image == None:
+		if self._pil_image is None:
 			self._pil_image = Image.open(component_name)
 		return self._pil_image
 
@@ -63,8 +63,8 @@ class Part(object):
 				transp = band[1]
 
 		# Decide what blending we will be doing
-		if user_mask == None:
-			if transp == None:
+		if user_mask is None:
+			if transp is None:
 				# We have no concept of transparency at all -- use a
 				# flat setting
 				Logger.log.debug("Using flat mask")
@@ -74,7 +74,7 @@ class Part(object):
 				Logger.log.debug("Using existing transparency")
 				mask = transp
 		else:
-			if transp == None:
+			if transp is None:
 				# We have a mask but no transparency -- use the user's
 				# mask
 				Logger.log.debug("Using provided mask")

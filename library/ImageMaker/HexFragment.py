@@ -18,7 +18,7 @@ class HexFragment(ImageFragment):
 	def _make_part(self, component_name):
 		"""Take a full terrain image tile and fragment it into the five
 		pieces we can construct rendered images from""" 
-		if (self.image != '' and self.image != None):
+		if (self.image != '' and self.image is not None):
 			im = Image.open(self._source_path(self.image))
 			center_x=int(im.size[0]/2)
 			top_fold=int(im.size[1]/4)

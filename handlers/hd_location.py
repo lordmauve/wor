@@ -53,7 +53,7 @@ def neighbourhood_handler(req, loc, components):
 	# next ring.
 	# Start with the first "ring": the centre
 	this_ring = [ here ]
-	if here == None:
+	if here is None:
 		req.write('type:none\n-\n')
 	else:
 		info = here.context_get()
@@ -70,13 +70,13 @@ def neighbourhood_handler(req, loc, components):
 			# For this edge of the current ring, we start with the
 			# "straight-out" hex:
 			dep = prev_ring[edge * (distance-1)]
-			if dep == None:
+			if dep is None:
 				this_ring.append(None)
 				req.write('type:none\n')
 			else:
 				loc = dep.local_directions[edge](dep)
 				this_ring.append(loc)
-				if loc == None:
+				if loc is None:
 					req.write('type:none\n')
 				else:
 					info = loc.context_get()
@@ -97,15 +97,15 @@ def neighbourhood_handler(req, loc, components):
 					continue
 
 				# Deal with the case if both antecedents are undefined
-				if a0 == None and a1 == None:
+				if a0 is None and a1 is None:
 					this_ring.append(None)
 					req.write('type:none\n-\n')
 					continue
 
 				# Deal with one or other antecedents being undefined
-				if a0 == None:
+				if a0 is None:
 					loc = a1.local_directions[edge](a1)
-				elif a1 == None:
+				elif a1 is None:
 					loc = a0.local_directions[(edge+1)%6](a0)
 				# or check that both paths to this hex yield the same
 				# result
@@ -118,7 +118,7 @@ def neighbourhood_handler(req, loc, components):
 					loc = a1.local_directions[edge](a1)
 
 				this_ring.append(loc)
-				if loc == None:
+				if loc is None:
 					req.write('type:none\n')
 				else:
 					info = loc.context_get()

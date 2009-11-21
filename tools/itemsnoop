@@ -29,7 +29,7 @@ if len(args) != 1:
 	sys.exit(1)
 
 i = Item.load(int(args[0]), allprops=True)
-if i == None:
+if i is None:
 	print "Item ID", args[0], "not found"
 	sys.exit(1)
 
