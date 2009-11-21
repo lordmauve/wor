@@ -1,19 +1,40 @@
 #########
 # Representative of a coordinate: also includes orientation
 
-class Position:
+class Position(object):
 	def __init__(self, x, y, layer):
-		self.x = x
-		self.y = y
-		self.layer = layer
+		self._p = x, y, layer
+	
+	@property
+	def x(self):
+		return self._p[0]
+
+	@property
+	def y(self):
+		return self._p[1]
+
+	@property
+	def layer(self):
+		return self._p[2]
+
+	def __iter__(self):
+		return iter(self._p)
+
+	def __hash__(self):
+		return hash(['Position'] + list(self))
 
 	def __repr__(self):
-		return "%d,%d,%s" % (self.x, self.y, self.layer)
+		return "Position(%r, %r, %r)" % tuple(self)
 
-	def context_get(self):
+	def translate(self, x, y):
+		return Position(self.x + x, self.y + y, self.layer)
+
+	def as_dict(self):
 		return { 'x': self.x,
 				 'y': self.y,
 				 'layer': self.layer }
+	
+	context_get = as_dict
 
 	def distance(self, them):
 		"""Compute the Euclidean distance between this position and

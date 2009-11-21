@@ -39,9 +39,7 @@ class Actor(SerObject):
 
 	def _save_indices(self):
 		inds = super(Actor, self)._save_indices()
-		inds['x'] = self.position.x
-		inds['y'] = self.position.y
-		inds['layer'] = self.position.layer
+		inds.update(self.position.as_dict())
 		return inds
 
 	@classmethod

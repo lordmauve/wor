@@ -35,9 +35,7 @@ class Location(SerObject):
 		cur.execute('SELECT id, state FROM location '
 					+ 'WHERE x=%(x)s AND y=%(y)s AND layer=%(layer)s '
 					+ 'ORDER BY overlay',
-					{ 'x': pos.x,
-					  'y': pos.y,
-					  'layer': pos.layer }
+					pos.as_dict()
 					)
 		row = cur.fetchone()
 		location = None
@@ -74,9 +72,7 @@ class Location(SerObject):
 
 	def _save_indices(self):
 		inds = super(Location, self)._save_indices()
-		inds['x'] = self.pos.x
-		inds['y'] = self.pos.y
-		inds['layer'] = self.pos.layer
+		inds.update(self.pos.as_dict())
 		inds['overlay'] = self.overlay
 		return inds
 
@@ -211,56 +207,42 @@ class Location(SerObject):
 	def __str__(self):
 		return "[%s;%d]" % (str(self.pos), self.overlay)
 
-
 	def e(self):
 		"""Return the hex to the east of this one"""
 		if hasattr(self, 'warp_e'):
 			return self.load_by_pos(self.warp_e)
-		pos = copy.copy(self.pos)
-		pos.x += 1
-		return self.load_by_pos(pos)
+		return self.load_by_pos(self.pos.translate(1, 0))
 
 	def w(self):
 		"""Return the hex to the west of this one"""
 		if hasattr(self, 'warp_w'):
 			return self.load_by_pos(self.warp_w)
-		pos = copy.copy(self.pos)
-		pos.x -= 1
-		return self.load_by_pos(pos)
+		return self.load_by_pos(self.pos.translate(-1, 0))
 
 	def ne(self):
 		"""Return the hex to the north-east of this one"""
 		if hasattr(self, 'warp_ne'):
 			return self.load_by_pos(self.warp_ne)
-		pos = copy.copy(self.pos)
-		pos.y += 1
-		return self.load_by_pos(pos)
+		return self.load_by_pos(self.pos.translate(0, 1))
 
 	def nw(self):
 		"""Return the hex to the north-west of this one"""
 		if hasattr(self, 'warp_nw'):
 			return self.load_by_pos(self.warp_nw)
-		pos = copy.copy(self.pos)
-		pos.x -= 1
-		pos.y += 1
-		return self.load_by_pos(pos)
+		return self.load_by_pos(self.pos.translate(-1, 1))
 
 	def se(self):
 		"""Return the hex to the south-east of this one"""
 		if hasattr(self, 'warp_se'):
 			return self.load_by_pos(self.warp_se)
-		pos = copy.copy(self.pos)
-		pos.x += 1
-		pos.y -= 1
-		return self.load_by_pos(pos)
+		return self.load_by_pos(self.pos.translate(1, -1))
 
 	def sw(self):
 		"""Return the hex to the south-west of this one"""
 		if hasattr(self, 'warp_sw'):
 			return self.load_by_pos(self.warp_se)
-		pos = copy.copy(self.pos)
-		pos.y -= 1
-		return self.load_by_pos(pos)
+		return self.load_by_pos(self.pos.translate(0, -1))
+
 
 	"""Table used for obtaining directions algorithmically"""
 	directions = [ e, ne, nw, w, sw, se ]
@@ -356,7 +338,7 @@ class Location(SerObject):
 		cur = DB.cursor()
 		cur.execute("SELECT id FROM actor"
 					+ " WHERE x=%(x)s AND y=%(y)s AND layer=%(layer)s",
-					self.pos.__dict__)
+					self.pos.as_dict())
 		row = cur.fetchone()
 		while row != None:
 			ret.append(row[0])
