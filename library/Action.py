@@ -17,7 +17,7 @@ class Action(object):
 		self.group = group
 		self.parameters = parameters
 		self.html = html
-		if html == None:
+		if html is None:
 			self.html = self.make_button_for()
 
 	def context_get(self):
@@ -63,10 +63,10 @@ class Action(object):
 
 	def make_button_for(self, caption=None, cost=None, parameters=None):
 		"""Make a button for this Action object."""
-		if caption == None:
+		if caption is None:
 			caption = self.caption
 		if cost is None:
 			cost = self.cost
-		if parameters == None:
+		if parameters is None:
 			parameters = self.parameters
 		return self.make_button(caption, self.uid, cost, parameters)

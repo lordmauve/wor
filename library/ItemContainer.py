@@ -97,7 +97,7 @@ class ItemContainer(OnLoad):
 					  'container': self.name })
 
 		row = cur.fetchone()
-		while row != None:
+		while row is not None:
 			# Update the list by ID
 			self._item_ids.add(row[0])
 			# Update the list by name
@@ -209,7 +209,7 @@ class ItemContainer(OnLoad):
 
 	def split_or_remove(self, item, num_items):
 		split_item = self.split(item, num_items)
-		if split_item == None:
+		if split_item is None:
 			self.remove(item)
 		
 		return split_item

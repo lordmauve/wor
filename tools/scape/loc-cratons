@@ -91,7 +91,7 @@ for x in range(0, MAX_X):
 
 		# Get the list of nearby centres
 		closest.sort(lambda a, b: cmp(a[0], b[0]))
-		if blend == None:
+		if blend is None:
 			print closest[0][3],
 		else:
 			mini = closest[0][0]

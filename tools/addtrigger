@@ -48,12 +48,12 @@ if len(args) < 1:
 	usage()
 	sys.exit(1)
 
-if aid != None:
+if aid is not None:
 	p = Actor.load(aid)
 else:
 	p = Player.load_by_name(args.pop(0))
 
-if p == None:
+if p is None:
     print "Player not found"
     sys.exit(2)
 

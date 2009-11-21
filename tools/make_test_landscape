@@ -44,7 +44,7 @@ for x in range(-3, 4):
 		pos = Position(x, y, 'test')
 		if ccl.hop_distance(pos) <= 3:
 			old = Location.load_by_pos(pos)
-			if old != None:
+			if old is not None:
 				old.demolish()
 			l = Location(pos)
 			l.name = "(%d, %d)" % (x, y)

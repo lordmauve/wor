@@ -38,7 +38,7 @@ class Player(Actor):
 					+ " WHERE name = %(name)s",
 					{ 'name': name } )
 		row = cur.fetchone()
-		if row == None:
+		if row is None:
 			return None
 		#log.debug("Loading player %s (=%d)" % (name, row[0]))
 		return cls.load(row[0], allprops)
@@ -67,7 +67,7 @@ class Player(Actor):
 	####
 	# Create a new player
 	def __init__(self, name, align, position=None):
-		if position == None:
+		if position is None:
 			# FIXME: Make this alignment-dependent
 			position = Position(0, 0, 'main')
 
@@ -130,7 +130,7 @@ class Player(Actor):
 			# No actions are possible at negative AP
 			return acts
 		
-		if fuid == None:
+		if fuid is None:
 			action_id = None
 			name = None
 		else:
@@ -162,7 +162,7 @@ class Player(Actor):
 		# What can we do to the item we're holding?
 		item = self.held_item()
 		# Match any action at this stage
-		if item != None and Util.match_id(action_id, item):
+		if item is not None and Util.match_id(action_id, item):
 			item.external_actions(acts, self, name)
 		
 		# What can we do to the items we're wearing?

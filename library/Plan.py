@@ -41,7 +41,7 @@ class Plan(object):
 		self.makes = makes
 		self.ap = ap
 		self.ap10 = ap10
-		if self.ap10 == None:
+		if self.ap10 is None:
 			self.ap10 = 10*self.ap
 		self.align = align
 		self.catalyst = catalyst

@@ -35,11 +35,11 @@ Context.context = Context.ADMIN_CTX
 pos = Position(int(args[0]), int(args[1]), args[2])
 loc = Location.load_by_pos(pos, allprops=True)
 
-if loc == None:
+if loc is None:
 	print "Location not found"
 	sys.exit(1)
 
-while loc != None:
+while loc is not None:
 	info = loc.context_get()
 	ind = Util.info_key_length(info)+1
 	print ("%-"+str(ind+1)+"s%s") % ("type:", loc.ob_type())

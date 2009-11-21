@@ -60,7 +60,7 @@ def verify_core(req):
 	# Set up the OpenID library
 	session = Session.Session(req, timeout=60)
 	global store
-	if store == None:
+	if store is None:
 		Logger.log.debug("Creating new store")
 		server_options = req.get_options()
 		store_path = os.path.join(server_options['wor.root_path'], "oid_store")
@@ -68,7 +68,7 @@ def verify_core(req):
 	oid_consumer = consumer.Consumer(session, store)
 
 	# Get the user's account details that they provided
-	if getattr(req, "form", None) == None:
+	if getattr(req, "form", None) is None:
 		req.form = util.FieldStorage(req, True)
 	account = req.form.getfirst("openid_identifier")
 
@@ -78,7 +78,7 @@ def verify_core(req):
 	except consumer.DiscoveryFailure, ex:
 		raise
 
-	if request == None:
+	if request is None:
 		raise Exception("No OpenID services found for " + account)
 
 	# We request some other details from them, too, so that we can use
@@ -142,7 +142,7 @@ def process_core(req):
 	# Set up OpenID library
 	session = Session.Session(req, timeout=60)
 	global store
-	if store == None:
+	if store is None:
 		Logger.log.debug("Creating new store")
 		server_options = req.get_options()
 		store_path = os.path.join(server_options['wor.root_path'], "oid_store")
@@ -150,7 +150,7 @@ def process_core(req):
 	oid_consumer = consumer.Consumer(session, store)
 
 	# Get request parameters
-	if getattr(req, "form", None) == None:
+	if getattr(req, "form", None) is None:
 		req.form = util.FieldStorage(req, True)
 
 	# Convert the request parameters into an ordinary decent
@@ -200,7 +200,7 @@ def process_core(req):
 		# does exist, we should drop them into the game UI, in
 		# "character-selection" mode.
 		accid = Account.get_id_from_name(display_identifier)
-		if accid == None:
+		if accid is None:
 			# Then there's no corresponding account: create one
 			pass
 

@@ -6,7 +6,7 @@ def get_id_from_name(name):
 				+ " WHERE username = %{username}s",
 				{ 'username': display_identifier } )
 	row = cur.fetchone()
-	if row == None:
+	if row is None:
 		return None
 	return row[0]
 

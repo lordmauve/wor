@@ -50,7 +50,7 @@ if len(args) < 2 or len(args) > 5:
 	usage()
 	sys.exit(2)
 
-if lid != None:
+if lid is not None:
 	loc = Location.load(lid)
 else:
 	x, y, layer = args[0:3]
@@ -58,13 +58,13 @@ else:
 	pos = Position(x, y, layer)
 	loc = Location.load_by_pos(pos)
 
-if loc == None:
+if loc is None:
     print "Location not found"
     sys.exit(3)
 
 # Convert the string parameter from the command line to an appropriate
 # type
-if typ == None:
+if typ is None:
 	value = Util.retype(args[1])
 else:
 	value = typ(args[1])

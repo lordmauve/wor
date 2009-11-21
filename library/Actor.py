@@ -57,7 +57,7 @@ class Actor(SerObject):
 
 	def held_item(self):
 		"""Return the item(s) currently held by the actor"""
-		if getattr(self, 'holding', None) == None:
+		if getattr(self, 'holding', None) is None:
 			return None
 		return Item.load(self.holding)
 
@@ -86,7 +86,7 @@ class Actor(SerObject):
 
 		# Equipment held
 		held = self.held_item()
-		if held != None:
+		if held is not None:
 			powr += held.power(name)
 
 		# Equipment worn
@@ -147,7 +147,7 @@ class Actor(SerObject):
 
 		result = []
 		row = cur.fetchone()
-		while row != None:
+		while row is not None:
 			result.append(row)
 			row = cur.fetchone()
 		return result
@@ -158,7 +158,7 @@ class Actor(SerObject):
 		"""Create and return a hash of all possible actions the
 		given player might perform on this actor"""
 
-		if name == None:
+		if name is None:
 			requested = [ "attack" ]
 		else:
 			requested = [ name ]

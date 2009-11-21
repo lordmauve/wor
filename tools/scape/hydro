@@ -121,10 +121,10 @@ def get_downhill(x, y, height, water):
 	for l in ret:
 		x, y = l
 		h = height[x][y] + water[x][y]
-		if minl == None or minh < h:
+		if minl is None or minh < h:
 			minh = h
 			minl = l
-	if minl != None:
+	if minl is not None:
 		return [minl]
 	return []
 
@@ -224,10 +224,10 @@ def rainfall(arr):
 def write_file(name, array):
 	if name == '-':
 		f = sys.stdout
-	elif name != None:
+	elif name is not None:
 		f = open(name, "w")
 
-	if name != None:
+	if name is not None:
 		f.write(str(MAX_X) + "\n")
 		for x in xrange(0, MAX_X, SUBSET):
 			for y in xrange(0, MAX_X-x, SUBSET):
@@ -251,7 +251,7 @@ for f in hfiles:
 # Force everything to the right datatype
 for x in xrange(0, MAX_X):
 	for y in xrange(0, MAX_X-x):
-		if height[x][y] != None:
+		if height[x][y] is not None:
 			height[x][y] = int(float(height[x][y]))
 		# Set the water to meet the zero-level
 		water[x][y] = max(0.0, -height[x][y])

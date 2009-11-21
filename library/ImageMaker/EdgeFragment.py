@@ -16,7 +16,7 @@ class EdgeFragment(ImageFragment):
 
 		# Assumption: your border image runs vertically, smack dab in
 		# the middle of the image.
-		if self.image != "" and self.image != None:
+		if self.image != "" and self.image is not None:
 			im = Image.open(self._source_path(self.image))
 			# Yes, it's more effort to maintain left & right separately.
 			# But maybe you have a really fancy border that you don't want

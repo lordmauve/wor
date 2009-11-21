@@ -53,11 +53,11 @@ for o, a in optlist:
 		usage()
 		sys.exit(0)
 
-if acid == None and len(args) != 2 or acid != None and len(args) != 1:
+if acid is None and len(args) != 2 or acid is not None and len(args) != 1:
 	usage()
 	sys.exit(1)
 
-if acid == None:
+if acid is None:
 	cur = DB.cursor()
 	cur.execute("SELECT account_id FROM account WHERE username=%(uname)s",
 			{ "uname": args.pop(0) })
