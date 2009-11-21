@@ -12,6 +12,7 @@ from ItemContainer import ItemContainer
 from Items.Punch import Punch
 
 from Action import Action
+from Cost import Cost
 from SimpleTimedCounter import SimpleTimedCounter
 from Position import Position
 
@@ -151,7 +152,8 @@ class Player(Actor):
 			uid = Action.make_id(self, "changeitem")
 			act_html = "Use item <input id='%s_id' size='3' />. " % uid
 			acts[uid] = Action(
-				uid, self, caption="Change", ap=0, group="inventory",
+				uid, self, caption="Change", cost=Cost(ap=0),
+				group="inventory",
 				action=lambda d: self.change_item_action(d),
 				html=act_html, parameters=['id']
 				)
