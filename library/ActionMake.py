@@ -2,6 +2,7 @@
 # ActionMake: Subclass of an Action object for making stuff
 
 from Action import Action
+from Cost import Cost
 from Logger import log
 
 class ActionMake(Action):
@@ -9,7 +10,7 @@ class ActionMake(Action):
 		uid = Action.make_id(item, plan.name)
 		super(ActionMake, self).__init__(
 			uid, player, caption="Make",
-			ap=plan.ap, group="build"
+			cost=Cost(ap=plan.ap), group="build"
 			)
 		
 		self.action = lambda d: self.build(d)

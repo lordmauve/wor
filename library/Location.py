@@ -6,6 +6,7 @@ import functools
 from Database import DB
 from SerObject import SerObject
 from Action import Action
+from Cost import Cost
 from Util import no_d
 from Logger import log
 import Context
@@ -326,7 +327,7 @@ class Location(SerObject):
 				a = no_d(functools.partial(player.move_to, l.pos))
 				# Create the action itself
 				acts[uid] = Action(uid, player, caption="Move " + n.upper(),
-								   ap=cost,
+								   cost=Cost(ap=cost),
 								   action=a,
 								   group="move")
 

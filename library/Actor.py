@@ -11,6 +11,7 @@ from Item import Item
 from Logger import log
 from Location import Location
 from Action import Action
+from Cost import Cost
 from Database import DB
 from TriggerDeath import TriggerDeath
 
@@ -169,7 +170,7 @@ class Actor(SerObject):
 			
 			uid = Action.make_id(self, "attack")
 			acts[uid] = Action(
-				uid, self, caption="Attack", ap=1, group="outsider",
+				uid, self, caption="Attack", cost=Cost(ap=1), group="outsider",
 				action=lambda: player.attack(self)
 				)
 

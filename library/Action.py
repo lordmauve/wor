@@ -1,16 +1,18 @@
 ######
 # An action: something that the user can be invited to do
 
+from Cost import Cost
+
 FAIL = -1
 
 class Action(object):
-	def __init__(self, uid, actor, caption="Use", ap=1,
+	def __init__(self, uid, actor, caption="Use", cost=Cost(ap=1),
 				 action=lambda d: None,
 				 group="none", html=None, parameters=[]):
 		self.uid = uid
 		self.actor = actor
 		self.caption = caption
-		self.ap = ap
+		self.cost = cost
 		self.action = action
 		self.group = group
 		self.parameters = parameters
@@ -21,7 +23,7 @@ class Action(object):
 	def context_get(self):
 		ret = {}
 		ret['html'] = self.html
-		ret['ap'] = self.ap
+		ret['cost'] = str(self.cost)
 		ret['uid'] = self.uid
 		ret['caption'] = self.caption
 		ret['group'] = self.group
@@ -32,7 +34,7 @@ class Action(object):
 	def perform(self, data):
 		rv = self.action(data)
 		if not rv:
-			self.actor.ap -= self.ap
+			self.cost.charge(self.actor)
 		return rv
 
 	@staticmethod
@@ -40,15 +42,16 @@ class Action(object):
 		return "%s.%d.%s" % (object.ob_type(), object._id, act)
 
 	@staticmethod
-	def make_button(caption, uid, ap=1, parameters=[]):
+	def make_button(caption, uid, cost=Cost(), parameters=[]):
 		"""Make a button, with appropriate caption and JavaScript to
 		despatch the request."""
 		action_params = '"' + uid + '"'
 		for it in parameters:
 			action_params += ', "' + uid + '_' + it + '"'
 		aptext = ""
-		if ap == 0:
-			aptext = " (%d AP)" % ap
+		cost = str(cost)
+		if cost:
+			aptext = " (%s)" % cost
 			
 		return ("<button onclick='post_action(%(params)s)'>"
 				+ "%(caption)s%(aptext)s</button>") % {
@@ -58,12 +61,12 @@ class Action(object):
 			'params': action_params
 			}
 
-	def make_button_for(self, caption=None, ap=None, parameters=None):
+	def make_button_for(self, caption=None, cost=None, parameters=None):
 		"""Make a button for this Action object."""
 		if caption == None:
 			caption = self.caption
-		if ap == None:
-			ap = self.ap
+		if cost is None:
+			cost = self.cost
 		if parameters == None:
 			parameters = self.parameters
-		return self.make_button(caption, self.uid, ap, parameters)
+		return self.make_button(caption, self.uid, cost, parameters)
