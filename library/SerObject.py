@@ -1,6 +1,4 @@
 #########
-# Serialisable object
-# This is the base object for all objects that might end up in the database
 
 from Database import DB
 from Logger import log, exception_log
@@ -12,14 +10,13 @@ import psycopg2
 import Util
 import types
 
-####
-# A serialisable object
+
 class SerObject(Triggerable):
-	####
-	# Loading the object by ID from the database
+	"""This is the base class for all objects that might end up in the database."""
+
 	@classmethod
 	def load(cls, id, allprops=False):
-		"""Get the SerObject with the given id from the given table"""
+		"""Get the SerObject with the given id from the database"""
 
 		#log.debug("Request to load " + str(id) + " from " + cls._table)
 
