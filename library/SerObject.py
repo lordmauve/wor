@@ -259,8 +259,13 @@ class SerObject(Triggerable):
 		# we've probably not been called through self.save().
 		if not hasattr(self, '_pickle'):
 			log.error("Failure in pickle for " + self.ob_type() + " " + str(self._id))
-			# Panic! (See comment above)
-			raise AssertionError()
+			# Panic! (See comment above). The usual cause of this
+			# exception is storing a SerObject in foo.bar, where it
+			# then gets pickled as foo is pickled, but without having
+			# been passed through foo.bar.save(). Instead, use either
+			# foo._bar or foo.bar = bar._id.
+			# FIXME: Catch this error in save() and warn loudly about it.
+			raise AssertionError("You have probably stored a reference to a SerObject in a member that doesn't start with _")
 
 		obj = {}
 		for k in self._pickle:
