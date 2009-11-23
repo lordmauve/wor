@@ -12,6 +12,11 @@ class AggregateItem(Item):
 	   object with a 500 count"""
 	aggregate = True
 
+	def __init__(self, count=1):
+		"""Create a new AggregateItem with the given unit count."""
+		Item.__init__(self)
+		self.count = count
+
 	def merge(self, new_item):
 		"""Merge the given item with this item, if possible.  Return 
 		  True if the new item should be discarded, False otherwise"""
