@@ -103,9 +103,8 @@ class ItemContainer(OnLoad):
 			# Update the list by ID
 			self._item_ids.add(row[0])
 			# Update the list by name
-			if row[1] not in self._item_types:
-				self._item_types[row[1]] = set()
-			self._item_types[row[1]].add(row[0])
+			iset = self._item_types.setdefault(row[1], set())
+			iset.add(row[0])
 			row = cur.fetchone()
 
 	####
@@ -193,7 +192,6 @@ class ItemContainer(OnLoad):
 			# Note that we can only have a single aggregate of a 
 			# given type per container
 			total = self.__get_first_item(itemclass.__name__).count
-		
 		else:
 			total = len(self._item_types[itemclass.__name__])
 
@@ -211,31 +209,30 @@ class ItemContainer(OnLoad):
 		
 		shouldDiscard = False
 
-		# If our type is not in the container already, create a new set 
-		# for it
-		if itype not in self._item_types:
-			self._item_types[itype] = set()
-		else:
-			# On the other hand, if it IS in the container already, 
-			# get the first element of the type.  
-			existing_item = self.__get_first_item(itype)
-
-			# Now, try to merge the new item into it.  Note that if 
-			# this is an aggregate, we'll only have one element in 
-			# the set.  If it's not, there'll be no need to merge 
-			# anyhow, so we can get away  with only eyeballing the 
-			# first element
+		# get the first element of the type.
+		existing_item = self.__get_first_item(itype)
+		if existing_item is not None:
+			# Now, try to merge the new item into it.  Note that if
+			# this is an aggregate, we'll only have one element in the
+			# set. If it's not, there'll be no need to merge anyhow,
+			# so we can get away with only eyeballing the first
+			# element.
 			shouldDiscard = existing_item.merge(item)
 
 		# If merge does not indicate we should discard the element, add
 		# it to our ID and type collections
-		if shouldDiscard == False:
+		if shouldDiscard:
+			item.demolish()
+			# We don't need to set any changes here, as we've only
+			# updated the internal state of existing_item, and not
+			# modified the container itself.
+		else:
+			# If we're not discarding the new item, it should be added
+			# to the container, and its ownership updated.
 			self._item_ids.add(item._id)
 			self._item_types[itype].add(item._id)
 			self._changes.add(item._id)
 			item.set_owner(self.parent)
-		else:
-			item.demolish()
 
 	def remove(self, item):
 		"""Removes the given item from the container, and returns it.
@@ -280,8 +277,12 @@ class ItemContainer(OnLoad):
 		Returns: an arbitrary item of that type from the container, or
 		None if no item of that type is present
 		"""
-		item_id = iter(self._item_types[itype]).next()
-		item_class = Item.get_class(itype)
-		item = Item.load(item_id)
+		items = self._item_types.setdefault(itype, set())
+		try:
+			item_id = iter(items).next()
+		except StopIteration:
+			item = None
+		else:
+			item = Item.load(item_id)
 
 		return item
