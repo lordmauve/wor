@@ -127,6 +127,17 @@ class ItemContainer(OnLoad):
 	####
 	# Item access
 	def __getitem__(self, key):
+		"""Find an (arbitrary) item in the container, and return that
+		item without removing it from the container.
+
+		Parameters:
+		key -- one of: the unique ID of the item to retrieve, or
+		               the name of an item type
+		Returns: If key is an item ID, return that specific item. If
+		the key is an item type name, return a copy of the set of
+		items with that type name in the container.
+		"""
+		# FIXME: Allow a class to be passed as key, as well
 		if isinstance(key, long) or isinstance(key, int):
 			# We've been asked for an item by ID
 			return self._item_ids[key]
@@ -139,18 +150,33 @@ class ItemContainer(OnLoad):
 		raise KeyError()
 
 	def __contains__(self, key):
-		"""Tests whether an item is in the container, by ID. Use has()
-		to test for the presence of items."""
+		"""Tests whether a specific item is in the container, by ID.
+
+		Parameters:
+		key -- item ID to test
+		Returns: True if the container holds the item with the given id
+
+		Use has() to test for the presence of items by class.
+		"""
 		return key in self._item_ids
 
 	def has(self, itemclass, count=1):
 		"""Test whether the container has 'count' of items of type
-		itemclass. itemclass must be a class object."""
+		itemclass.
+
+		Parameters:
+		itemclass -- the class of the item to check for. Must be a leaf
+		             class (base classes will not be counted).
+		count -- the number of items to look for.
+		
+		Returns: True if the container contains at least 'count' items
+		of class 'itemclass'.
+		"""
 		if itemclass.__name__ not in self._item_types:
 			return False
 
 		# Since items have a count of 1 by default, we can just 
-		# iterate through all of them, regardless of the 
+		# iterate through all of them.
 		#
 		# TODO: Figure out if there's a way to internalize this in 
 		#       Item
@@ -165,7 +191,11 @@ class ItemContainer(OnLoad):
 		return total >= count
 
 	def add(self, item):
-		"""Add the given item to the container"""
+		"""Add the given item to the container.
+
+		Parameters:
+		item -- The item to add.
+		"""
 
 		# Get the type from the item
 		itype = item.ob_type()
@@ -199,16 +229,27 @@ class ItemContainer(OnLoad):
 			item.demolish()
 
 	def remove(self, item):
-		"""Removes the given item from the container.  Note that this 
-		   does NOT change the persistent state of the item at all"""
+		"""Removes the given item from the container, and returns it.
+		"""
 		self._changes.add(item._id)
 		item.set_owner(None)
 		
 	
 	def split(self, item, num_items):
-		"""Splits the given number of items from this item.  If this is 
-		   an aggregate, the split instance should be returned.  If 
-		   not, None will be returned"""
+		"""Splits the given number of items from this item, returning
+		the split items.
+
+		If the item is not an aggregate, nothing is returned.
+
+		If the item held in the container becomes empty, remove it
+		from the container.
+
+		Parameters:
+		item -- the item to split
+		num_items -- the number of parts to split from it
+		
+		Returns: None if this item is not an aggregate. Otherwise, the
+		split instance is returned."""
 		return item.split(num_items)
 
 	def split_or_remove(self, item, num_items):
@@ -219,6 +260,13 @@ class ItemContainer(OnLoad):
 		return split_item
 	
 	def __get_first_item(self, itype):
+		"""Get an arbitrary item of the given type from the container.
+
+		Parameters:
+		itype -- an item type name.
+		Returns: an arbitrary item of that type from the container, or
+		None if no item of that type is present
+		"""
 		item_id = iter(self._item_types[itype]).next()
 		item_class = Item.get_class(itype)
 		item = Item.load(item_id)
