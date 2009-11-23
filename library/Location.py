@@ -71,6 +71,11 @@ class Location(SerObject):
 			return
 		stack[obj.overlay] = obj
 
+	@classmethod
+	def flush_cache(cls):
+		cls.cache_by_id = {}
+		cls.cache_by_pos = {}
+
 	def _save_indices(self):
 		inds = super(Location, self)._save_indices()
 		inds.update(self.pos.as_dict())
