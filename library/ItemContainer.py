@@ -157,12 +157,17 @@ class ItemContainer(OnLoad):
 		"""Tests whether a specific item is in the container, by ID.
 
 		Parameters:
-		key -- item ID to test
+		key -- item or item ID to test
 		Returns: True if the container holds the item with the given id
 
 		Use has() to test for the presence of items by class.
 		"""
-		return key in self._item_ids
+		if isinstance(key, Item):
+			return key._id in self._item_ids
+		elif isinstance(key, long) or isinstance(key, int):
+			return key in self._item_ids
+		else:
+			raise TypeError()
 
 	def has(self, itemclass, count=1):
 		"""Test whether the container has 'count' of items of type
@@ -235,9 +240,11 @@ class ItemContainer(OnLoad):
 	def remove(self, item):
 		"""Removes the given item from the container, and returns it.
 		"""
+		self._item_types[item.ob_type()].remove(item._id)
 		self._changes.add(item._id)
+		self._item_ids.remove(item._id)
 		item.set_owner(None)
-		
+		return item
 	
 	def split(self, item, num_items):
 		"""Splits the given number of items from this item, returning
@@ -254,15 +261,17 @@ class ItemContainer(OnLoad):
 		
 		Returns: None if this item is not an aggregate. Otherwise, the
 		split instance is returned."""
-		return item.split(num_items)
+		rv = item.split(num_items)
+		if item.count <= 0:
+			self.remove(item).destroy()
+		return rv
 
 	def split_or_remove(self, item, num_items):
 		split_item = self.split(item, num_items)
 		if split_item is None:
-			self.remove(item)
-		
+			split_item = self.remove(item)
 		return split_item
-	
+
 	def __get_first_item(self, itype):
 		"""Get an arbitrary item of the given type from the container.
 
