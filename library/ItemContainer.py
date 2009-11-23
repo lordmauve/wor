@@ -133,14 +133,18 @@ class ItemContainer(OnLoad):
 		Parameters:
 		key -- one of: the unique ID of the item to retrieve, or
 		               the name of an item type
-		Returns: If key is an item ID, return that specific item. If
-		the key is an item type name, return a copy of the set of
+		Returns: If key is an item ID, return that specific item, or
+		raise KeyError if the item does not exist.
+		If the key is an item type name, return a copy of the set of
 		items with that type name in the container.
 		"""
 		# FIXME: Allow a class to be passed as key, as well
 		if isinstance(key, long) or isinstance(key, int):
 			# We've been asked for an item by ID
-			return self._item_ids[key]
+			if key in self._item_ids:
+				return Item.load(key)
+			else:
+				raise KeyError()
 		elif isinstance(key, str):
 			return self._item_types[key].copy()
 		else:
