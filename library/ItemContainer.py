@@ -127,11 +127,11 @@ class ItemContainer(OnLoad):
 	####
 	# Item access
 	def __getitem__(self, key):
-		if key is int:
+		if isinstance(key, long) or isinstance(key, int):
 			# We've been asked for an item by ID
 			return self._item_ids[key]
-		elif key is str:
-			return self._item_types[key][:]
+		elif isinstance(key, str):
+			return self._item_types[key].copy()
 		else:
 			raise TypeError()
 
