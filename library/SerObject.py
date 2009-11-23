@@ -393,6 +393,7 @@ class SerObject(Triggerable):
 	####
 	# Destruction
 	def demolish(self):
+		self._changed = True
 		self._deleted = True
 
 	def ob_type(self):
