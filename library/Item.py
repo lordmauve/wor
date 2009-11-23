@@ -79,6 +79,11 @@ class Item(SerObject):
 		idxs = super(Item, self)._save_indices()
 		idxs['type'] = self.ob_type()
 		return idxs
+
+	@classmethod
+	def flush_cache(cls):
+		cls.cache_by_id = {}
+		cls.class_cache_by_name = {}
 	
 	def owner(self):
 		"""Return the owner of this object, loading it if necessary"""
