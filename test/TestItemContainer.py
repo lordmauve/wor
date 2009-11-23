@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """Test cases for ItemContainer"""
 
 import unittest
@@ -110,6 +112,21 @@ class TestItemContainer(TestDatabaseSetup):
 			self.assert_(True)
 		else:
 			self.fail()
+
+	def testContains(self):
+		self.p1.inventory.add(self.rock)
+		self.assert_(self.rock in self.p1.inventory)
+		self.assert_(self.rock._id in self.p1.inventory)
+
+	def testContainsFail(self):
+		self.failIf(self.rock in self.p1.inventory)
+
+	def testRemove(self):
+		self.p1.inventory.add(self.rock)
+		self.assert_(self.rock in self.p1.inventory)
+		item = self.p1.inventory.remove(self.rock)
+		self.failIf(self.rock in self.p1.inventory)
+		self.assert_(item is self.rock)
 
 def suite():
 	s = unittest.TestSuite()
