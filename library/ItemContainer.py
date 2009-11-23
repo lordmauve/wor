@@ -194,6 +194,7 @@ class ItemContainer(OnLoad):
 			self._item_ids.add(item._id)
 			self._item_types[itype].add(item._id)
 			self._changes.add(item._id)
+			item.set_owner(self.parent)
 		else:
 			item.demolish()
 
@@ -201,6 +202,7 @@ class ItemContainer(OnLoad):
 		"""Removes the given item from the container.  Note that this 
 		   does NOT change the persistent state of the item at all"""
 		self._changes.add(item._id)
+		item.set_owner(None)
 		
 	
 	def split(self, item, num_items):

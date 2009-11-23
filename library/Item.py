@@ -86,8 +86,10 @@ class Item(SerObject):
 		cls.class_cache_by_name = {}
 	
 	def owner(self):
-		"""Return the owner of this object, loading it if necessary"""
-		if self._owner is None:
+ 		"""The notional owner of the item. For quantum items with
+ 		multiple owners, this will be the owner that last touched it.
+ 		"""
+ 		if self._owner is None and self.owner_type != "":
 			# Get the module for the right type of object, loading the class
 			mod = __import__(self.owner_type, globals(), locals(), [self.owner_type], -1)
 			# Get a handle on the class itself
@@ -95,6 +97,15 @@ class Item(SerObject):
 			# Use the class's load() method to load the owner object
 			self._owner = cls.load(self.owner_id)
 		return self._owner
+
+	def set_owner(self, obj):
+		self._owner = obj
+		if obj is not None:
+			self.owner_type = obj.__class__.__name__
+			self.owner_id = obj._id
+		else:
+			self.owner_type = ""
+			self.owner_id = -1
 
 	def power(self, name):
 		return getattr(self, name, 0)
