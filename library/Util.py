@@ -81,6 +81,11 @@ class WorError(Exception):
 	"""Base Exception for all WOR code.  Subclass if needed"""
 	pass
 
+class WorInsufficientItemsException(WorError):
+	"""An attempt was made to remove a number of items from a
+	collection when that number was not present."""
+	pass
+
 def no_d(f):
 	"""Generate a new function whose first parameter is discarded. Can
 	be used for the case when we create a partial function for use in

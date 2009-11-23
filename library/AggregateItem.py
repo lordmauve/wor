@@ -28,11 +28,8 @@ class AggregateItem(Item):
 			#DBLogger.log_item_event(DBLogger.ITEM_MERGE)
 			return True
 		else:
-			raise WorError("Incompatible types ("
-				       + self.ob_type()
-				       + "/"
-				       + new_item.ob_type()
-				       + ") cannot be merged")
+			raise Util.WorError("Incompatible types (%s/%s) cannot be merged"
+								% (self.ob_type(), new_item.ob_type()))
 
 
 	def split(self, num_items):
@@ -46,11 +43,9 @@ class AggregateItem(Item):
 		# code.  I'll be in the corner trying to keep my head from 
 		# exploding
 		if self.count < num_items:
-			raise WorError("Cannot split " 
-				       + num_items
-				       + " items from an aggregate with only "
-				       + self.count
-				       + " items")
+			raise Util.WorInsufficientItemsException(
+				"Cannot split %d items from an aggregate with only %d items"
+				% (num_items, self.count))
 		else:
 			# Clone this object
 			new_obj = deepcopy(self)
