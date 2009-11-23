@@ -14,7 +14,10 @@ import psycopg2
 from Database import DB
 import GameUtil
 
+
 class TestDatabaseSetup(TestCase):
+	"""Base class for all WoR unit tests: Start with a clean database
+	and a clear cache."""
 	def setUp(self):
 		GameUtil.flush_cache()
 		self.cur = DB.cursor()
