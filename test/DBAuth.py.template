@@ -1,0 +1,7 @@
+######
+# Database host authentication
+
+host = "dbhost"
+name = "wor_tests"
+user = "wor"
+passwd = "wor"
