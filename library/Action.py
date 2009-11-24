@@ -7,13 +7,13 @@ FAIL = -1
 
 class Action(object):
 	def __init__(self, uid, actor, caption="Use", cost=Cost(ap=1),
-				 action=lambda d: None,
+				 action=None,
 				 group="none", html=None, parameters=[]):
 		self.uid = uid
 		self.actor = actor
 		self.caption = caption
 		self.cost = cost
-		self.action = action
+		self.action_callback = action
 		self.group = group
 		self.parameters = parameters
 		self.html = html
@@ -36,6 +36,10 @@ class Action(object):
 		if not rv:
 			self.cost.charge(self.actor)
 		return rv
+
+	def action(self, data):
+		if self.action_callback is not None:
+			self.action_callback(data)
 
 	@staticmethod
 	def make_id(object, act):

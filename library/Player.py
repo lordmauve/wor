@@ -20,6 +20,12 @@ from Logger import log
 import Util
 import Context
 
+
+class ActionChangeItem(Action):
+	def action(self, data):
+		self.actor.change_item_action(data)
+
+
 class Player(Actor):
 	# Additional caching over and above the cache by ID for actors
 	cache_by_name = {}
@@ -151,8 +157,8 @@ class Player(Actor):
 		if Util.match_id(action_id, self, "changeitem"):
 			uid = Action.make_id(self, "changeitem")
 			act_html = "Use item <input id='%s_id' size='3' />. " % uid
-			acts[uid] = Action(
-				uid, self, caption="Change", cost=Cost(ap=0),
+			acts[uid] = ActionChangeItem(
+				uid, self, caption="Change", cost=Cost(),
 				group="inventory",
 				action=lambda d: self.change_item_action(d),
 				html=act_html, parameters=['id']

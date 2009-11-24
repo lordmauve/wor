@@ -5,6 +5,7 @@ from Action import Action
 from Cost import Cost
 from Logger import log
 
+
 class ActionMake(Action):
 	def __init__(self, player, item, plan):
 		uid = Action.make_id(item, plan.name)
@@ -13,7 +14,6 @@ class ActionMake(Action):
 			cost=Cost(ap=plan.ap), group="build"
 			)
 		
-		self.action = lambda d: self.build(d)
 		self.item = item
 		self.plan = plan
 		self.player = player
@@ -31,7 +31,7 @@ class ActionMake(Action):
 		self.html += " <input id='%s_quantity' size='3' /> times. " % self.uid
 		self.html += self.make_button_for()
 
-	def build(self, data):
+	def action(self, data):
 		return self.plan.make(self.player, data[self.uid + '_quantity'])
 
 	def objectlist(self, hash):

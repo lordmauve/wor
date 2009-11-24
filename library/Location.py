@@ -12,6 +12,18 @@ from Logger import log
 import Context
 import types
 
+
+class ActionMove(Action):
+	def __init__(self, uid, actor, direction, dest, cost=Cost(ap=1)):
+		super(MoveAction, self).__init__(uid, actor, caption='Move %s' % direction.upper(), cost=cost, group='move')
+		self.direction = direction
+		self.dest = dest
+
+	def action(self, data):
+		self.actor.message('You move %s' % self.direction)
+		self.actor.move_to(self.dest)
+
+
 class Location(SerObject):
 	_table = 'location'
 	cache_by_id = {}
@@ -331,10 +343,8 @@ class Location(SerObject):
 				# Create the action function
 				a = no_d(functools.partial(player.move_to, l.pos))
 				# Create the action itself
-				acts[uid] = Action(uid, player, caption="Move " + n.upper(),
-								   cost=Cost(ap=cost),
-								   action=a,
-								   group="move")
+				acts[uid] = ActionMove(uid, player, n.upper(),
+									   cost=Cost(ap=cost))
 
 	# Who's here?
 	def actor_ids(self):
