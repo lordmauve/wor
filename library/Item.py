@@ -66,13 +66,18 @@ class Item(SerObject):
 	@staticmethod
 	def list_all_classes():
 		"""Obtain a list of all item class names"""
-		# Get all the files in the Item directory
-		cls_list = os.listdir(os.path.join(BaseConfig.base_dir, "content/Items"))
-		# Filter out just the .py files
-		cls_list = filter(lambda x: x.endswith(".py"), cls_list)
-		cls_list = filter(lambda x: x[0] != '_', cls_list)
-		# Remove the trailing .py and return
-		return [ x[:-3] for x in cls_list ]
+		import Items
+		from AggregateItem import AggregateItem
+		items = []
+		for k in dir(Items):
+			v = getattr(Items, k)
+			if (isinstance(v, type)
+				and issubclass(v, Item)
+				and v is not Item
+				and v is not AggregateItem):
+				items.append(v)
+
+		return items
 
 	def __init__(self):
 		SerObject.__init__(self)
