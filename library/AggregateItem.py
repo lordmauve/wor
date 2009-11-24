@@ -5,9 +5,10 @@ from Item import Item
 import DBLogger
 import Util
 
+
 class AggregateItem(Item):
 	"""An item containing a number of identical objects.  Note that it 
-           contains the underlying stuff in a conceptual sense only - rather 
+	   contains the underlying stuff in a conceptual sense only - rather 
 	   than containing 500 Gold objects, for example, it's simply a Gold 
 	   object with a 500 count"""
 	aggregate = True
@@ -55,11 +56,10 @@ class AggregateItem(Item):
 				% (num_items, self.count))
 		else:
 			# Clone this object
-			new_obj = deepcopy(self)
+			new_obj = self.__class__(num_items)
 
 			# And adjust the counts accordingly
 			oq = self.count
-			new_obj.count = num_items
 			self.count -= num_items
 
 			# Log the split
