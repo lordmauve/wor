@@ -121,12 +121,50 @@ class TestItemContainer(TestDatabaseSetup):
 	def testContainsFail(self):
 		self.failIf(self.rock in self.p1.inventory)
 
+	def testTakeBasic(self):
+		self.p1.inventory.add(self.rock)
+		otherrock = Rock()
+		self.p1.inventory.add(otherrock)
+		ilist = self.p1.inventory.take(Rock, 2)
+		self.assertEqual(len(ilist), 2)
+		self.assert_(self.rock in ilist)
+		self.assert_(otherrock in ilist)
+
+	def testTakeAggregate(self):
+		self.p1.inventory.add(self.gp3)
+		ilist = self.p1.inventory.take(GoldPiece, 2)
+		self.assertEqual(len(ilist), 1)
+		item = iter(ilist).next()
+		self.assertEqual(item.count, 2)
+
+	def testAddItems(self):
+		ilist = (self.rock, self.gp3, Rock())
+		self.p1.inventory.add_items(ilist)
+		self.assert_(self.p1.inventory.has(Rock, 2))
+		self.failIf(self.p1.inventory.has(Rock, 3))
+		self.assert_(self.p1.inventory.has(GoldPiece, 3))
+		self.failIf(self.p1.inventory.has(GoldPiece, 4))
+
 	def testRemove(self):
 		self.p1.inventory.add(self.rock)
 		self.assert_(self.rock in self.p1.inventory)
 		item = self.p1.inventory.remove(self.rock)
 		self.failIf(self.rock in self.p1.inventory)
 		self.assert_(item is self.rock)
+
+	def testTransferToBasic(self):
+		self.p1.inventory.add(self.rock)
+		self.p1.inventory.transfer_to(self.rock, self.p2.inventory)
+		self.failIf(self.rock in self.p1.inventory)
+		self.assert_(self.rock in self.p2.inventory)
+
+	def testTransferToAggregate(self):
+		self.p1.inventory.add(self.gp3)
+		self.p1.inventory.transfer_to(self.gp3, self.p2.inventory, 2)
+		self.assert_(self.p1.inventory.has(GoldPiece, 1))
+		self.failIf(self.p1.inventory.has(GoldPiece, 2))
+		self.assert_(self.p2.inventory.has(GoldPiece, 2))
+		self.failIf(self.p1.inventory.has(GoldPiece, 3))
 
 def suite():
 	s = unittest.TestSuite()
