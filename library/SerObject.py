@@ -161,6 +161,9 @@ class SerObject(Triggerable):
 			elif typ is bool:
 				params['type'] = 'b'
 				value_field = 'ivalue'
+			elif issubclass(typ, SerObject):
+				# This is a Bad Thing: complain about it lots
+				log.error("The attribute '%s' contains a SerObject (%s). This combination cannot be pickled. Your attribute has not been stored at all. You should fix this as soon as possible." % (key, str(self.__dict__[key])))
 			elif hasattr(self.__dict__[key], 'save'):
 				# If the object has its own save() method, call that
 				# as well, but still pickle it
@@ -264,8 +267,7 @@ class SerObject(Triggerable):
 			# then gets pickled as foo is pickled, but without having
 			# been passed through foo.bar.save(). Instead, use either
 			# foo._bar or foo.bar = bar._id.
-			# FIXME: Catch this error in save() and warn loudly about it.
-			raise AssertionError("You have probably stored a reference to a SerObject in a member that doesn't start with _")
+			raise AssertionError("You have probably stored a reference to a SerObject in an attribute that doesn't start with '_'. Check the logs for which attribute it is.")
 
 		obj = {}
 		for k in self._pickle:
