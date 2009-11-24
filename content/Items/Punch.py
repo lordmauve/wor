@@ -5,3 +5,4 @@ class Punch(Item):
 	plural = "punches"
 	damage = 1
 	sticky = True
+	group = "Weapons"

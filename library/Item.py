@@ -1,7 +1,5 @@
 # coding: utf-8
 
-########
-
 import os
 import os.path
 
@@ -17,6 +15,7 @@ import DBLogger
 # Can't be done in Plan, for circular reference reasons.
 import Plans
 
+
 class Item(SerObject):
 	"""An item. By default, all items are unique. Some items are
 	'aggregate' and represent a block of otherwise identical things --
@@ -25,12 +24,12 @@ class Item(SerObject):
 	_table = "item"
 	cache_by_id = {}
 	class_cache_by_name = {}
+	group = "General"
 
 	# Default failure function is a mean life of 300, and equal
 	# probability of failing on each use.
 	break_profile = lambda life: weibull(life, 300.0, 1.0)
 
-	name = "Item"
 	aggregate = False
 	count = 1
 
@@ -44,12 +43,20 @@ class Item(SerObject):
 
 	@classmethod
 	def name_for(cls, player=None, count=1):
+		try:
+			name = cls.name
+		except AttributeError:
+			name = cls.__name__.lower()
+			
 		if count > 1:
-			if hasattr(cls, plural):
+			if hasattr(cls, 'plural'):
 				return cls.plural
 			else:
-				return cls.name + "s"
-		return cls.name
+				return name + "s"
+		return name
+
+	def __unicode__(self):
+		return self.name_for()
 
 	@classmethod
 	def get_class(cls, name):
