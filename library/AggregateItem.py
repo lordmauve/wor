@@ -37,7 +37,7 @@ class AggregateItem(Item):
 		else:
 			raise Util.WorError("Incompatible types (%s/%s) cannot be merged"
 								% (self.ob_type(), new_item.ob_type()))
-
+		return False
 
 	def split(self, num_items):
 		"""Splits the given number of items from this item.  If this is 
@@ -69,3 +69,5 @@ class AggregateItem(Item):
 									orig_quantity=oq,
 									new_quantity=self.count)
 			return new_obj
+
+		return None
