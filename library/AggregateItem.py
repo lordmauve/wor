@@ -30,7 +30,7 @@ class AggregateItem(Item):
 
 			# FIXME: the log_item_event table appears to be 
 			#        nonexistent atm
-			#DBLogger.log_item_event(DBLogger.ITEM_MERGE)
+			DBLogger.log_item_event(DBLogger.ITEM_MERGE)
 			return True
 		else:
 			raise Util.WorError("Incompatible types (%s/%s) cannot be merged"
