@@ -26,20 +26,16 @@ def remove_item(name, item_class_name, count, target_id):
     # Get the player
     p = Player.load_by_name(name)
 
-    # Try to split or remove the item.
-    item = p.inventory[item_class_name]           
-    split_item = p.inventory.split_or_remove(item, count)
-    
-    # Now just use item to hold the item we need to manipulate further
-    if split_item is not None:
-        item = split_item
-        
+	# Retrieve the item(s) from the player's inventory
+	items = p.inventory.take(item_class_name, count)
+
     # If a target was specified, load it and add the item to it
-    if target_id != 0: 
+    if target_id is not None:
         target_container = ItemContainer.load(target_id)
-        target_container.add(item)
+        target_container.add_items(items)
     else:
-        item.destroy()
+		for i in items:
+			i.destroy()
             
     # TODO: insert something witty here.  If we were REALLY feeling ambitious, 
     #       we could even have it pick a saying at random from a list 
@@ -59,7 +55,7 @@ except getopt.GetoptError, err:
     sys.exit(1)
 
 count = 1
-target_id = 0
+target_id = None
 
 for opt, arg in optlist:
     if opt in ('-h', '-?', '--help'):

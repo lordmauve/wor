@@ -234,6 +234,54 @@ class ItemContainer(OnLoad):
 			self._changes.add(item._id)
 			item.set_owner(self.parent)
 
+	def add_items(self, ilist):
+		"""Add a list of items to the container.
+
+		Parameters:
+		ilist -- an iterable list of items to add
+		"""
+		for i in ilist:
+			self.add(i)
+
+	def take(self, itemclass, count=1):
+		"""Remove items arbitrarily from the container.
+
+		Parameters:
+		itemclass -- the class of item to remove
+		count -- the number of items to remove
+		Returns:
+		A set containing the items removed.
+		Raises:
+		WorInsufficientItemsError if there are not enough items in
+		this inventory container to fulfil the request.
+		"""
+		itype = itemclass.__name__
+		# Try splitting the item
+		first_item = self.__get_first_item(itype)
+		split_item = first_item.split(count)
+
+		rv = None
+		if split_item is None:
+			# We can't split, so we've got a singular item class: grab
+			# the first count items from the list and remove them
+			rv = set()
+			for i in self._item_types[itype].copy():
+				item = Item.load(i)
+				rv.add(item)
+				self.remove(item)
+				if len(rv) >= count:
+					break
+
+			if len(rv) < count:
+				raise Util.WorInsufficientItemsException(
+					"Attempted to remove %d items of type %s, but only %d were found"
+					% (count, itemclass, len(rv)))
+		else:
+			# We successfully split, so return the result
+			rv = set([split_item,])
+
+		return rv
+
 	def remove(self, item):
 		"""Removes the given item from the container, and returns it.
 		"""
