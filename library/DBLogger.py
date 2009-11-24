@@ -63,7 +63,7 @@ def log_item_event(etype, item_id, other_item=None,
 		sql_params['cname'] = cid[2]
 		cur.execute("INSERT INTO log_item_event"
 					+ " (stamp, request_id, item_id, type, "
-					+ "  container_type, container_id, container_name)"
+					+ "  owner_type, owner_id, container)"
 					+ " VALUES (%(stamp)s, %(req)s, %(id)s, %(type)s,"
 					+ "         %(ctyp)s, %(cid)s, %(cname)s)",
 					sql_params)

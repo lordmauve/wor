@@ -7,6 +7,7 @@ from Database import DB
 from Item import Item
 from OnLoad import OnLoad
 from Logger import log
+import DBLogger
 import Context
 import Util
 
@@ -242,6 +243,8 @@ class ItemContainer(OnLoad):
 			self._item_types[itype].add(item._id)
 			self._changes.add(item._id)
 			item.set_owner(self.parent)
+			DBLogger.log_item_event(DBLogger.ITEM_ADD, item._id,
+									container=self)
 
 	def add_items(self, ilist):
 		"""Add a list of items to the container.
@@ -298,6 +301,8 @@ class ItemContainer(OnLoad):
 		self._changes.add(item._id)
 		self._item_ids.remove(item._id)
 		item.set_owner(None)
+		DBLogger.log_item_event(DBLogger.ITEM_REMOVE, item._id,
+								container=self)
 		return item
 	
 	def split(self, item, num_items):
