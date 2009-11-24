@@ -343,3 +343,32 @@ class ItemContainer(OnLoad):
 			item = Item.load(item_id)
 
 		return item
+
+	def transfer_to(self, item, destination, count=1):
+		"""Transfer an item from this container to another.
+
+		Parameters:
+		item -- The item to move
+		destination -- The target container
+		count -- The number of units to move, if the item is aggregate
+
+		Raises: WorInsufficientItemsError if there are not enough
+		items in this inventory container to fulfil the request.
+		"""
+		split_item = self.split_or_remove(item, count)
+		destination.add(split_item)
+
+	def bulk_transfer_to(self, itemclass, destination, count=1):
+		"""Transfer a number of items (chosen arbitrarily) of a given
+		class to another container.
+
+		Parameters:
+		itemclass -- the class of item to transfer
+		destination -- the target container
+		count -- the number of units to move
+
+		Raises: WorInsufficientItemsError if there are not enough
+		items in this inventory container to fulfil the request.
+		"""
+		ilist = self.take(itemclass, count)
+		destination.add_items(ilist)
