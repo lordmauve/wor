@@ -2,18 +2,12 @@
 -- PostgreSQL database dump
 --
 
+SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = off;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET escape_string_warning = off;
-
---
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
---
-
-COMMENT ON SCHEMA public IS 'Standard public schema';
-
 
 SET search_path = public, pg_catalog;
 
@@ -22,6 +16,7 @@ SET search_path = public, pg_catalog;
 --
 
 CREATE SEQUENCE account_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -258,6 +253,47 @@ CREATE TABLE location_properties (
 ALTER TABLE public.location_properties OWNER TO wor;
 
 --
+-- Name: log_item_event; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
+--
+
+CREATE TABLE log_item_event (
+    id integer NOT NULL,
+    stamp numeric(12,6),
+    request_id character varying(21),
+    item_id integer,
+    type character varying(8),
+    other_id integer,
+    owner_type character varying,
+    owner_id integer,
+    container character varying,
+    orig_q integer,
+    new_q integer
+);
+
+
+ALTER TABLE public.log_item_event OWNER TO wor;
+
+--
+-- Name: log_item_event_id_seq; Type: SEQUENCE; Schema: public; Owner: wor
+--
+
+CREATE SEQUENCE log_item_event_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.log_item_event_id_seq OWNER TO wor;
+
+--
+-- Name: log_item_event_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: wor
+--
+
+ALTER SEQUENCE log_item_event_id_seq OWNED BY log_item_event.id;
+
+
+--
 -- Name: log_raw_action; Type: TABLE; Schema: public; Owner: wor; Tablespace: 
 --
 
@@ -313,6 +349,13 @@ ALTER TABLE item ALTER COLUMN id SET DEFAULT nextval('item_id_seq'::regclass);
 --
 
 ALTER TABLE location ALTER COLUMN id SET DEFAULT nextval('location_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: wor
+--
+
+ALTER TABLE log_item_event ALTER COLUMN id SET DEFAULT nextval('log_item_event_id_seq'::regclass);
 
 
 --
@@ -479,7 +522,7 @@ ALTER TABLE ONLY item_properties
 --
 
 ALTER TABLE ONLY location_properties
-    ADD CONSTRAINT location_properties_location_id_fkey FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE;
+    ADD CONSTRAINT location_properties_location_id_fkey FOREIGN KEY (location_id) REFERENCES "location"(id) ON DELETE CASCADE;
 
 
 --

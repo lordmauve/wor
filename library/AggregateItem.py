@@ -26,11 +26,13 @@ class AggregateItem(Item):
 		# TODO: Is this good, or do we need to support subclasses as 
 		#       well?
 		if self.ob_type() == new_item.ob_type():
+			oq = self.count
 			self.count += int(new_item.count)
-
-			# FIXME: the log_item_event table appears to be 
-			#        nonexistent atm
-			DBLogger.log_item_event(DBLogger.ITEM_MERGE)
+			DBLogger.log_item_event(DBLogger.ITEM_MERGE,
+									self._id,
+									other_item=new_item._id,
+									orig_quantity=oq,
+									new_quantity=self.count)
 			return True
 		else:
 			raise Util.WorError("Incompatible types (%s/%s) cannot be merged"
@@ -56,9 +58,14 @@ class AggregateItem(Item):
 			new_obj = deepcopy(self)
 
 			# And adjust the counts accordingly
+			oq = self.count
 			new_obj.count = num_items
 			self.count -= num_items
 
 			# Log the split
-			DBLogger.log_item_event(DBLogger.ITEM_SPLIT)
+			DBLogger.log_item_event(DBLogger.ITEM_SPLIT,
+									self._id,
+									other_item=new_obj._id,
+									orig_quantity=oq,
+									new_quantity=self.count)
 			return new_obj
