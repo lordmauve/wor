@@ -22,6 +22,13 @@ class ItemContainer(OnLoad):
 		self._item_types = {}
 		self._changes = set()
 
+	def identity(self):
+		"""Return a tuple representing the container's unique
+		identity: the type and ID of its parent, and its name. This
+		information is both necessary and sufficient to identify the
+		container in the database."""
+		return (self.parent.ob_type(), self.parent._id, self.name)
+
 	####
 	# Loading and saving
 	def save(self):
@@ -29,9 +36,10 @@ class ItemContainer(OnLoad):
 		# Update the database, using our list of changed fields
 		cur = DB.cursor()
 		params = {}
-		params['owner_type'] = self.parent.ob_type()
-		params['owner_id'] = self.parent._id
-		params['container'] = self.name
+		my_id = self.identity()
+		params['owner_type'] = my_id[0]
+		params['owner_id'] = my_id[1]
+		params['container'] = my_id[2]
 
 		for itemid in self._changes:
 			params['id'] = itemid
@@ -87,6 +95,7 @@ class ItemContainer(OnLoad):
 		self._changes = set()
 
 		# Now load the contents of the container
+		my_id = self.identity()
 		cur = DB.cursor()
 		cur.execute('SELECT item.id, item.type'
 					+ ' FROM item, item_owner'
@@ -94,9 +103,9 @@ class ItemContainer(OnLoad):
 					+ '   AND item_owner.owner_type = %(owner_type)s'
 					+ '   AND item_owner.owner_id = %(owner_id)s'
 					+ '   AND item_owner.container = %(container)s',
-					{ 'owner_type': self.parent.ob_type(),
-					  'owner_id': self.parent._id,
-					  'container': self.name })
+					{ 'owner_type': my_id[0],
+					  'owner_id': my_id[1],
+					  'container': my_id[2] })
 
 		row = cur.fetchone()
 		while row is not None:

@@ -11,6 +11,7 @@ import BaseConfig
 from Plan import Plan, makeable_plans
 from ActionMake import ActionMake
 import Context
+import DBLogger
 
 # We must do this to run the code that defines all possible plans.
 # Can't be done in Plan, for circular reference reasons.
@@ -73,6 +74,10 @@ class Item(SerObject):
 		# Remove the trailing .py and return
 		return [ x[:-3] for x in cls_list ]
 
+	def __init__(self):
+		SerObject.__init__(self)
+		DBLogger.log_item_event(DBLogger.ITEM_CREATE, self._id)
+
 	####
 	# Add the indices for saving this object
 	def _save_indices(self):
@@ -113,6 +118,7 @@ class Item(SerObject):
 	def destroy(self):
 		"""Destroy this item, recycling it if necessary"""
 		self.demolish()
+		DBLogger.log_item_event(DBLogger.ITEM_DESTROY)
 
 	def try_break(self):
 		"""Test this item for breakage, and return True if it broke"""
