@@ -117,8 +117,8 @@ class Item(SerObject):
 
 	def destroy(self):
 		"""Destroy this item, recycling it if necessary"""
+		DBLogger.log_item_event(DBLogger.ITEM_DESTROY, self._id)
 		self.demolish()
-		DBLogger.log_item_event(DBLogger.ITEM_DESTROY)
 
 	def try_break(self):
 		"""Test this item for breakage, and return True if it broke"""
