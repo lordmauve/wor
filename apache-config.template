@@ -7,22 +7,22 @@
 	PythonDebug On
 	
 	# First, map the file paths to the server root
-	DocumentRoot /home/hrm/develop/wor/server_root
+	DocumentRoot @INSTALL_BASE@/server_root
 	<Directory />
 		Options FollowSymLinks
 		AllowOverride None
 	</Directory>
 
 	PythonAutoReload On
-	PythonOption wor.root_path /home/hrm/develop/wor
-	PythonPath "sys.path + ['/home/hrm/develop/wor/library', '/home/hrm/develop/wor/handlers', '/home/hrm/develop/wor/content']"
+	PythonOption wor.root_path @INSTALL_BASE@
+	PythonPath "sys.path + ['@INSTALL_BASE@/library', '@INSTALL_BASE@/handlers', '@INSTALL_BASE@/content']"
 
 	<Location />
 		AuthType Digest
 		AuthName WoR
 		AuthDigestDomain http://test.worldofrodney.org/ http://game.worldofrodney.org/ http://www.worldofrodney.org/ http://worldofrodney.org/
 		AuthDigestProvider file
-		AuthUserFile /home/hrm/develop/wor/authn_file
+		AuthUserFile @INSTALL_BASE@/authn_file
 		Require valid-user
 	</Location>
 
@@ -34,26 +34,33 @@
 		SetHandler mod_python
 		PythonHandler hd_all::api_handler
 	</Location>
+@TERRAIN_SERVER[
 	<Location /img/terrain>
 		Order deny,allow
 		Allow from all
 		SetHandler mod_python
 		PythonHandler hd_image::image_handler
 	</Location>
+]TERRAIN_SERVER@
 
 	LogLevel warn
 	ErrorLog /var/log/apache2/wor.error.log
 	CustomLog /var/log/apache2/wor.access.log combined
 </VirtualHost>
 
+@USE_HTTPS[
+<VirtualHost *:443>
+]USE_HTTPS@
+@!USE_HTTPS[
 <VirtualHost *:80>
+]USE_HTTPS@
 	ServerAdmin webmaster@worldofrodney.org
 	ServerName login.worldofrodney.org
 	ServerAlias login.test.worldofrodney.org
 
 	PythonDebug On
 
-	DocumentRoot /home/hrm/develop/wor/login_root
+	DocumentRoot @INSTALL_BASE@/login_root
 	<Directory />
 		Options FollowSymlinks
 		AllowOverride None
@@ -61,12 +68,14 @@
 		Allow from all
 	</Directory>
 
+@USE_HTTPS[
 	# FIXME: Add HTTPS configuration here
+]USE_HTTPS@
 
 	PythonAutoReload On
-	PythonOption wor.root_path /home/hrm/develop/wor
+	PythonOption wor.root_path @INSTALL_BASE@
 	PythonOption mod_python.session.session_type FileSession
-	PythonPath "sys.path + ['/home/hrm/develop/wor/handlers']"
+	PythonPath "sys.path + ['@INSTALL_BASE@/handlers']"
 
 	<Location /verify>
 		SetHandler mod_python
