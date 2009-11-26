@@ -1,7 +1,7 @@
 ######
 # Database host authentication
 
-host = "dbhost"
-name = "wor_tests"
-user = "wor"
-passwd = "wor"
+host = "@DB_HOST@"
+name = "@DB_NAME@_test"
+user = "@DB_USER@"
+passwd = "@DB_PASS@"
