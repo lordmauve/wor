@@ -26,51 +26,57 @@ STRANGER_VISIBLE = 4
 # Default access, given to everyone else: entity invisible
 STRANGER_INVISIBLE = 5
 
-def visible(ctx):
-	if ( ctx == ADMIN
-		 or ctx == OWNER
-		 or ctx == FRIEND_VISIBLE
-		 or ctx == STRANGER_VISIBLE ):
-		return True
-	return False
+class Context(object):
+	def __init__(self, player):
+		self.player = player
 
-def authz_actor(actor):
-	"""Return the degree of data that can be returned w.r.t. the
-	current context."""
-	# Administrators
-	if getattr(context, 'admin', False):
-		return ADMIN
+	def is_admin(self):
+		return getattr(self.player, 'admin', False)
 
-	if context == actor:
-		return OWNER
+	def authz_actor(self, actor):
+		"""Return the degree of data that can be returned w.r.t. the
+		current context."""
+		context = self.player
 
-	if context.loc()._id == actor.loc()._id:
-		return STRANGER_VISIBLE
+		if self.is_admin():
+			return ADMIN
 
-	return STRANGER_INVISIBLE
+		if context == actor:
+			return OWNER
 
-def authz_location(loc):
-	"""Return the degree of data that can be returned w.r.t. the
-	current context."""
-	if getattr(context, 'admin', False):
-		return ADMIN
+		if context.loc()._id == actor.loc()._id:
+			return STRANGER_VISIBLE
 
-	#if context._id == loc.owner()._id:
-	#	return OWNER
+		return STRANGER_INVISIBLE
 
-	if context.loc().pos.hop_distance(loc.pos) <= context.power('sight'):
-		return STRANGER_VISIBLE
+	def authz_location(self, loc):
+		"""Return the degree of data that can be returned w.r.t. the
+		current context."""
+		context = self.player
+		if self.is_admin():
+			return admin
 
-	return STRANGER_INVISIBLE
+		#if context._id == loc.owner()._id:
+		#	return OWNER
 
-def authz_item(item):
-	if getattr(context, 'admin', False):
-		return ADMIN
+		if context.loc().pos.hop_distance(loc.pos) <= context.power('sight'):
+			return STRANGER_VISIBLE
 
-	if context.has_item(item):
-		return OWNER
+		return STRANGER_INVISIBLE
 
-	return STRANGER_INVISIBLE
+	def authz_item(self, item):
+		context = self.player
+		if self.is_admin():
+			return admin
+
+		if context.has_item(item):
+			return OWNER
+
+		return STRANGER_INVISIBLE
+
+	def visible(self, ctx):
+		return ctx in [ADMIN, OWNER, FRIEND_VISIBLE, STRANGER_VISIBLE]
+
 
 def all_fields(obj):
 	"""Return all "interesting" properties of this object."""

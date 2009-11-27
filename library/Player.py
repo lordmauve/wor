@@ -18,7 +18,7 @@ from Position import Position
 
 from Logger import log
 import Util
-import Context
+from Context import Context
 
 
 class ActionChangeItem(Action):
@@ -89,10 +89,13 @@ class Player(Actor):
 		punch = Punch()
 		self.inventory.add(punch)
 
-	def context_get(self):
-		ret = super(Player, self).context_get()
-		auth = Context.authz_actor(self)
-		fields = [ 'is_zombie' ]
+	def get_context(self):
+		return Context(self)
+
+	def context_get(self, context):
+		ret = super(Player, self).context_get(context)
+		auth = context.authz_actor(self)
+		fields = ['is_zombie']
 
 		return self.build_context(ret, fields)
 

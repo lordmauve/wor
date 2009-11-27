@@ -89,8 +89,8 @@ def api_handler_core(req):
 				return apache.HTTP_NOT_FOUND
 		else:
 			act_id = check_actor(req)
-			Context.context = Player.load(act_id)
-			if Context.context is None:
+			player = Player.load(act_id)
+			if player is None:
 				req.status = apache.HTTP_FORBIDDEN
 				req.write("No context found for actor id " + str(act_id))
 				return apache.OK
@@ -110,17 +110,19 @@ def api_handler_core(req):
 				return retry_process(
 					lambda: hd_actor.actor_handler(
 						req,
+						player,
 						target,
 						components[2:]))
 
 			elif components[0] == 'location':
 				if components[1] == 'here':
-					target = Context.context.loc()._id
+					target = player.loc()._id
 				elif components[1] == 'neighbourhood':
-					target = Context.context.loc()._id
+					target = player.loc()._id
 					return retry_process(
 						lambda: hd_location.neighbourhood_handler(
 							req,
+							player,
 							target, components[2:]))
 				elif components[1].isdigit():
 					target = int(components[1])
@@ -132,6 +134,7 @@ def api_handler_core(req):
 				return retry_process(
 					lambda: hd_location.location_handler(
 						req,
+						player,
 						target,
 						components[2:]))
 
@@ -146,6 +149,7 @@ def api_handler_core(req):
 				return retry_process(
 					lambda: hd_item.item_handler(
 						req,
+						player,
 						target,
 						components[2:]))
 			else:
