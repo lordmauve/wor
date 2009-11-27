@@ -11,7 +11,7 @@ from Logger import log
 import Util
 import Context
 
-def location_handler(req, loc, components):
+def location_handler(req, player, loc, components):
 	"""Handle a request for information on a single location"""
 	if len(components) != 1:
 		return apache.HTTP_NOT_FOUND
@@ -23,7 +23,7 @@ def location_handler(req, loc, components):
 	here = Location.load(loc)
 
 	if components[0] == 'desc':
-		info = here.context_get()
+		info = here.context_get(player.get_context())
 		Util.render_info(info, req)
 	elif components[0] == 'actions':
 		# Return possible location-based actions
@@ -33,7 +33,7 @@ def location_handler(req, loc, components):
 
 	return apache.OK
 
-def neighbourhood_handler(req, loc, components):
+def neighbourhood_handler(req, player, loc, components):
 	"""Handle a request for the neighbourhood of this location"""
 	if len(components) != 0:
 		return apache.HTTP_NOT_FOUND
@@ -44,10 +44,11 @@ def neighbourhood_handler(req, loc, components):
 	req.content_type = "text/plain"
 	here = Location.load(loc)
 
-	if Context.context == Context.ADMIN_CTX:
+	context = player.get_context()
+	if context.is_admin():
 		sight = 2
 	else:
-		sight = Context.context.power('sight')
+		sight = player.power('sight')
 	
 	# We construct each ring of output in turn, keeping it for the
 	# next ring.
@@ -56,7 +57,7 @@ def neighbourhood_handler(req, loc, components):
 	if here is None:
 		req.write('type:none\n-\n')
 	else:
-		info = here.context_get()
+		info = here.context_get(context)
 		Util.render_info(info, req)
 		req.write('-\n')
 
@@ -79,7 +80,7 @@ def neighbourhood_handler(req, loc, components):
 				if loc is None:
 					req.write('type:none\n')
 				else:
-					info = loc.context_get()
+					info = loc.context_get(context)
 					Util.render_info(info, req)
 				
 			req.write('-\n')
@@ -121,7 +122,7 @@ def neighbourhood_handler(req, loc, components):
 				if loc is None:
 					req.write('type:none\n')
 				else:
-					info = loc.context_get()
+					info = loc.context_get(context)
 					Util.render_info(info, req)
 
 				req.write('-\n')

@@ -119,14 +119,14 @@ class ItemContainer(OnLoad):
 
 	####
 	# REST API support
-	def context_get_equip(self):
+	def context_get_equip(self, context):
 		"""Retrieve a table of the contents of this object for
 		purposes of the REST API"""
 		ret = []
 		for itype, ilist in self._item_types.iteritems():
 			for itemid in ilist:
 				item_class = Item.get_class(itype)
-				textname = item_class.name_for(Context.context)
+				textname = item_class.name_for(context.player)
 
 				item = Item.load(itemid)
 				ret.append((itype, itemid, item.count, textname))

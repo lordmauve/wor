@@ -98,13 +98,13 @@ class Actor(SerObject):
 
 		return powr
 
-	def context_get(self):
+	def context_get(self, context):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
 		ret = {}
 		ret['id'] = str(self._id)
 
-		auth = Context.authz_actor(self)
+		auth = context.authz_actor(self)
 		if auth == Context.ADMIN:
 			fields = Context.all_fields(self)
 		elif auth == Context.OWNER:
@@ -170,7 +170,7 @@ class Actor(SerObject):
 			
 			uid = Action.make_id(self, "attack")
 			acts[uid] = Action(
-				uid, self, caption="Attack", cost=Cost(ap=1), group="outsider",
+				uid, self, caption="Attack %s" % self.name, cost=Cost(ap=1), group="outsider",
 				action=lambda: player.attack(self)
 				)
 

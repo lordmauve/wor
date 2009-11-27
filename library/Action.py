@@ -20,7 +20,7 @@ class Action(object):
 		if html is None:
 			self.html = self.make_button_for()
 
-	def context_get(self):
+	def context_get(self, context):
 		ret = {}
 		ret['html'] = self.html
 		ret['cost'] = str(self.cost)

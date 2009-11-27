@@ -150,20 +150,20 @@ class Item(SerObject):
 			act = ActionMake(player, self, p)
 			acts[act.uid] = act
 
-	def context_get(self):
+	def context_get(self, context):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
 		ret = {}
 		ret['id'] = str(self._id)
 		ret['type'] = self.ob_type()
 
-		auth = Context.authz_item(self)
+		auth = context.authz_item(self)
 		if auth == Context.ADMIN:
-			fields = Context_all_fields(self)
+			fields = Context.all_fields(self)
 		elif auth == Context.OWNER:
-			fields = [ 'name', 'damage', 'description' ]
+			fields = ['name', 'damage', 'description']
 		else:
-			fields = [ 'name' ]
+			fields = ['name']
 
 		return self.build_context(ret, fields)
 

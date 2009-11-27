@@ -5,7 +5,7 @@ import copy
 import functools
 from Database import DB
 from SerObject import SerObject
-from Action import Action
+from Action import *
 from Cost import Cost
 from Util import no_d
 from Logger import log
@@ -171,32 +171,32 @@ class Location(SerObject):
 		# This line is not reachable
 		raise AttributeError, (key, self.__class__)
 
-	def context_get(self):
+	def context_get(self, context):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
-		ret = { 'type': self.ob_type(),
-				'id': str(self._id) }
+		ret = {'type': self.ob_type(),
+				'id': str(self._id)}
 
-		auth = Context.authz_location(self)
-		if Context.visible(auth):
-			ret['actors'] = ','.join(( str(x) for x in self.actor_ids() ))
-			ret['description'] = self.description(Context.context)
+		auth = context.authz_location(self)
+		if context.visible(auth):
+			ret['actors'] = ','.join([str(x) for x in self.actor_ids()])
+			ret['description'] = self.description(context.player)
 
 			if auth == Context.ADMIN:
 				fields = Context.all_fields(self)
 			elif auth == Context.OWNER:
-				fields = [ 'name' ]
+				fields = ['name']
 			elif auth == Context.STRANGER_VISIBLE:
-				fields = [ 'name' ]
+				fields = ['name']
 		else:
-			fields = [ ]
+			fields = []
 
 		image_stack = []
 		for overlay in self.stack_layers():
 			image_stack = overlay.build_image_stack(image_stack)
 		ret['stack'] = '.'.join(image_stack)
 
-		for k in ( '_underneath', '_above', 'cache_by_id', 'cache_by_pos' ):
+		for k in ['_underneath', '_above', 'cache_by_id', 'cache_by_pos']:
 			if k in fields:
 				fields.remove(k)
 
@@ -269,7 +269,7 @@ class Location(SerObject):
 	def r(self, who=None):
 		"""Return the hex to the right of this one, according to the
 		given player"""
-		if who is None: who = Context.context
+		if who is None: return self.e()
 		start = 0
 		if who.power('flipped'):
 			start = 6 - start
@@ -279,7 +279,7 @@ class Location(SerObject):
 	def ur(self, who=None):
 		"""Return the hex to the upper right of this one, according to the
 		given player"""
-		if who is None: who = Context.context
+		if who is None: return self.ne()
 		start = 1
 		if who.power('flipped'):
 			start = 6 - start
@@ -289,7 +289,7 @@ class Location(SerObject):
 	def ul(self, who=None):
 		"""Return the hex to the upper left of this one, according to the
 		given player"""
-		if who is None: who = Context.context
+		if who is None: return self.nw()
 		start = 2
 		if who.power('flipped'):
 			start = 6 - start
@@ -299,7 +299,7 @@ class Location(SerObject):
 	def l(self, who=None):
 		"""Return the hex to the left of this one, according to the
 		given player"""
-		if who is None: who = Context.context
+		if who is None: return self.w()
 		start = 3
 		if who.power('flipped'):
 			start = 6 - start
@@ -309,7 +309,7 @@ class Location(SerObject):
 	def ll(self, who=None):
 		"""Return the hex to the lower left of this one, according to the
 		given player"""
-		if who is None: who = Context.context
+		if who is None: return self.sw()
 		start = 4
 		if who.power('flipped'):
 			start = 6 - start
@@ -319,7 +319,7 @@ class Location(SerObject):
 	def lr(self, who=None):
 		"""Return the hex to the lower right of this one, according to the
 		given player"""
-		if who is None: who = Context.context
+		if who is None: return self.se()
 		start = 5
 		if who.power('flipped'):
 			start = 6 - start

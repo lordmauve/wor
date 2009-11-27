@@ -10,7 +10,7 @@ from Item import Item
 from Logger import log
 from mod_python import apache
 
-def actor_handler(req, target, components):
+def actor_handler(req, player, target, components):
 	"""Handle a request for actor information, for the given target ID"""
 	# We must have precisely one component in the request URL
 	if len(components) != 1:
@@ -18,6 +18,7 @@ def actor_handler(req, target, components):
 
 	req.content_type = "text/plain"
 	actor = Actor.load(target)
+	context = player.get_context()
 
 	# Check for actions first -- simplifies the handling of action POSTs
 	if components[0] == 'actions':
@@ -25,7 +26,7 @@ def actor_handler(req, target, components):
 			# List of actions
 			acts = actor.get_actions()
 			for id, act in acts.iteritems():
-				info = act.context_get()
+				info = act.context_get(context)
 				Util.render_info(info, req)
 				req.write("-\n")
 
@@ -50,15 +51,15 @@ def actor_handler(req, target, components):
 	log.debug("Actor handler: requested " + str(components))
 	if components[0] == 'desc':
 		# Description
-		info = actor.context_get()
+		info = actor.context_get(context)
 		Util.render_info(info, req)
 	elif components[0] == 'inventory':
 		# Inventory
-		info = actor.inventory.context_get_equip()
+		info = actor.inventory.context_get_equip(context)
 		Util.render_table(info, req)
 	elif components[0] == 'equipment':
 		# Equipment
-		info = actor.equipment.context_get_equip()
+		info = actor.equipment.context_get_equip(context)
 		Util.render_table(info, req)
 	elif components[0] == 'log':
 		# Actor logs
