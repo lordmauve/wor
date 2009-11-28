@@ -5,6 +5,7 @@ from Database import DB
 import Logger
 from Context import log_ctx
 
+
 ####
 # Logging specific event types to database
 def log_raw_action(actid, params):
