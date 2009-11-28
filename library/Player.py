@@ -198,7 +198,7 @@ class Player(Actor):
 		full one."""
 		actions = self.get_actions(action_id)
 		if action_id in actions:
-			self.last_action = Context.request_time
+			self.last_action = time.time()
 			actions[action_id].perform(data)
 
 	def say_boo(self):

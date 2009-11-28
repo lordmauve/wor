@@ -5,7 +5,7 @@ import os
 import sys
 import logging
 import BaseConfig
-import Context
+from Context import log_ctx
 
 # Set up a custom formatter class
 class WoRLogFormatter(logging.Formatter):
@@ -14,7 +14,7 @@ class WoRLogFormatter(logging.Formatter):
 
 	def format(self, record):
 		text = logging.Formatter.format(self, record)
-		text = Context.request_id + " " + text
+		text = log_ctx.id + " " + text
 		return text
 
 # Set up a generic debug log

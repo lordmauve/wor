@@ -3,7 +3,7 @@
 
 from Database import DB
 import Logger
-import Context
+from Context import log_ctx
 
 ####
 # Logging specific event types to database
@@ -15,8 +15,8 @@ def log_raw_action(actid, params):
 					  params.iterkeys(),
 					  params.iteritems())
 
-	sql_params = { 'stamp': Context.request_time,
-				   'req': Context.request_id,
+	sql_params = { 'stamp': log_ctx.time,
+				   'req': log_ctx.id,
 				   'act': actid,
 				   'name': actid.split('.')[2],
 				   'params': param_pairs.join(' ')
@@ -39,8 +39,8 @@ def log_item_event(etype, item_id, other_item=None,
 				   container=None, orig_quantity=0, new_quantity=0):
 	"""Log an item event"""
 	cur = DB.cursor()
-	sql_params = { 'stamp': Context.request_time,
-				   'req': Context.request_id,
+	sql_params = { 'stamp': log_ctx.time,
+				   'req': log_ctx.id,
 				   'id': item_id,
 				   'type': etype,
 				   }

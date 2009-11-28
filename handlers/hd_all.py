@@ -17,6 +17,8 @@ import Logger
 import hd_actor
 import hd_item
 import hd_location
+from handler_utils import server_error
+
 
 def api_handler(req):
 	ret_value = api_handler_core(req)
@@ -53,7 +55,7 @@ def api_handler_core(req):
 		components.pop(0)
 
 		# We need to set up the logging/request context here
-		Context.set_request_id()
+		Context.log_ctx.generate()
 
 		Logger.log.debug("Request components: " + str(components))
 		if components[0] == '':
@@ -159,23 +161,7 @@ def api_handler_core(req):
 		# Catch and re-raise apache/mod_python exceptions here
 		raise
 	except Exception, ex:
-		# Catch any other exception
-
-		# Set up a simple Infernal Server Error response 
-		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
-		req.write("There was an infernal server error. Please report this (with reference %s) to the admins.\n" % (Context.request_id))
-
-		# Get the details of the last exception
-		exlist = sys.exc_info()
-		# Get a list of text lines (possibly with embedded \n)
-		# describing the full backtrace
-		exdata = traceback.format_exception(exlist[0], exlist[1], exlist[2])
-		# Write those lines to the exception log
-		head = Logger.header % { 'stamp': Context.request_time, 'req': Context.request_id }
-		Logger.exception_log.error(head + ''.join(exdata))
-
-		# Return the Infernal Server Error
-		return apache.OK
+		return server_error(req)
 
 	return apache.OK
 

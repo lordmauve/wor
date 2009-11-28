@@ -4,6 +4,10 @@ import types
 import time
 import os
 
+import thread
+import threading
+
+
 context = None
 
 # Fake "Player" object to use as an admin context
@@ -97,23 +101,43 @@ def all_fields(obj):
 	return fields
 
 
-####
-# Context for a request: unique ID for logging, and timestamp in UTC
-request_time = 0
-request_id = "-"
-request_sequence = -1
+class ThreadsafeSequence(object):
+	"""This class implements a callable that returns sequential integers
+	starting from start, and can be call by multiple threads without
+	returning duplicate IDs.
 
-def set_request_id():
-	# Bring the module's variables into this function's namespace
-	global request_time
-	global request_id
-	global request_sequence
+	"""
+	def __init__(self, start=0):
+		self.request_sequence = start
+		self.lock = threading.Lock()
 	
-	request_time = time.time()
-	request_sequence = request_sequence + 1
-	request_id = str(os.getpid()) + "." + str(request_sequence)
+	def next(self):
+		lock.acquire()
+		r = self.request_sequence
+		self.request_sequence += 1
+		lock.release()
+		return r
 
-####
+
+class LogContext(threading.local):
+	"""Thread-local context for a request.
+ 	
+	LogContext.id - a unique ID for log entries corresponding to a single request
+	LogContext.time - a timestamp in UTC for the request
+	"""
+	sequence = ThreadsafeSequence()
+
+	def __init__(self):
+		self.time = time.time()
+		self.id = "%d.init" % os.getpid()
+
+	def generate(self):
+		"""Reinitialise context with current time and next id."""
+		self.time = time.time()
+		self.id = '%d.%d' % (os.getpid(), self.sequence.next())
+
+log_ctx = LogContext()
+
 # Server configuration
 terrain_dir = ""
 

@@ -14,6 +14,7 @@ from openid.extensions import sreg
 import Context
 import Logger
 import Account
+from handler_utils import server_error
 
 store = None
 
@@ -28,29 +29,13 @@ def random_key(length):
 
 def verify(req):
 	try:
-		Context.set_request_id()
+		Context.log_ctx.generate()
 		return verify_core(req)
 	except apache.SERVER_RETURN, ex:
 		# Catch and re-raise apache/mod_python exceptions here
 		raise
 	except Exception, ex:
-		# Catch any other exception
-
-		# Set up a simple Infernal Server Error response 
-		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
-		req.write("There was an infernal server error. Please report this (with reference %s) to the admins.\n" % (Context.request_id))
-
-		# Get the details of the last exception
-		exlist = sys.exc_info()
-		# Get a list of text lines (possibly with embedded \n)
-		# describing the full backtrace
-		exdata = traceback.format_exception(exlist[0], exlist[1], exlist[2])
-		# Write those lines to the exception log
-		head = Logger.header % { 'stamp': Context.request_time, 'req': Context.request_id }
-		Logger.exception_log.error(head + ''.join(exdata))
-
-		# Return the Infernal Server Error
-		return apache.OK
+		return server_error(req)
 
 def verify_core(req):
 	"""This is the first phase of the OpenID login. We check the
@@ -113,29 +98,13 @@ def verify_core(req):
 
 def process(req):
 	try:
-		Context.set_request_id()
+		Context.log_ctx.generate()
 		return process_core(req)
 	except apache.SERVER_RETURN, ex:
 		# Catch and re-raise apache/mod_python exceptions here
 		raise
 	except Exception, ex:
-		# Catch any other exception
-
-		# Set up a simple Infernal Server Error response 
-		req.status = apache.HTTP_INTERNAL_SERVER_ERROR
-		req.write("There was an infernal server error. Please report this (with reference %s) to the admins.\n" % (Context.request_id))
-
-		# Get the details of the last exception
-		exlist = sys.exc_info()
-		# Get a list of text lines (possibly with embedded \n)
-		# describing the full backtrace
-		exdata = traceback.format_exception(exlist[0], exlist[1], exlist[2])
-		# Write those lines to the exception log
-		head = Logger.header % { 'stamp': Context.request_time, 'req': Context.request_id }
-		Logger.exception_log.error(head + ''.join(exdata))
-
-		# Return the Infernal Server Error
-		return apache.OK
+		return server_error(req)
 
 def process_core(req):
 	Logger.log.debug("Processing request: " + str(req))
