@@ -3,7 +3,6 @@
 import types
 import time
 import os
-
 import thread
 import threading
 
@@ -121,9 +120,10 @@ class ThreadsafeSequence(object):
 
 class LogContext(threading.local):
 	"""Thread-local context for a request.
- 	
-	LogContext.id - a unique ID for log entries corresponding to a single request
-	LogContext.time - a timestamp in UTC for the request
+
+	LogContext.id - a unique ID for log entries corresponding to a
+	single request.
+	LogContext.time - a timestamp in UTC for the request.
 	"""
 	sequence = ThreadsafeSequence()
 
