@@ -207,17 +207,19 @@ if len(args) == 0:
 	args = [ 'web', 'database' ]
 
 if not installer.preconditions(args):
-	pass
+	sys.exit(1)
 
 template_substitution()
 
 # Set up postgres
 if "database" in args:
+	print "\nSetting up database\n"
 	installer.postgres(value_by_key)
 
 # Add user/group membership -- only necessary for apache server to
 # write to log files and cache files.
 if "web" in args:
+	print "\nSetting up web server\n"
 	installer.users_groups(value_by_key)
 
 	# Get the names of the files/dirs to allow the server to write to
