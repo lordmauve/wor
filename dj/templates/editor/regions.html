@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+	<h2>Regions</h2>
+	<ul>
+		{% for name, region in regions %}
+			<li><a href="/editor/{{name}}/">{{region}}</a></li>
+		{% endfor %}
+	</ul>
+{% endblock %}
