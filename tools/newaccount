@@ -3,11 +3,9 @@
 """Create a new account"""
 
 import sys
-import random
 from optparse import OptionParser
 
-from Database import DB
-import GameUtil
+from wor.db import db
 
 
 def create_user(username, password=None, realname=None, email=None):
@@ -49,4 +47,11 @@ if len(args) != 1:
 	parser.error('invalid number of arguments')
 
 username = args[0]
-create_user(username, options.password, options.realname, options.email)
+accounts = db.accounts()
+if options.password:
+	accounts.create_account(username, options.password, options.realname, options.email)
+else:
+	password = accounts.generate_password()
+	accounts.create_account(username, password, options.realname, options.email)
+	print username, password
+db.commit()

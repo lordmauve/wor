@@ -1,16 +1,13 @@
-##########
-# A location
+from persistent import Persistent
 
-import copy
-import functools
-from Database import DB
-from SerObject import SerObject
 from Action import *
 from Cost import Cost
 from Util import no_d
 from Logger import log
 import Context
 import types
+
+from wor.jsonutil import JSONSerialisable
 
 
 class ActionMove(Action):
@@ -24,163 +21,65 @@ class ActionMove(Action):
 		self.actor.move_to(self.dest)
 
 
-class Location(SerObject):
-	_table = 'location'
-	cache_by_id = {}
-	cache_by_pos = {}
-
+class NullLocation(object):
+	title = ''
+	description = ''
+	id = None
 	move_ap = 1
-	image_name = 'colin'
 
-	####
-	# Load the location
-	@classmethod
-	def load_by_pos(cls, pos, allprops=False):
-		"""Load a complete location stack by position"""
-		rpos = repr(pos)
-		if rpos in Location.cache_by_pos:
-			stack = Location.cache_by_pos[rpos]
-			overlays = stack.keys()
-			overlays.sort()
-			return stack[overlays[-1]]
-
-		cur = DB.cursor()
-		cur.execute('SELECT id, state FROM location '
-					+ 'WHERE x=%(x)s AND y=%(y)s AND layer=%(layer)s '
-					+ 'ORDER BY overlay',
-					pos.as_dict()
-					)
-		row = cur.fetchone()
-		location = None
-		while row is not None:
-			# Load the overlay
-			tmploc = cls._load_from_row(row, allprops)
-			# Set up a doubly-linked list
-			tmploc._underneath = location
-			if location is not None:
-				location._above = tmploc
-			# Push the underlying location down
-			location = tmploc
-			row = cur.fetchone()
-
-		if location is not None:
-			location._above = None
-
-		return location
-
-	@classmethod
-	def _cache_object(cls, obj):
-		"""Hook to allow classes to define their own caching scheme.
-		Called after an object has been loaded and cached in
-		cls.cache_by_id"""
-		super(Location, cls)._cache_object(obj)
-		rpos = repr(obj.pos)
-		stack = cls.cache_by_pos.setdefault(rpos, {})
-		if obj.overlay in stack:
-			# FIXME: Raise an exception here: we've just loaded a
-			# duplicate object
-			log.error("Trying to cache a Location overlay that already exists, at (%d, %d, %s, %d)" % (obj.pos.x, obj.pos.y, obj.pos.layer, obj.overlay))
-			return
-		stack[obj.overlay] = obj
-
-	@classmethod
-	def flush_cache(cls):
-		cls.cache_by_id = {}
-		cls.cache_by_pos = {}
-
-	def _save_indices(self):
-		inds = super(Location, self)._save_indices()
-		inds.update(self.pos.as_dict())
-		inds['overlay'] = self.overlay
-		return inds
-
-	####
-	# Create a new location
 	def __init__(self, pos):
-		"""Create a completely new location"""
-		self._underneath = None
-		self._above = None
-		super(Location, self).__init__()
 		self.pos = pos
-		self.overlay = 0
-		self._cache_object(self)
 
-	####
-	# Stack management
-	def stack_bottom(self):
-		"""Return the bottom Location of the stack that this Location
-		lives in."""
-		loc = self
-		while loc._underneath is not None:
-			loc = loc._underneath
-		return loc
-	
-	def stack_top(self):
-		"""Return the top Location of the stack that this Location
-		lives in."""
-		loc = self
-		while loc._above is not None:
-			loc = loc._above
-		return loc
-	
-	def deoverride(self):
-		"""Unhook this location (overlay) from the stack, and remove
-		it from the database."""
-		self._underneath._above = self._above
-		if self._above is not None:
-			self._above._underneath = self._underneath
-		self._deleted = True
+	def get_title(self):
+		return None
 
-	def add_overlay(self, loc):
-		"""Add loc to the top of the stack that this Location lives
-		in."""
-		stack_top = self.stack_top()
-		loc.overlay = stack_top.overlay + 1
-		stack_top._above = loc
-		loc._underneath = stack_top
-		loc._above = None
+	def context_get(self, context=None):
+		return None
 
-	def stack_layers(self):
-		"""Generator function to iterate through the stack from the
-		bottom upwards"""
-		loc = self.stack_bottom()
-		while loc is not None:
-			yield loc
-			loc = loc._above
+	def can_enter(self, actor):
+		return False
 
-	def stack_layers_rev(self):
-		"""Generator function to iterate through the stack from the
-		top down"""
-		loc = self.stack_top()
-		while loc is not None:
-			yield loc
-			loc = loc._underneath
 
-	####
-	# Property access
+class Location(Persistent, JSONSerialisable):
+	move_ap = 1
 
-	# Walk down the stack in order until we hit the bottom or find the
-	# property that we asked for.
-	def __getattr__(self, key):
+	pos = None
+	region = None
+
+	default_title = 'Void'
+
+	def __init__(self, title=None, description=''):
+		self.title = title
+		self.description = ''
+
+	def get_title(self):
+		return self.title or self.default_title
+
+	@property
+	def id(self):	
+		return str(self.pos)
+
+	@classmethod
+	def load_by_pos(cls, pos):
+		"""Load a complete location stack by position"""
+		from wor.db import db
 		try:
-			return SerObject.__getattribute__(self, key)
-		except AttributeError:
-			if self._underneath is not None:
-				return self._underneath.__getattr__(key)
+			return db.world()[pos]
+		except KeyError:
+			return NullLocation(pos)
 
-		# This line is not reachable
-		raise AttributeError, (key, self.__class__)
+	context_fields = ['title', 'pos', 'actors', 'description']
 
-	def context_get(self, context):
+	def context_get_(self, context):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
-		ret = {'type': self.ob_type(),
-				'id': str(self._id)}
+		ret = {'type': self.__class__.__name__,
+				'id': str(self.pos)}
 
 		auth = context.authz_location(self)
 		if context.visible(auth):
-			ret['actors'] = ','.join([str(x) for x in self.actor_ids()])
-			ret['description'] = self.description(context.player)
+			ret['actors'] = self.actors()
+			ret['description'] = self.description
 
 			if auth == Context.ADMIN:
 				fields = Context.all_fields(self)
@@ -191,39 +90,14 @@ class Location(SerObject):
 		else:
 			fields = []
 
-		image_stack = []
-		for overlay in self.stack_layers():
-			image_stack = overlay.build_image_stack(image_stack)
-		ret['stack'] = '.'.join(image_stack)
-
-		for k in ['_underneath', '_above', 'cache_by_id', 'cache_by_pos']:
-			if k in fields:
-				fields.remove(k)
-
-		ret['_underneath'] = str(self._underneath)
-		ret['_above'] = str(self._above)
-
 		return self.build_context(ret, fields)
 
-
-	####
-	# Basic properties
 	def power(self, name):
 		"""Return the value of the named power attribute"""
 		return getattr(self, name, 0)
 
-	def build_image_stack(self, image_stack):
-		"""Given the stack of images to render the terrain up to but
-		not including this overlay, return the image stack needed to
-		render the terrain including this overlay."""
-		try:
-			image_stack.append(self.image_name)
-		except AttributeError:
-			pass
-		return image_stack
-
 	def __str__(self):
-		return "[%s;%d]" % (str(self.pos), self.overlay)
+		return "Location(%r)" % self.pos
 
 	def e(self):
 		"""Return the hex to the east of this one"""
@@ -347,27 +221,20 @@ class Location(SerObject):
 									   cost=Cost(ap=cost))
 
 	# Who's here?
-	def actor_ids(self):
-		"""Return a list of the actor IDs on this location"""
-		ret = []
-		
-		cur = DB.cursor()
-		cur.execute("SELECT id FROM actor"
-					+ " WHERE x=%(x)s AND y=%(y)s AND layer=%(layer)s",
-					self.pos.as_dict())
-		row = cur.fetchone()
-		while row is not None:
-			ret.append(row[0])
-			row = cur.fetchone()
-			
-		return ret
+	def actors(self):
+		"""Return a list of the actors on this location"""
+		return self.region.get_actors_at(self.pos)
 
 	def could_go(self, player, direction):
 		# FIXME: Add support for edge conditions
 		loc = getattr(self, direction)(self)
 		if loc is None:
 			return False
+		return loc.can_enter(player)
+
+	def can_enter(self, actor):
 		return True
 
 	def move_cost(self, player, destination):
 		return self.move_ap + destination.move_ap
+

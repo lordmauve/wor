@@ -21,13 +21,17 @@ class Position(object):
 		return iter(self._p)
 
 	def __hash__(self):
-		return hash(['Position'] + list(self))
+		return hash(('Position',) + tuple(self))
 
 	def __repr__(self):
 		return "Position(%r, %r, %r)" % tuple(self)
 
 	def translate(self, x, y):
 		return Position(self.x + x, self.y + y, self.layer)
+
+	def __cmp__(self, ano):
+		"""Imposes a total order on Positions, for use in BTree"""
+		return cmp(self.layer, ano.layer) or cmp(self._p, ano._p)
 
 	def as_dict(self):
 		return { 'x': self.x,

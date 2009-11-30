@@ -43,7 +43,9 @@ class Action(object):
 
 	@staticmethod
 	def make_id(object, act):
-		return "%s.%d.%s" % (object.ob_type(), object._id, act)
+		if hasattr(object, 'internal_name'):
+			return "%s.%s.%s" % (object.internal_name(), object.id, act)
+		return "%s.%s.%s" % (object.__class__.__name__, object.id, act)
 
 	@staticmethod
 	def make_button(caption, uid, cost=Cost(), parameters=[]):

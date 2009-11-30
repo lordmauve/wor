@@ -6,12 +6,13 @@ import sys
 import random
 from optparse import OptionParser
 
-from Player import Player
+from wor.actors.player import Player, DuplicatePlayerName
 from Item import Item
 from Alignment import Alignment
-from Database import DB
 from Items.Rock import Rock
-import GameUtil
+
+
+from wor.db import db
 
 
 ALIGN_MAP = {
@@ -22,40 +23,30 @@ ALIGN_MAP = {
 	'm': Alignment.METAL
 }
 
-def accountid_for_username(username):
-	cur = DB.cursor()
-	cur.execute("SELECT account_id FROM account WHERE username=%(uname)s",
-		{"uname": username})
-	return cur.fetchone()[0]
+
+def create_player(name, alignment, username):
+	try:
+		account = db.accounts().get_account(username)
+	except KeyError:
+		print >>sys.stderr, "The username specified does not exist in the database."
+		return
+
+	try:
+		account.create_player(name, align)
+	except DuplicatePlayerName, e:
+		print >>sys.stderr, str(e)
+		db.abort()
+	else:
+		db.commit()
 
 
-def create_player(name, alignment, accountid):
-	p = Player(args[0], align)
-	print "Created player id", p._id
-	rock = Rock()
-	p.inventory.add(rock)
-
-	GameUtil.save()
-
-	cur = DB.cursor()
-	cur.execute(
-		"INSERT INTO account_actor (account_id, actor_id) "
-		"VALUES (%(acid)s, %(actid)s)",
-			{"acid": acid,
-			  "actid": p._id})
-
-	DB.commit()
-
-
-parser = OptionParser(usage='%prog [options] {<account>|-i account-id} <playername>')
+parser = OptionParser(usage='%prog [options] <account> <playername>')
 parser.add_option('-a', '--align', type='choice', choices=ALIGN_MAP.keys(), help="Alignment of player to create [default: random alignment]")
-parser.add_option('-i', '--account-id', type='int', help="Account ID of owning account")
 
 options, args = parser.parse_args()
 
-# check that we have either a username or account id but not both
-if (len(args) == 2) ^ (options.account_id is None):
-	parser.error('You must specify either -i <account-id> or provide a username.')
+if len(args) != 2:
+	parser.error('You must specify a username and a player name.')
 
 
 if options.align:
@@ -66,12 +57,5 @@ else:
 	align = random.choice(ALIGN_MAP.values())
 
 
-if options.account_id is None:
-	playername, username = args
-	acid = accountid_for_username(username)
-else:
-	playername = args[0]
-	acid = options.account_id
-
-
-create_player(playername, align, acid)
+username, playername = args
+create_player(playername, align, username)

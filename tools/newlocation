@@ -6,9 +6,9 @@
 import sys
 import getopt
 
-from Location import Location
+from wor.db import db
+from wor.world.location import Location
 from Position import Position
-from Database import DB
 import GameUtil
 
 def usage():
@@ -41,12 +41,11 @@ if len(args) != 3:
 	usage()
 	sys.exit(1)
 
-loc = Location(Position(int(args[0]), int(args[1]), args[2]))
+pos = Position(int(args[0]), int(args[1]), args[2])
 
 #overlay = Location(Position(0, 0, 'main'))
 #loc.add_overlay(overlay)
 #overlay.taxi = 1200
+db.world.set_location(position, Location())
 
-GameUtil.save()
-
-DB.commit()
+db.commit()

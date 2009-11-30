@@ -1,10 +1,12 @@
-##########
-# Generic actor: covers players, NPCs, monsters
+"""Generic actor: covers players, NPCs, monsters"""
 
 import types
 import time
 
-from SerObject import SerObject
+from persistent import Persistent
+from persistent.list import PersistentList
+from BTrees.IOBTree import IOBTree
+
 import Util
 import Context
 from Item import Item
@@ -12,48 +14,64 @@ from Logger import log
 from Location import Location
 from Action import Action
 from Cost import Cost
-from Database import DB
+
+from Triggerable import Triggerable
 from TriggerDeath import TriggerDeath
 
+from wor.jsonutil import JSONSerialisable
 
-class Actor(SerObject):
-	# We have our own DB table and caching scheme for Actors
-	_table = 'actor'
-	cache_by_id = {}
 
+class MessageLog(IOBTree):
+	"""A message log for an actor.
+
+	Messages are stored in a integer-indexed BTree for performance;
+	the indices are integer timestamps.
+	"""
+	def message(self, message, msg_type='message'):
+		"""Write a message to the actor's message log.
+		"""
+		t = int(time.time())
+		msg = (t, msg_type, message)
+		self.setdefault(t, PersistentList()).append(msg)
+
+	def get_messages(self, since):
+		msgs = []
+		for i in self.itervalues(since):
+			msgs += i
+		return msgs
+
+
+class Actor(Persistent, Triggerable, JSONSerialisable):
 	# Define constants for scaling the to-hit function
 	TO_HIT_SCALE = 100
 	TO_HIT_MIN = 0.05
 	TO_HIT_MAX = 0.95
 
-	####
-	# Creating a new object
-	def __init__(self, name, position):
+	def __init__(self, name):
 		"""Create a completely new actor"""
 		super(Actor, self).__init__()
 		self.name = name
-		self.position = position
+		self._position = None
 		self.hp = 1
 
 		# When HP passes zero, going down, call the dead() function
 		hp_trigger = TriggerDeath(self)
 
-	def _save_indices(self):
-		inds = super(Actor, self)._save_indices()
-		inds.update(self.position.as_dict())
-		return inds
+	def _set_position(self, pos):
+		from wor.db import db
+		db.world()._move_actor(self, self._position, pos)
 
-	@classmethod
-	def flush_cache(cls):
-		cls.cache_by_id = {}
+	def _get_position(self):
+		return self._position
 
-	####
-	# Basic properties of the object
+	position = property(_get_position, _set_position)
+
 	def loc(self):
 		"""Return the Location (or Road for monsters) that we're stood on"""
 		if not hasattr(self, '_loc'):
-			self._loc = Location.load_by_pos(self.position)
-		return self._loc
+			from wor.db import db
+			self._v_loc = db.world()[self.position]
+		return self._v_loc
 
 	def held_item(self):
 		"""Return the item(s) currently held by the actor"""
@@ -98,11 +116,11 @@ class Actor(SerObject):
 
 		return powr
 
-	def context_get(self, context):
+	def context_get_(self, context):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
 		ret = {}
-		ret['id'] = str(self._id)
+		ret['id'] = self.id
 
 		auth = context.authz_actor(self)
 		if auth == Context.ADMIN:
@@ -114,43 +132,23 @@ class Actor(SerObject):
 		else:
 			fields = [ 'name' ]
 
-		if 'cache_by_id' in fields:
-			fields.remove('cache_by_id')
-
 		return self.build_context(ret, fields)
 
-	####
-	# Administration
 	def message(self, message, msg_type='message'):
-		"""Write a message to the actor's message log"""
-		cur = DB.cursor()
-		cur.execute("INSERT INTO actor_message"
-					+ " (stamp, actor_id, msg_type, message)"
-					+ " VALUES (%(stamp)s, %(id)s, %(msg_type)s, %(message)s)",
-					{ 'stamp': time.time(),
-					  'id': self._id,
-					  'msg_type': msg_type,
-					  'message': message })
+		"""Write a message to the actor's message log, creating it
+		if it does not yet exist.
+
+		"""
+		if not hasattr(self, 'messages'):
+			self.messages = MessageLog()
+
+		self.messages.message(message, msg_type)
 
 	def get_messages(self, since):
-		"""Get messages from this actor's message log"""
-		cur = DB.cursor()
-		cur.execute("SELECT stamp, msg_type, message"
-					+ " FROM actor_message"
-					+ " WHERE stamp >= %(since)s"
-					+ "   AND actor_id = %(id)s"
-					+ " ORDER BY stamp DESC"
-					+ " LIMIT %(limit)s",
-					{ 'since': since,
-					  'id': self._id,
-					  'limit': 1024 })
+		if not hasattr(self, 'messages'):
+			return []
 
-		result = []
-		row = cur.fetchone()
-		while row is not None:
-			result.append(row)
-			row = cur.fetchone()
-		return result
+		self.messages.get_messages(since)
 
 	####
 	# Actions infrastructure: Things the player can do to this actor
@@ -165,7 +163,7 @@ class Actor(SerObject):
 
 		# They could attack us...
 		if ("attack" in requested
-			and self._id is not player._id
+			and self.id is not player.id
 			and self.is_combative(player)):
 			
 			uid = Action.make_id(self, "attack")
@@ -278,3 +276,4 @@ class Actor(SerObject):
 	def dead(self):
 		"""We died. What happens?"""
 		pass
+

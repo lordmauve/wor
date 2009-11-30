@@ -1,15 +1,11 @@
 # coding: utf-8
-########
-# Player Character
 
 import time
 
-from Database import DB
-from Actor import Actor
-from Location import Location
-from ItemContainer import ItemContainer
-
-from Items.Punch import Punch
+from wor.actors.actor import Actor
+from wor.world.location import Location
+from wor.items.container import Inventory
+from wor.items.martial import Punch
 
 from Action import Action
 from Cost import Cost
@@ -26,90 +22,45 @@ class ActionChangeItem(Action):
 		self.actor.change_item_action(data)
 
 
-class Player(Actor):
-	# Additional caching over and above the cache by ID for actors
-	cache_by_name = {}
+class DuplicatePlayerName(Exception):
+	"""The player name requested already exists."""
 
-	####
-	# Load an instance of this object
+
+class Player(Actor):
 	@classmethod
-	def load_by_name(cls, name, allprops=False):
+	def load_by_name(cls, name):
 		"""Additional function to load a player by name instead of by
 		ID"""
-		if name in cls.cache_by_name:
-			return cls.cache_by_name[name]
+		from wor.db import db
+		return db.world().get_player(name)
 
-		cur = DB.cursor()
-		cur.execute("SELECT id FROM " + cls._table
-					+ " WHERE name = %(name)s",
-					{ 'name': name } )
-		row = cur.fetchone()
-		if row is None:
-			return None
-		#log.debug("Loading player %s (=%d)" % (name, row[0]))
-		return cls.load(row[0], allprops)
-
-	@classmethod
-	def _cache_object(cls, obj):
-		"""Hook to allow classes to define their own caching scheme.
-		Called after an object has been loaded and cached in
-		cls.cache_by_id"""
-		super(Player, cls)._cache_object(obj)
-		# FIXME: Complain if we have a duplicate cache key
-		cls.cache_by_name[obj.name] = obj
-
-	@classmethod
-	def flush_cache(cls):
-		super(Player, cls).flush_cache()
-		cache_by_name = {}
-		
-	####
-	# Additional indices to write to the database on save
-	def _save_indices(self):
-		inds = super(Player, self)._save_indices()
-		inds['name'] = self.name
-		return inds
-
-	####
-	# Create a new player
-	def __init__(self, name, align, position=None):
-		if position is None:
-			# FIXME: Make this alignment-dependent
-			position = Position(0, 0, 'main')
-
-		super(Player, self).__init__(name, position)
-		self._cache_object(self)
+	def __init__(self, name, align):
+		super(Player, self).__init__(name)
 		self.align = align
 		# Start at 120AP, get one more every 6 minutes (240 per day),
 		# maximum 240.
 		self.ap_counter = SimpleTimedCounter(self, 120, 360, 240)
 		self.hp = 300
 		self.maxhp = 300
-		self.inventory = ItemContainer(self, "inventory")
-		punch = Punch()
-		self.inventory.add(punch)
+		self.inventory = Inventory(self)
+		self.inventory.create('martial.Punch')
 
 	def get_context(self):
 		return Context(self)
 
+	context_fields = ['name', 'id', 'hp', 'maxhp', 'position', 'align', 'is_zombie', 'ap_counter']
+
 	def context_get(self, context):
 		ret = super(Player, self).context_get(context)
 		auth = context.authz_actor(self)
-		fields = ['is_zombie']
+#		fields = ['is_zombie']
 
-		return self.build_context(ret, fields)
+		return ret
 
-	####
-	# AP handling
-
-	# Python 2.6:
-	# @property
 	def __ap_getter(self):
 		"""Action points"""
 		return self.ap_counter.value
 
-	# Python 2.6:
-	# @ap.setter
 	def __ap_setter(self, value):
 		self.ap_counter.value = value
 
@@ -183,8 +134,7 @@ class Player(Actor):
 			loc.external_actions(acts, self, name)
 		
 		# What can we do to actors here?
-		for actid in self.loc().actor_ids():
-			actor = Actor.load(actid)
+		for actor in self.loc().actors():
 			if Util.match_id(action_id, actor):
 				actor.external_actions(acts, self, name)
 
@@ -196,10 +146,12 @@ class Player(Actor):
 	def perform_action(self, action_id, data):
 		"""Despatch an action to the target object. The action_id is a
 		full one."""
-		actions = self.get_actions(action_id)
+		actions = self.get_actions()
 		if action_id in actions:
 			self.last_action = time.time()
 			actions[action_id].perform(data)
+		else:
+			raise KeyError("Unknown action")
 
 	def say_boo(self):
 		"""Test action"""
