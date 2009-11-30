@@ -1,3 +1,17 @@
+import sys
+try:
+	import json
+except ImportError:
+	try:
+		import simplejson as json
+	except ImportError:
+		print >>sys.stderr, "simplejson is required for Python <2.6"
+		print >>sys.stderr, "try easy_install simplejson or download from http://pypi.python.org/pypi/simplejson/"
+		sys.exit(3)
+
+import codecs
+import datetime
+
 from django.http import HttpResponse, Http404, HttpResponseNotAllowed
 from Database import DB, retry_process
 
@@ -6,9 +20,17 @@ from Player import Player
 from Actor import Actor
 from Location import Location
 
-import Context
+from Context import Context
 import GameUtil
 import Util
+
+
+class JSONResponse(HttpResponse):
+	def __init__(self, blob):
+		super(JSONResponse, self).__init__(mimetype='text/javascript; charset=UTF-8')
+		utf8_out = codecs.getwriter('utf8')(self)
+		json.dump(blob, utf8_out, indent=2) # indent=2 is for legibility while debugging - remove to save bandwidth
+
 
 account = 'mauve'
 
@@ -21,48 +43,24 @@ def actors(request):
 				+ "   AND account.username = %(username)s",
 				{ 'username': account })
 
-	resp = HttpResponse()
+	acts = {}
 	row = cur.fetchone()
 	while row != None:
-		resp.write("id:%d\n" % row[0])
-		resp.write("name:%s\n" % row[1])
-		resp.write("-\n")
+		acts[row[0]] = row[1]
 		row = cur.fetchone()
-	return resp
-
-
-def write_class(req, name):
-	"""Get the class details for the given class (name), and render it
-	back to the requester. Return True if successful."""
-	try:
-		cls = Item.get_class(name)
-	except ImportError:
-		return False
-
-	req.write(name + ":" + cls.name_for() + "\n")
-
-	return True
+	return JSONResponse(acts)
 
 
 def item_names(request, name=None):
-	resp = HttpResponse()
 	if name is None:
-		for icls in Item.list_all_classes():
-			write_class(resp, icls)
+		return JSONResponse(dict((icls.__name__, icls.name_for()) for icls in Item.list_all_classes()))
 	else:
-		write_class(resp, name)
-	return resp
+		return JSONResponse({name: Item.get_class(name).name_for()})
 
 
 def get_actor(request):
 	"""Retrieve the current actor from the request"""
-	try:
-		pid = int(request.META['HTTP_X_WOR_ACTOR'])
-	except:	
-		from ui.models import Account
-		account = Account.objects.get(pk=request.session['account'])
-		pid = account.actors()[0].id
-		
+	pid = int(request.META['HTTP_X_WOR_ACTOR'])
 	player = Player.load(pid)
 	if player is None:
 		raise KeyError('Invalid player id')
@@ -77,19 +75,15 @@ def actor_detail(request, op, target=None):
 		actor = player
 	else:
 		actor = Actor.load(int(target))
-	
-	resp = HttpResponse()
-	if op == 'desc':
-		info = actor.context_get()
-		Util.render_info(info, resp)
-		return resp
 
-	if op == 'inventory':
-		info = actor.inventory.context_get_equip()
+
+	ctx = Context(player)
+	if op == 'desc':
+		return JSONResponse(actor.context_get(ctx))
+	elif op == 'inventory':
+		return JSONResponse(actor.inventory.context_get_equip(ctx))
 	elif op == 'equipment':
-		info = actor.equipment.context_get_equip()
-	Util.render_table(info, resp)
-	return resp
+		return JSONResponse(actor.equipment.context_get_equip(ctx))
 
 
 def actor_log(request, target=None):
@@ -100,12 +94,9 @@ def actor_log(request, target=None):
 	else:
 		actor = Actor.load(int(target))
 
-	since = request.META.get('X-WoR-Messages-Since', getattr(actor, 'last_action', 0))
-		
-	info = actor.get_messages(since)
-	resp = HttpResponse()
-	Util.render_table(info, resp)
-	return resp
+	since = 0 #request.META.get('X-WoR-Messages-Since', getattr(actor, 'last_action', 0))
+
+	return JSONResponse(actor.get_messages(since))
 
 
 def actions(request):
@@ -113,19 +104,15 @@ def actions(request):
 	if request.method == 'GET':
 		# List of actions
 		acts = player.get_actions()
-		resp = HttpResponse()
-		for id, act in acts.iteritems():
-			info = act.context_get()
-			Util.render_info(info, resp)
-			resp.write("-\n")
-		return resp
+		data = [act.context_get(player.get_context()) for id, act in acts.iteritems()]
+		return JSONResponse(data)
 	elif request.method == 'POST':
 		if 'action' in request.POST:
-			actor.perform_action(request.POST['action'], request.POST)
+			player.perform_action(request.POST['action'], request.POST)
 
 		# Save any game state that might have changed
 		GameUtil.save()
-		return HttpResponse('OK')
+		return JSONResponse('OK')
 	else:
 		return HttpNotAllowed(['GET', 'POST'])
 
@@ -142,13 +129,11 @@ def location(request, op, location_id=None):
 	else:	
 		location = Location.load(int(location_id))
 
-	resp = HttpResponse()
+	ctx = Context(player)
 	if op == 'desc':
-		info = location.context_get()
-		Util.render_info(info, resp)
-		return resp
+		return JSONResponse(location.context_get(ctx))
 	elif op == 'actions':
-		return resp
+		return JSONResponse(None)
 	else:
 		raise Http404()
 
@@ -159,30 +144,24 @@ def neighbourhood(request):
 
 	sight = player.power('sight')
 
-	resp = HttpResponse()
-	for loc in get_neighbourhood(here, sight):
-		if loc is None:
-			resp.write('type:none\n-\n')
-		elif loc == 'unknown':
-			resp.write('type:unknown\n-\n')
+	ctx = Context(player)
+	locs = []
+	for loc in get_neighbourhood(here, sight, player):
+		if loc is None or loc == 'unknown':
+			locs.append(loc)
 		else:
-			info = loc.context_get()
-			Util.render_info(info, resp)
-			resp.write('-\n')
+			locs.append(loc.context_get(ctx))
 
-	return resp
+	return JSONResponse(locs)
 
 
 def item(request, item_id):
 	item = Item.load(int(item_id))
-	info = item.context_get()
-	resp = HttpResponse()
-	Util.render_info(info, req)
-	return resp
+	return JSONResponse(item.context_get())
 
 
 # not a view
-def get_neighbourhood(here, dist):
+def get_neighbourhood(here, dist, player=None):
 	locs = []
 	this_ring = [here]
 
@@ -202,12 +181,12 @@ def get_neighbourhood(here, dist):
 			if dep == None:
 				this_ring.append(None)
 			else:
-				loc = dep.local_directions[edge](dep)
+				loc = dep.local_directions[edge](dep, player)
 				this_ring.append(loc)
 				
 			# Now do the remaining elements of the current ring
 			for h in range(1, distance):
-				prev_pos = edge*(distance-1) + h - 1
+				prev_pos = edge * (distance - 1) + h - 1
 
 				# This hex's antecedents
 				a0 = prev_ring[prev_pos]
@@ -225,17 +204,17 @@ def get_neighbourhood(here, dist):
 
 				# Deal with one or other antecedents being undefined
 				if a0 == None:
-					loc = a1.local_directions[edge](a1)
+					loc = a1.local_directions[edge](a1, player)
 				elif a1 == None:
-					loc = a0.local_directions[(edge + 1) % 6](a0)
+					loc = a0.local_directions[(edge + 1) % 6](a0, player)
 				# or check that both paths to this hex yield the same
 				# result
-				elif (a1.local_directions[edge](a1)
-					 != a0.local_directions[(edge + 1) % 6](a0)):
+				elif (a1.local_directions[edge](a1, player)
+					 != a0.local_directions[(edge + 1) % 6](a0, player)):
 					this_ring.append("unknown")
 					continue
 				else:
-					loc = a1.local_directions[edge](a1)
+					loc = a1.local_directions[edge](a1, player)
 
 				this_ring.append(loc)
 	return locs + this_ring

@@ -1,38 +1,28 @@
 ////////////
 // Messages
 
-function update_messages()
-{
-	basic_ajax_get("/actor/self/log", load_messages);
-}
+var MessagePane = {
+	update: function () {
+		get_json("/actor/self/log", MessagePane.show_messages);
+	},
 
-function load_messages(req)
-{
-	if(req.readyState == 4)
-	{
+	show_messages: function (messages) {
 		var panel = get_side_panel("messages");
-		if(req.status == 200)
-		{
-			panel.innerHTML = "";
-			// Parse the input stream, and construct the panel
-			var messages = parse_input_table(req.responseText, 3);
-			for(var i in messages)
-			{
-				var bits = messages[i];
-				var when = new Date();
-				when.setTime(bits[0] * 1000);
 
-				panel.innerHTML += "<div class='message msg_type_" + bits[1] + "'>"
-								 + "<span class='timestamp'>"
-								 + format_date_time(when)
-								 + "</span> "
-								 + bits[2]
-								 + "</div>";
-			}
-		}
-		else
+		var html = ''
+		for (var i = 0; i < messages.length; i++)
 		{
-			panel.innerHTML = "Error loading messages.\n<div>" + req.responseText + "</div>";
+			var bits = messages[i];
+			var when = new Date(bits[0] * 1000);
+
+			html += '<div class="message msg_type_' + bits[1] + '">'
+							 + '<span class="timestamp" title="' + when.toLocaleString() + '">'
+							 + when.toLocaleTimeString()
+							 + "</span> "
+							 + bits[2]
+							 + "</div>";
 		}
+		panel.innerHTML = html;
+		// panel.innerHTML = "Error loading messages.\n<div>" + req.responseText + "</div>";
 	}
-}
+};
