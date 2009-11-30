@@ -10,8 +10,10 @@ import psycopg2
 import Util
 import types
 
+from Strategied import Strategied
 
-class SerObject(Triggerable):
+
+class SerObject(Triggerable, Strategied):
 	"""This is the base class for all objects that might end up in the database."""
 
 	@classmethod
@@ -342,7 +344,7 @@ class SerObject(Triggerable):
 		# class hierarchy as a class property. So we go looking for
 		# it in the class hierarchy.
 		#log.debug(" ... " + key + " going upstream")
-		return object.__getattribute__(self, key)
+		return Strategied.__getattribute__(self, key)
 
 	def _demand_load_property(self, key):
 		cur = DB.cursor()
