@@ -2,7 +2,7 @@
 	ServerAdmin webmaster@worldofrodney.org
 	ServerName game.worldofrodney.org
 	ServerAlias www.worldofrodney.org
-	ServerAlias test.worldofrodney.org
+	ServerAlias game.test.worldofrodney.org
 
 	PythonDebug On
 	
@@ -20,7 +20,7 @@
 	<Location />
 		AuthType Digest
 		AuthName WoR
-		AuthDigestDomain http://test.worldofrodney.org/ http://game.worldofrodney.org/ http://www.worldofrodney.org/ http://worldofrodney.org/
+		AuthDigestDomain http://game.test.worldofrodney.org/ http://game.worldofrodney.org/
 		AuthDigestProvider file
 		AuthUserFile @INSTALL_BASE@/authn_file
 		Require valid-user

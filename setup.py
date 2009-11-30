@@ -22,7 +22,13 @@ class ConfVar(object):
 		self.default = default
 		self.re = re.compile("@%s@" % self.key)
 
-	def ask(self):
+	def ask(self, write_defaults=None):
+		rv = self.ask_impl()
+		if write_defaults is not None:
+			write_defaults.write('"%s": """%s""",\n' % (self.key, str(self.value)))
+		return rv
+
+	def ask_impl(self):
 		"""Ask the user for input, return True if we pass validation.
 		"""
 		sys.stdout.write("%s (%s): " % (self.prompt, self.default))
@@ -30,6 +36,7 @@ class ConfVar(object):
 		self.value = sys.stdin.readline()
 		if self.value == "\n":
 			self.value = self.default
+		self.value = self.value.strip()
 		return True
 
 	def replace(self, line, state):
@@ -39,7 +46,7 @@ class CVFixed(ConfVar):
 	def __init__(self, key, default):
 		ConfVar.__init__(self, key, '', default)
 
-	def ask(self):
+	def ask_impl(self):
 		self.value = self.default
 		return True
 
@@ -58,7 +65,7 @@ class CVPassword(ConfVar):
 	def __init__(self, key, prompt):
 		ConfVar.__init__(self, key, prompt, '')
 
-	def ask(self):
+	def ask_impl(self):
 		self.value = getpass.getpass("%s:" % self.prompt)
 		return True
 
@@ -67,7 +74,11 @@ class CVBoolean(ConfVar):
 	def __init__(self, key, prompt, default=True):
 		ConfVar.__init__(self, key, prompt, default)
 
-	def ask(self):
+	def ask_impl(self):
+		if self.default == "True":
+			self.default = True
+		elif self.default == "False":
+			self.default = False
 		if self.default:
 			sys.stdout.write("%s (Y/n): " % (self.prompt,))
 		else:
@@ -143,13 +154,25 @@ variables = [
 value_by_key = {}
 
 def template_substitution():
+	try:
+		from setup_defaults import setup_defaults
+	except ImportError:
+		setup_defaults = {}
+	new_defaults = open(os.path.join(sys.path[0], "setup_defaults.py"), "w")
+	new_defaults.write("setup_defaults = {\n")
+
 	# We've got the list of prompts and variables, so ask about each of
 	# them in turn
 	for v in variables:
-		while not v.ask():
+		if setup_defaults.get(v.key) != None:
+			v.default = setup_defaults.get(v.key)
+		while not v.ask(new_defaults):
 			sys.stdout.write("Got value for " + v.key + " " + str(v.value))
 			sys.stdout.flush()
 		value_by_key[v.key] = v.value
+
+	new_defaults.write("}\n")
+	new_defaults.close()
 
 	# Now do the substitutions
 	for path, dirs, files in os.walk(value_by_key['INSTALL_BASE']):
@@ -164,11 +187,8 @@ def template_substitution():
 			outfile = open(dest_name, "w")
 			state = { 'output': True }
 			for line in infile:
-				print "----"
-				print line
 				for v in variables:
 					line = v.replace(line, state)
-					print line, v.key, v.value, state
 				if state['output']:
 					outfile.write(line)
 
@@ -177,29 +197,27 @@ def template_substitution():
 
 
 # Validate the installation parameters
+valid_params = ( 'web', 'database' )
 args = sys.argv[1:]
 for p in args:
 	if p == "help" or p not in valid_params:
 		help()
 
 if len(args) == 0:
-	args = [ 'apache', 'database' ]
+	args = [ 'web', 'database' ]
 
 if not installer.preconditions(args):
 	pass
-#sys.exit(1)
 
 template_substitution()
 
-sys.exit(1)
-
 # Set up postgres
-if "postgres" in args:
+if "database" in args:
 	installer.postgres(value_by_key)
 
 # Add user/group membership -- only necessary for apache server to
 # write to log files and cache files.
-if "apache" in args:
+if "web" in args:
 	installer.users_groups(value_by_key)
 
 	# Get the names of the files/dirs to allow the server to write to
