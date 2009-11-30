@@ -38,6 +38,8 @@ def postgres(variables):
 		sys.exit(1)
 
 	os.seteuid(postgres)
+
+	sql_file = os.path.join('tools', 'setup', 'schema.sql')
 	
 	psql = subprocess.Popen(["psql", "template1"],
 							stdin=subprocess.PIPE,
@@ -47,11 +49,11 @@ def postgres(variables):
 
 	psql.stdin.write("CREATE DATABASE %(DB_NAME)s OWNER %(DB_USER)s ENCODING UTF8;\n" % variables)
 	psql.stdin.write("\\c %(DB_NAME)s %(DB_USER)s\n" % variables)
-	psql.stdin.write("\\i schema.sql\n")
+	psql.stdin.write("\\i " + sql_file + "\n")
 
 	psql.stdin.write("CREATE DATABASE %(DB_NAME)s_test OWNER %(DB_USER)s ENCODING UTF8;\n" % variables)
 	psql.stdin.write("\\c %(DB_NAME)s_test %(DB_USER)s\n" % variables)
-	psql.stdin.write("\\i schema.sql\n")
+	psql.stdin.write("\\i " + sql_file + "\n")
 
 	psql.stdin.write("\\q\n")
 	
@@ -85,7 +87,7 @@ def apache(variables):
 	avail = os.path.join('/etc', 'apache2', 'sites-available')
 	enabled = os.path.join('/etc', 'apache2', 'sites-enabled')
 	if (os.path.isdir(avail) and os.path.isdir(enabled)):
-		infile = open('apache-config', 'r')
+		infile = open(os.path.join('tools', 'setup', 'apache-config'), 'r')
 
 		outfile_name = os.path.join(avail, 'wor')
 		if os.path.exists(outfile_name):
