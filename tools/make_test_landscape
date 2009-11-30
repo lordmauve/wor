@@ -1,22 +1,43 @@
 #!/usr/bin/python
 
-"""Create a whole test landscape"""
+######
+# Create a whole test landscape
 
 import sys
-from optparse import OptionParser
+import getopt
 
 from Location import Location
 from Position import Position
 from Database import DB
 import GameUtil
 
-parser = OptionParser(usage='%prog\nCreate a default test area for landscape things.')
-options, args = parser.parse_args()
+def usage():
+	print """Usage: make_test_landscape
+Create a default test area for landscape things.
+"""
 
-if args:
-	parser.error('invalid commandline detected')
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?i:', ['help'])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
 
-ccl = Position(0,  0, 'test')
+aid = None
+
+for o, a in optlist:
+	if o in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	else:
+		usage()
+		sys.exit(0)
+
+if len(args) != 0:
+	usage()
+	sys.exit(1)
+
+ccl = Position( 0,  0, 'test')
 
 for x in range(-3, 4):
 	for y in range(-3, 4):

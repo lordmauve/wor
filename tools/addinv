@@ -1,15 +1,22 @@
 #!/usr/bin/python
 
-"""Add items to a player's inventory"""
+######
+# Add items to a player's inventory
 
 import sys
-from optparse import OptionParser
+import getopt
 
 from Player import Player
 from Item import Item
 from Database import DB
 import GameUtil
 
+def usage():
+    print """Usage: addinv [options] <player_name> <item_class>
+Options:
+\t-c, --count=<count>\tNumber of items to give.  1 By default.
+\t-h, --help\t\tDisplay this message
+"""
 
 def add_item(name, item_class_name, count):
     """Adds count instances of the given item to the given player's inventory.  
@@ -37,14 +44,27 @@ def add_item(name, item_class_name, count):
 	GameUtil.flush_cache()
 	DB.commit()
     
+try:
+	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?c:', ['help', 'count='])
+except getopt.GetoptError, err:
+	print str(err)
+	usage()
+	sys.exit(1)
 
-parser = OptionParser(usage='%prog [options] <player_name> <item_class>')
-parser.add_option('-c', '--count', type='int', default=1, help="Number of items to remove. [Default: %default]")
+count = 0
 
-options, args = parser.parse_args()
+for opt, arg in optlist:
+	if opt in ('-h', '-?', '--help'):
+		usage()
+		sys.exit(0)
+	elif opt in ('-c', '--count'):
+		count = int(arg)
+	else:
+		usage()
+		sys.exit(0)
 
 if len(args) != 2:
-	parser.error("Incorrect number of arguments")
+    usage()
+    sys.exit(1)
 
-player_name, item_class = args
-add_item(player_name, item_class, count)
+add_item(args[0], args[1], count)
