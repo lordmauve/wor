@@ -1,0 +1,35 @@
+#!/usr/bin/python
+import sys
+import os
+import os.path
+
+import code
+
+def relpath(p):
+	return os.path.join(os.path.dirname(__file__), p)
+
+sys.path = sys.path[:1] + [relpath('../library'), relpath('../content')] + sys.path[1:]
+
+from wor.db import db
+from wor.items.base import Item
+
+import transaction
+tran = transaction.get()
+tran.setUser(os.environ.get('LOGNAME', ''))
+
+code.interact(
+	banner="""Welcome to the WoR interactive Python shell.
+The WoRDB is available as 'db'.""",
+	local={'db': db, 'Item': Item}
+)
+
+if os.isatty(sys.stdin.fileno()):
+	while True:
+		c = raw_input("Would you like to commit now? [y/N] ")
+		if c.lower() in 'yn' or not c:
+			break
+	if c == 'y':
+		import readline
+		msg = raw_input("Please enter a commit message: ")
+		tran.note(msg)
+		tran.commit()
