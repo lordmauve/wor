@@ -8,6 +8,8 @@ import pwd
 import platform
 import stat
 
+import psycopg2
+
 def preconditions(args):
 	"""Test that the installation environment is correct, with the
 	relevant software installed and running.
@@ -29,6 +31,59 @@ def permissions(variables, files):
 		os.chmod(f, stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
 		os.chown(f, -1, grp.getgrnam(variables['GROUP_NAME'])[2])
 
+def create_database(db, variables, suffix=""):
+	"""Create a database instance.
+	"""
+	cur = db.cursor()
+	
+	variables['db_suffix'] = suffix
+	success = False
+	while not success:
+		# PG doesn't allow CREATE DATABASE to be used inside a transaction
+		# Python API doesn't allow there not to be a transaction
+		# Hack, hack...
+		sql = ("COMMIT TRANSACTION; " \
+			   + "CREATE DATABASE %(DB_NAME)s%(db_suffix)s" \
+			   + " OWNER %(DB_USER)s" \
+			   + " ENCODING 'UTF8';\n") % variables
+		try:
+			cur.execute(sql)
+		except psycopg2.ProgrammingError, ex:
+			db.rollback()
+			if str(ex).find('database "%(DB_NAME)s%(db_suffix)s" already exists' % variables) != -1:
+				decision = None
+				while decision is None:
+					sys.stdout.write("The database %(DB_NAME)s%(db_suffix)s already exists: remove it? (y/N): " % variables)
+					response = sys.stdin.readline()
+					if response[0] in ('y', 'Y', 'n', 'N', '\n'):
+						decision = (response[0] in ('y', 'Y'))
+					else:
+						print "Please respond Y or N"
+				cur.execute("COMMIT TRANSACTION; DROP DATABASE %(DB_NAME)s%(db_suffix)s" % variables)
+			else:
+				raise ex
+		else:
+			success = True
+	db.commit()
+
+def set_up_database(db, variables, sql_file, suffix=""):
+	db = psycopg2.connect(host = variables['DB_HOST'],
+						  database = variables['DB_NAME'] + suffix,
+						  user = variables['DB_USER'],
+						  password = variables['DB_PASS'])
+	cur = db.cursor()
+	inf = open(sql_file, "r")
+	sql = ""
+	for line in inf:
+		if line.startswith("--") or line.isspace():
+			continue
+		sql += line
+		if line.endswith(";\n"):
+			cur.execute(sql)
+			sql = ""
+	db.commit()
+	db.close()
+
 def postgres(variables):
 	"""Set up the database: Users, databases and schemas."""
 	try:
@@ -37,27 +92,46 @@ def postgres(variables):
 		sys.stderr.write("Could not find postgres user. Aborting.\n")
 		sys.exit(1)
 
-	os.seteuid(postgres)
+	# Turn into the postgres user, so we can connect to template1
+	os.seteuid(postgres[2])
 
 	sql_file = os.path.join('tools', 'setup', 'schema.sql')
-	
-	psql = subprocess.Popen(["psql", "template1"],
-							stdin=subprocess.PIPE,
-							stdout=subprocess.PIPE,
-							stderr=subprocess.STDOUT)
-	psql.stdin.write("CREATE USER %(DB_USER)s WITH UNENCRYPTED PASSWORD '%(DB_PASS)s';\n" % variables)
 
-	psql.stdin.write("CREATE DATABASE %(DB_NAME)s OWNER %(DB_USER)s ENCODING UTF8;\n" % variables)
-	psql.stdin.write("\\c %(DB_NAME)s %(DB_USER)s\n" % variables)
-	psql.stdin.write("\\i " + sql_file + "\n")
+	db = psycopg2.connect(database = "template1",
+						  user = "postgres")
+	cur = db.cursor()
+	sql = "CREATE ROLE %(DB_USER)s WITH UNENCRYPTED PASSWORD '%(DB_PASS)s';\n" % variables
+	try:
+		cur.execute(sql)
+	except psycopg2.ProgrammingError, ex:
+		db.rollback()
+		if str(ex).find('role "%(DB_USER)s" already exists' % variables) != -1:
+			decision = None
+			while decision is None:
+				sys.stdout.write("User %(DB_USER)s already exists. Change password instead? (y/N): " % variables)
+				response = sys.stdin.readline()
+				if response[0] not in ('Y', 'y', 'N', 'n', '\n'):
+					print "Please respond Y or N"
+				else:
+					decision = (response in ('Y', 'y'))
+				
+			if decision:
+				sql = "ALTER ROLE %(DB_USER)s UNENCRYPTED PASSWORD '%(DB_PASS)s'" % variables
+				cur.execute(sql)
+		else:
+			raise ex
+	db.commit()
 
-	psql.stdin.write("CREATE DATABASE %(DB_NAME)s_test OWNER %(DB_USER)s ENCODING UTF8;\n" % variables)
-	psql.stdin.write("\\c %(DB_NAME)s_test %(DB_USER)s\n" % variables)
-	psql.stdin.write("\\i " + sql_file + "\n")
+	create_database(db, variables)
+	create_database(db, variables, suffix="_test")
 
-	psql.stdin.write("\\q\n")
-	
+	db.close()
+
+	# Turn back to normal
 	os.seteuid(0)
+
+	set_up_database(db, variables, sql_file)
+	set_up_database(db, variables, sql_file, "_test")
 
 def users_groups(variables):
 	"""Set up users, groups and file permissions."""
