@@ -6,6 +6,7 @@ import subprocess
 import grp
 import pwd
 import platform
+import stat
 
 def preconditions(args):
 	"""Test that the installation environment is correct, with the
@@ -26,7 +27,7 @@ def permissions(variables, files):
 	"""
 	for f in files:
 		os.chmod(f, stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
-		os.chown(f, -1, variables['GROUP_NAME'])
+		os.chown(f, -1, grp.getgrnam(variables['GROUP_NAME'])[2])
 
 def postgres(variables):
 	"""Set up the database: Users, databases and schemas."""
@@ -65,7 +66,7 @@ def users_groups(variables):
 	except KeyError:
 		os.system("addgroup %(GROUP_NAME)s" % variables)
 	else:
-		print "Group %(GROUP_NAME)s already exists." % variables
+		print "Group %(GROUP_NAME)s already exists: not creating a new one" % variables
 
 	try:
 		pwd.getpwnam('www-data')
@@ -88,9 +89,9 @@ def apache(variables):
 
 		outfile_name = os.path.join(avail, 'wor')
 		if os.path.exists(outfile_name):
-			print "Destination file %s exists. Overwrite?" % (outfile_name,)
+			sys.stdout.write("Destination file %s exists. Overwrite? " % (outfile_name,))
 			result = sys.stdin.readline()
-			if result not in [ 'Y', 'y' ]:
+			if result[0] not in [ 'Y', 'y' ]:
 				print "Aborting installation"
 				sys.exit(0)
 			os.unlink(outfile_name)
@@ -101,8 +102,11 @@ def apache(variables):
 		outfile.close()
 
 		linkfile_name = os.path.join(enabled, '100-wor')
-		os.unlink(linkfile_name)
+		try:
+			os.unlink(linkfile_name)
+		except OSError:
+			pass
 		os.symlink(os.path.join('..', 'sites-available', 'wor'), linkfile_name)
 
 	# Restart Apache to pick up the new config
-	os.execute("/etc/init.d/apache2 restart")
+	os.system("/etc/init.d/apache2 restart")
