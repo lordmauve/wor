@@ -73,3 +73,6 @@ INSTALLED_APPS = [
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+
+RECAPTCHA_PUBLIC_KEY = '6LcbuAkAAAAAALQmzH9QtfUlskcXva4ClJl28cn_'
+RECAPTCHA_PRIVATE_KEY = '6LcbuAkAAAAAAAp69EH8m-W6ABhxPd3Pfzy7I8qL'
