@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-######
-# Create a new player
+"""Create a new player"""
 
 import sys
-import getopt
+import random
+from optparse import OptionParser
 
 from Player import Player
 from Item import Item
@@ -13,67 +13,65 @@ from Database import DB
 from Items.Rock import Rock
 import GameUtil
 
-def usage():
-	print """Usage: newplayer [options] { <account> | -i <account-id> } <playername>
-Options:
-\t-a, --align=<align>\t\tAlignment. Values can be:
-\t\t\t\t\t\tw\twood
-\t\t\t\t\t\te\tearth
-\t\t\t\t\t\tf\tfire
-\t\t\t\t\t\tt\twater
-\t\t\t\t\t\tm\tmetal
-\t-i, --id=<account-id>\t\tAccount ID to create player in
-"""
 
-align_map = { 'w': Alignment.WOOD,
-			  'e': Alignment.EARTH,
-			  'f': Alignment.FIRE,
-			  't': Alignment.WATER,
-			  'm': Alignment.METAL }
+ALIGN_MAP = {
+	'w': Alignment.WOOD,
+	'e': Alignment.EARTH,
+	'f': Alignment.FIRE,
+	't': Alignment.WATER,
+	'm': Alignment.METAL
+}
 
-try:
-	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?a:i:', ['help', 'align=', 'id='])
-except getopt.GetoptError, err:
-	print str(err)
-	usage()
-	sys.exit(1)
-
-align = align_map['w']
-acid = None
-
-for o, a in optlist:
-	if o in ('-h', '-?', '--help'):
-		usage()
-		sys.exit(0)
-	elif o in ('-a', '--align'):
-		align = align_map[a]
-	elif o in ('-i', '--id'):
-		acid = int(a)
-	else:
-		usage()
-		sys.exit(0)
-
-if acid is None and len(args) != 2 or acid is not None and len(args) != 1:
-	usage()
-	sys.exit(1)
-
-if acid is None:
+def accountid_for_username(username):
 	cur = DB.cursor()
 	cur.execute("SELECT account_id FROM account WHERE username=%(uname)s",
-			{ "uname": args.pop(0) })
-	acid = cur.fetchone()[0]
+		{"uname": username})
+	return cur.fetchone()[0]
 
-p = Player(args[0], align)
-print "Created player id", p._id
-rock = Rock()
-p.inventory.add(rock)
 
-GameUtil.save()
+def create_player(name, alignment, accountid):
+	p = Player(args[0], align)
+	print "Created player id", p._id
+	rock = Rock()
+	p.inventory.add(rock)
 
-cur = DB.cursor()
-cur.execute("INSERT INTO account_actor (account_id, actor_id)"
-		+ " VALUES (%(acid)s, %(actid)s)",
-		{ "acid": acid,
-		  "actid": p._id })
+	GameUtil.save()
 
-DB.commit()
+	cur = DB.cursor()
+	cur.execute(
+		"INSERT INTO account_actor (account_id, actor_id) "
+		"VALUES (%(acid)s, %(actid)s)",
+			{"acid": acid,
+			  "actid": p._id})
+
+	DB.commit()
+
+
+parser = OptionParser(usage='%prog [options] {<account>|-i account-id} <playername>')
+parser.add_option('-a', '--align', type='choice', choices=ALIGN_MAP.keys(), help="Alignment of player to create [default: random alignment]")
+parser.add_option('-i', '--account-id', type='int', help="Account ID of owning account")
+
+options, args = parser.parse_args()
+
+# check that we have either a username or account id but not both
+if (len(args) == 2) ^ (options.account_id is None):
+	parser.error('You must specify either -i <account-id> or provide a username.')
+
+
+if options.align:
+	# read alignment constant
+	align = ALIGN_MAP[options.align]
+else:
+	# pick random alignment
+	align = random.choice(ALIGN_MAP.values())
+
+
+if options.account_id is None:
+	playername, username = args
+	acid = accountid_for_username(username)
+else:
+	playername = args[0]
+	acid = options.account_id
+
+
+create_player(playername, align, acid)

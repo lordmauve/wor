@@ -1,69 +1,52 @@
 #!/usr/bin/python
 
-######
-# Create a new account
+"""Create a new account"""
 
 import sys
-import getopt
+import random
+from optparse import OptionParser
 
 from Database import DB
 import GameUtil
 
-def usage():
-	print """Usage: newaccount [options] <account>
-Options:
-\t-p, --password=<pwd>\tSet password (otherwise, generate a random one and print it)
-\t-r, --realname=<name>\tSet a real name for the account
-\t-e, --email=<address>\tSet an email address for the account
-\t
-"""
 
-try:
-	optlist, args = getopt.gnu_getopt(sys.argv[1:], 'h?p:r:e:', ['help', 'password=', 'realname=', 'email='])
-except getopt.GetoptError, err:
-	print str(err)
-	usage()
-	sys.exit(1)
+def create_user(username, password=None, realname=None, email=None):
+	"""Create a user account with the username given.
 
-password = None
-realname = None
-email = None
+	Also store a real name and e-mail address if given.
 
-for o, a in optlist:
-	if o in ('-h', '-?', '--help'):
-		usage()
-		sys.exit(0)
-	elif o in ('-p', '--password'):
-		password = a
-	elif o in ('-r', '--realname'):
-		realname = a
-	elif o in ('-e', '--email'):
-		email = a
-	else:
-		usage()
-		sys.exit(0)
+	If a password is given, store it as the password for the account,
+	otherwise generate a random password and print the username and
+	password pair to stdout.
+
+	"""
+	if not password:
+		valid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=+,.<>:;!$%^&*()?/"
+		password = ""
+		for i in xrange(12):
+			password += random.choice(valid)
+		print username, password
+
+	cur = DB.cursor()
+	cur.execute("INSERT INTO account (username, password, realname, email)"
+			+ " VALUES (%(uname)s, %(pwd)s, %(rname)s, %(email)s)",
+			{ "uname": username,
+			  "pwd": password,
+			  "rname": realname,
+			  "email": email })
+
+	DB.commit()
+
+
+parser = OptionParser(usage='%prog [options] <username>')
+parser.add_option('-p', '--password', help="Set password (otherwise, generate a random one and print it)")
+parser.add_option('-r', '--realname', help="Set a real name for the account")
+parser.add_option('-e', '--email', help="Set an e-mail address for the account")
+
+options, args = parser.parse_args()
 
 if len(args) != 1:
-	usage()
-	sys.exit(1)
+	parser.error('invalid number of arguments')
 
-if password is None:
-	valid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_=+,.<>:;!$%^&*()?/"
-	password = ""
-	f = open("/dev/urandom", "r")
-	while len(password) < 12:
-		b = f.read(1)
-		if b in valid:
-			password += b
-	f.close()
-	print password
-
-cur = DB.cursor()
-cur.execute("INSERT INTO account (username, password, realname, email)"
-		+ " VALUES (%(uname)s, %(pwd)s, %(rname)s, %(email)s)",
-		{ "uname": args[0],
-		  "pwd": password,
-		  "rname": realname,
-		  "email": email })
-
-DB.commit()
+username = args[0]
+create_user(username, options.password, options.realname, options.email)
