@@ -1,135 +1,38 @@
-####
-# ItemContainer
+from persistent import Persistent
+from persistent.list import PersistentList
+from persistent.mapping import PersistentMapping
+from BTrees.OOBTree import OOBTree
 
-import psycopg2
+from wor.db import db
+from wor.items.base import Item, AggregateItem
 
-from Database import DB
-from Item import Item
-from OnLoad import OnLoad
 from Logger import log
-import DBLogger
+#import DBLogger
 import Context
 import Util
 
-class ItemContainer(OnLoad):
-	"""Implements a generic container of items, serialised to the
-	object-ownership table. This container supports caching of items,
-	and demand-loading."""
-	def __init__(self, parent, name="container"):
-		super(ItemContainer, self).__init__(parent)
+
+class ItemContainer(Persistent):
+	"""Implements a generic container of items."""
+
+	def __init__(self, parent, items=[]):
 		self.parent = parent
-		self.name = name
-		self._item_ids = set()
-		self._item_types = {}
-		self._changes = set()
+		self.items = OOBTree()
+		if items:
+			self.add_items(items)
 
-	def identity(self):
-		"""Return a tuple representing the container's unique
-		identity: the type and ID of its parent, and its name. This
-		information is both necessary and sufficient to identify the
-		container in the database."""
-		return (self.parent.ob_type(), self.parent._id, self.name)
-
-	####
-	# Loading and saving
-	def save(self):
-		"""Called when its parent object is save()d"""
-		# Update the database, using our list of changed fields
-		cur = DB.cursor()
-		params = {}
-		my_id = self.identity()
-		params['owner_type'] = my_id[0]
-		params['owner_id'] = my_id[1]
-		params['container'] = my_id[2]
-
-		for itemid in self._changes:
-			params['id'] = itemid
-			if itemid in self._item_ids:
-				# The item has been added to this container, so we
-				# need to add it to the database
-				try:
-					# We try to insert. If it fails, we've already got
-					# it in here.
-					cur.execute('SAVEPOINT item_update')
-					cur.execute('INSERT INTO item_owner'
-								+ ' (item_id, owner_type, owner_id, container)'
-								+ ' VALUES (%(id)s, %(owner_type)s,'
-								+ '		 %(owner_id)s, %(container)s)',
-								params)
-				except psycopg2.Error, ex:
-					# If the insert failed, we roll back the savepoint
-					# just to keep it all sane.
-					cur.execute('ROLLBACK TO SAVEPOINT item_update')
-				else:
-					# If the insert succeeded, we close the
-					# savepoint. If it failed, we've rolled it back
-					# already.
-					cur.execute('RELEASE SAVEPOINT item_update')
-			else:
-				# The item is no longer in this container, so we need
-				# to delete it from the database
-				cur.execute('DELETE FROM item_owner'
-							+ ' WHERE item_id = %(id)s'
-							+ '   AND owner_type = %(owner_type)s'
-							+ '   AND owner_id = %(owner_id)s'
-							+ '   AND container_name = %(container)s',
-							params)
-				# Make sure to remove the item from our internal
-				# collections as well
-				self._item_ids.remove(item_id)
-				for item_ids in self._item_types.values():
-					if item_id in item_ids:
-						item_ids.remove(item_id)
-
-	def __getstate__(self):
-		"""Pickle this object. The contents of _item_ids and
-		_item_types should already have been saved, via save()"""
-		state = {}
-		for k in self.__dict__.iterkeys():
-			if k[0] != '_':
-				state[k] = self.__dict__[k]
-		return state
-
-	def on_load(self):
-		self._item_ids = set()
-		self._item_types = {}
-		self._changes = set()
-
-		# Now load the contents of the container
-		my_id = self.identity()
-		cur = DB.cursor()
-		cur.execute('SELECT item.id, item.type'
-					+ ' FROM item, item_owner'
-					+ ' WHERE item.id = item_owner.item_id'
-					+ '   AND item_owner.owner_type = %(owner_type)s'
-					+ '   AND item_owner.owner_id = %(owner_id)s'
-					+ '   AND item_owner.container = %(container)s',
-					{ 'owner_type': my_id[0],
-					  'owner_id': my_id[1],
-					  'container': my_id[2] })
-
-		row = cur.fetchone()
-		while row is not None:
-			# Update the list by ID
-			self._item_ids.add(row[0])
-			# Update the list by name
-			iset = self._item_types.setdefault(row[1], set())
-			iset.add(row[0])
-			row = cur.fetchone()
-
-	####
-	# REST API support
 	def context_get_equip(self, context):
 		"""Retrieve a table of the contents of this object for
 		purposes of the REST API"""
 		ret = []
-		for itype, ilist in self._item_types.iteritems():
-			for itemid in ilist:
-				item_class = Item.get_class(itype)
-				textname = item_class.name_for(context.player)
-
-				item = Item.load(itemid)
-				ret.append((itype, itemid, item.count, textname))
+		for ilist in self.items.values():
+			for item in ilist:
+				ret.append({
+					'cls': item.internal_name(),
+					'id': db.id(item),
+					'count': item.count,
+					'name': unicode(item),
+				})
 
 		return ret
 
@@ -190,7 +93,7 @@ class ItemContainer(OnLoad):
 		Returns: True if the container contains at least 'count' items
 		of class 'itemclass'.
 		"""
-		if itemclass.__name__ not in self._item_types:
+		if itemclass not in self.items:
 			return False
 
 		# Since items have a count of 1 by default, we can just 
@@ -201,11 +104,19 @@ class ItemContainer(OnLoad):
 		if itemclass.aggregate:
 			# Note that we can only have a single aggregate of a 
 			# given type per container
-			total = self.__get_first_item(itemclass.__name__).count
+			total = self.__get_first_item(itemclass).count
 		else:
-			total = len(self._item_types[itemclass.__name__])
+			total = len(self.items[itemclass])
 
 		return total >= count
+
+	def create(self, itype, count=1):
+		icls = Item.get_class(itype)
+		if issubclass(icls, AggregateItem):
+			self.add(icls(count=count))
+		else:
+			for i in xrange(count):
+				self.add(icls())
 
 	def add(self, item):
 		"""Add the given item to the container.
@@ -215,7 +126,7 @@ class ItemContainer(OnLoad):
 		"""
 
 		# Get the type from the item
-		itype = item.ob_type()
+		itype = item.internal_name()
 		
 		shouldDiscard = False
 
@@ -239,12 +150,10 @@ class ItemContainer(OnLoad):
 		else:
 			# If we're not discarding the new item, it should be added
 			# to the container, and its ownership updated.
-			self._item_ids.add(item._id)
-			self._item_types[itype].add(item._id)
-			self._changes.add(item._id)
 			item.set_owner(self.parent)
-			DBLogger.log_item_event(DBLogger.ITEM_ADD, item._id,
-									container=self)
+			self.items.setdefault(itype, PersistentList()).append(item)
+#			DBLogger.log_item_event(DBLogger.ITEM_ADD, item._id,
+#									container=self)
 
 	def add_items(self, ilist):
 		"""Add a list of items to the container.
@@ -255,7 +164,7 @@ class ItemContainer(OnLoad):
 		for i in ilist:
 			self.add(i)
 
-	def take(self, itemclass, count=1):
+	def take(self, itype, count=1):
 		"""Remove items arbitrarily from the container.
 
 		Parameters:
@@ -267,7 +176,6 @@ class ItemContainer(OnLoad):
 		WorInsufficientItemsError if there are not enough items in
 		this inventory container to fulfil the request.
 		"""
-		itype = itemclass.__name__
 		# Try splitting the item
 		first_item = self.__get_first_item(itype)
 		split_item = first_item.split(count)
@@ -276,18 +184,16 @@ class ItemContainer(OnLoad):
 		if split_item is None:
 			# We can't split, so we've got a singular item class: grab
 			# the first count items from the list and remove them
-			rv = set()
-			for i in self._item_types[itype].copy():
-				item = Item.load(i)
-				rv.add(item)
-				self.remove(item)
-				if len(rv) >= count:
-					break
+			items = self.items[itype]
+			rv, remaining_items = items[:count] + items[count:]
 
 			if len(rv) < count:
 				raise Util.WorInsufficientItemsException(
 					"Attempted to remove %d items of type %s, but only %d were found"
 					% (count, itemclass, len(rv)))
+
+			self.items[itype] = items
+			
 		else:
 			# We successfully split, so return the result
 			rv = set([split_item,])
@@ -297,12 +203,12 @@ class ItemContainer(OnLoad):
 	def remove(self, item):
 		"""Removes the given item from the container, and returns it.
 		"""
-		self._item_types[item.ob_type()].remove(item._id)
-		self._changes.add(item._id)
-		self._item_ids.remove(item._id)
+		itype = item.internal_name()
+		items = self.items[itype]
+		items.remove(item)
 		item.set_owner(None)
-		DBLogger.log_item_event(DBLogger.ITEM_REMOVE, item._id,
-								container=self)
+#		DBLogger.log_item_event(DBLogger.ITEM_REMOVE, item._id,
+#								container=self)
 		return item
 	
 	def split(self, item, num_items):
@@ -339,15 +245,7 @@ class ItemContainer(OnLoad):
 		Returns: an arbitrary item of that type from the container, or
 		None if no item of that type is present
 		"""
-		items = self._item_types.setdefault(itype, set())
-		try:
-			item_id = iter(items).next()
-		except StopIteration:
-			item = None
-		else:
-			item = Item.load(item_id)
-
-		return item
+		return self.items.get(itype, None)
 
 	def transfer_to(self, item, destination, count=1):
 		"""Transfer an item from this container to another.
@@ -377,3 +275,7 @@ class ItemContainer(OnLoad):
 		"""
 		ilist = self.take(itemclass, count)
 		destination.add_items(ilist)
+
+
+class Inventory(ItemContainer):
+	"""Inventory for an Actor; possibly does something with ownership?"""

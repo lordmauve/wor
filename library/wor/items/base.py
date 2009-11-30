@@ -3,27 +3,24 @@
 import os
 import os.path
 
-from SerObject import SerObject
+from persistent import Persistent
+
 import Util
 import BaseConfig
 from Plan import Plan, makeable_plans
 from ActionMake import ActionMake
 import Context
-import DBLogger
 
 # We must do this to run the code that defines all possible plans.
 # Can't be done in Plan, for circular reference reasons.
 import Plans
 
 
-class Item(SerObject):
+class Item(Persistent):
 	"""An item. By default, all items are unique. Some items are
 	'aggregate' and represent a block of otherwise identical things --
 	e.g. coins -- and can be combined and split (see AggregateItem).
 	"""
-	_table = "item"
-	cache_by_id = {}
-	class_cache_by_name = {}
 	group = "General"
 
 	# Default failure function is a mean life of 300, and equal
@@ -55,81 +52,63 @@ class Item(SerObject):
 				return name + "s"
 		return name
 
+	@classmethod
+	def internal_name(cls):
+		return cls.__module__.replace('wor.items.', '') + '.' + cls.__name__
+
+	def __repr__(self):
+		return '<Item: %s>' % self
+
+	def __str__(self):
+		return unicode(self).encode('utf8')
+
 	def __unicode__(self):
+		if self.count > 1:
+			return '%d %s' % (self.count, self.name_for(count=item.count))
 		return self.name_for()
 
 	@classmethod
 	def get_class(cls, name):
 		"""Obtain and cache an item class object by name"""
-		if name in cls.class_cache_by_name:
-			return cls.class_cache_by_name[name]
-		# Load the containing module
-		mod = __import__("Items."+name, globals(), locals(), [name], -1)
-		# Cache the class from that module -- assumes all classes have
-		# the exact same name as their containing module
-		cls.class_cache_by_name[name] = mod.__dict__[name]
-		return cls.class_cache_by_name[name]
-
-	@staticmethod
-	def list_all_classes():
-		"""Obtain a list of all item class names"""
-		import Items
-		from AggregateItem import AggregateItem
-		items = []
-		for k in dir(Items):
-			v = getattr(Items, k)
-			if (isinstance(v, type)
-				and issubclass(v, Item)
-				and v is not Item
-				and v is not AggregateItem):
-				items.append(v)
-
-		return items
-
-	def __init__(self):
-		SerObject.__init__(self)
-		DBLogger.log_item_event(DBLogger.ITEM_CREATE, self._id)
-
-	####
-	# Add the indices for saving this object
-	def _save_indices(self):
-		idxs = super(Item, self)._save_indices()
-		idxs['type'] = self.ob_type()
-		return idxs
+		items = Item.list_all_classes()
+		return items[name]
 
 	@classmethod
-	def flush_cache(cls):
-		cls.cache_by_id = {}
-		cls.class_cache_by_name = {}
-	
+	def list_all_classes(cls):
+		"""Obtain a list of all item class names"""
+		from wor import items
+		try:
+			return cls._item_cache
+		except AttributeError:
+			item_map = {}
+			for k, v in items.__dict__.items():
+				if (isinstance(v, type)
+					and issubclass(v, Item)
+					and v is not Item
+					and v is not AggregateItem):
+					item_map[v.internal_name()] = v
+			cls._item_cache = item_map
+			return item_map
+
+#	def __init__(self):
+#		DBLogger.log_item_event(DBLogger.ITEM_CREATE, self._id)
+
 	def owner(self):
- 		"""The notional owner of the item. For quantum items with
+		"""The notional owner of the item. For quantum items with
  		multiple owners, this will be the owner that last touched it.
+
  		"""
- 		if self._owner is None and self.owner_type != "":
-			# Get the module for the right type of object, loading the class
-			mod = __import__(self.owner_type, globals(), locals(), [self.owner_type], -1)
-			# Get a handle on the class itself
-			cls = mod.__dict__[self.owner_type]
-			# Use the class's load() method to load the owner object
-			self._owner = cls.load(self.owner_id)
 		return self._owner
 
 	def set_owner(self, obj):
 		self._owner = obj
-		if obj is not None:
-			self.owner_type = obj.__class__.__name__
-			self.owner_id = obj._id
-		else:
-			self.owner_type = ""
-			self.owner_id = -1
 
 	def power(self, name):
 		return getattr(self, name, 0)
 
 	def destroy(self):
 		"""Destroy this item, recycling it if necessary"""
-		DBLogger.log_item_event(DBLogger.ITEM_DESTROY, self._id)
+#		DBLogger.log_item_event(DBLogger.ITEM_DESTROY, self._id)
 		self.demolish()
 
 	def try_break(self):
@@ -199,3 +178,70 @@ class Item(SerObject):
 	def miss_actor(self, user, victim):
 		"""What to do if we missed the victim"""
 		pass
+
+
+class AggregateItem(Item):
+	"""An item containing a number of identical objects.  Note that it 
+	   contains the underlying stuff in a conceptual sense only - rather 
+	   than containing 500 Gold objects, for example, it's simply a Gold 
+	   object with a 500 count"""
+	aggregate = True
+
+	def __init__(self, count=1):
+		"""Create a new AggregateItem with the given unit count."""
+		super(AggregateItem, self).__init__()
+		self.count = count
+
+	def merge(self, new_item):
+		"""Merge the given item with this item, if possible.  Return 
+		  True if the new item should be discarded, False otherwise"""
+
+		# Make sure we're merging an object of the proper type
+		#
+		# TODO: Is this good, or do we need to support subclasses as 
+		#       well?
+		if self.ob_type() == new_item.ob_type():
+			oq = self.count
+			self.count += int(new_item.count)
+#			DBLogger.log_item_event(DBLogger.ITEM_MERGE,
+#									self._id,
+#									other_item=new_item._id,
+#									orig_quantity=oq,
+#									new_quantity=self.count)
+			return True
+		else:
+			raise Util.WorError("Incompatible types (%s/%s) cannot be merged"
+								% (self.ob_type(), new_item.ob_type()))
+		return False
+
+	def split(self, num_items):
+		"""Splits the given number of items from this item.  If this is 
+		   an aggregate, the split instance should be returned.  If 
+		   not, None will be returned"""
+
+		# Make sure we don't split more objects than we have.  If 
+		# someone comes up with an aggregate that can be split into 
+		# more instances than you originally had, then refactor this 
+		# code.  I'll be in the corner trying to keep my head from 
+		# exploding
+		if self.count < num_items:
+			raise Util.WorInsufficientItemsException(
+				"Cannot split %d items from an aggregate with only %d items"
+				% (num_items, self.count))
+		else:
+			# Clone this object
+			new_obj = self.__class__(num_items)
+
+			# And adjust the counts accordingly
+			oq = self.count
+			self.count -= num_items
+
+			# Log the split
+#			DBLogger.log_item_event(DBLogger.ITEM_SPLIT,
+#									self._id,
+#									other_item=new_obj._id,
+#									orig_quantity=oq,
+#									new_quantity=self.count)
+			return new_obj
+
+		return None
