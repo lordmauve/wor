@@ -19,7 +19,6 @@ from wor.items.base import Item
 from wor.world.location import Location
 
 from Context import Context
-import GameUtil
 import Util
 
 

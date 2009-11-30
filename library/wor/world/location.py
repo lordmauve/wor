@@ -1,3 +1,5 @@
+import functools
+
 from persistent import Persistent
 
 from Action import *
@@ -12,7 +14,7 @@ from wor.jsonutil import JSONSerialisable
 
 class ActionMove(Action):
 	def __init__(self, uid, actor, direction, dest, cost=Cost(ap=1)):
-		super(MoveAction, self).__init__(uid, actor, caption='Move %s' % direction.upper(), cost=cost, group='move')
+		super(ActionMove, self).__init__(uid, actor, caption='Move %s' % direction.upper(), cost=cost, group='move')
 		self.direction = direction
 		self.dest = dest
 
@@ -245,7 +247,7 @@ class Location(Persistent, JSONSerialisable):
 				# Create the action function
 				a = no_d(functools.partial(player.move_to, l.pos))
 				# Create the action itself
-				acts[uid] = ActionMove(uid, player, n.upper(),
+				acts[uid] = ActionMove(uid, player, n.upper(), l.pos,
 									   cost=Cost(ap=cost))
 
 	# Who's here?
