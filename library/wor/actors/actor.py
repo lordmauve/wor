@@ -147,7 +147,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 		if not hasattr(self, 'messages'):
 			return []
 
-		self.messages.get_messages(since)
+		return list(self.messages.get_messages(since))
 
 	####
 	# Actions infrastructure: Things the player can do to this actor
