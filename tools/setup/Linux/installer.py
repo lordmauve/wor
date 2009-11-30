@@ -59,7 +59,10 @@ def create_database(db, variables, suffix=""):
 						decision = (response[0] in ('y', 'Y'))
 					else:
 						print "Please respond Y or N"
-				cur.execute("COMMIT TRANSACTION; DROP DATABASE %(DB_NAME)s%(db_suffix)s" % variables)
+				if decision:
+					cur.execute("COMMIT TRANSACTION; DROP DATABASE %(DB_NAME)s%(db_suffix)s" % variables)
+				else:
+					success = True
 			else:
 				raise ex
 		else:
@@ -113,7 +116,7 @@ def postgres(variables):
 				if response[0] not in ('Y', 'y', 'N', 'n', '\n'):
 					print "Please respond Y or N"
 				else:
-					decision = (response in ('Y', 'y'))
+					decision = (response[0] in ('Y', 'y'))
 				
 			if decision:
 				sql = "ALTER ROLE %(DB_USER)s UNENCRYPTED PASSWORD '%(DB_PASS)s'" % variables
