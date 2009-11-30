@@ -18,6 +18,7 @@ urlpatterns = patterns('api_views',
 	(r'^api/item/(\d+)/desc', 'item'),
 
 	(r'^', include('ui.urls')),
+	(r'^editor/', include('editor.urls')),
 )
 
 urlpatterns += patterns('', 
