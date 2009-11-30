@@ -46,14 +46,16 @@ class Location(Persistent, JSONSerialisable):
 	pos = None
 	region = None
 
-	default_title = 'Void'
-
 	def __init__(self, title=None, description=''):
 		self.title = title
 		self.description = ''
 
 	def get_title(self):
-		return self.title or self.default_title
+		return self.title or self.__class__.__name__
+
+	@classmethod
+	def class_name(cls):
+		return cls.__name__
 
 	@property
 	def id(self):	
@@ -67,6 +69,32 @@ class Location(Persistent, JSONSerialisable):
 			return db.world()[pos]
 		except KeyError:
 			return NullLocation(pos)
+
+	@classmethod
+	def internal_name(cls):
+		return cls.__module__.replace('wor.locations.', '') + '.' + cls.__name__
+
+	@classmethod
+	def get_class(cls, name):
+		"""Obtain and cache an item class object by name"""
+		locs = Location.list_all_classes()
+		return locs[name]
+
+	@classmethod
+	def list_all_classes(cls):
+		"""Obtain a list of all Location class names"""
+		from wor import locations
+		try:
+			return cls._loc_cache
+		except AttributeError:
+			loc_map = {}
+			for k, v in locations.__dict__.items():
+				if (isinstance(v, type)
+					and issubclass(v, Location)
+					and v is not Location):
+					loc_map[v.internal_name()] = v
+			cls._loc_cache = loc_map
+			return loc_map
 
 	context_fields = ['title', 'pos', 'actors', 'description']
 

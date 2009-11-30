@@ -17,7 +17,7 @@
 		<div id="map-layer">
 			{% for wx, wy, x, y, z, loc in locations %}
 				{% if loc %}
-				<div class="loc" style="left: {{x}}px; top: {{y}}px; z-index: {{z}}">
+				<div class="loc {{loc.class_name}}" style="left: {{x}}px; top: {{y}}px; z-index: {{z}}; background-image: url('/tiles/{{loc.class_name|lower}}.png')">
 					<a href="/editor/{{region_id}}/{{wx}},{{wy}}/" target="panel">{{loc.get_title}}</a>
 				</div>
 				{% else %}
