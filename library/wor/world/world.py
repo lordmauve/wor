@@ -100,8 +100,11 @@ class World(Persistent):
 		except KeyError:
 			raise InvalidActor("No such Actor with id '%s'" % id)
 
+	def is_player_name_taken(self, name):
+		return name.lower() in self.players_by_name
+
 	def get_player(self, name):
-		return self.players_by_name[name]
+		return self.players_by_name[name.lower()]
 
 	def __getitem__(self, pos):
 		return self.get_region(pos.layer)[pos.x, pos.y]
@@ -139,7 +142,7 @@ class World(Persistent):
 				actor.id = 1
 			self.actors[actor.id] = actor
 			if isinstance(actor, Player):
-				self.players_by_name[actor.name] = actor
+				self.players_by_name[actor.name.lower()] = actor
 		actor.position = dest	# triggers move_actor to handle spawning into a region
 
 	def remove_actor(self, actor):

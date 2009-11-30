@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Create an account{% endblock %}
+
+{% block content %}
+	<form action="" method="post">
+		{{form.as_p}}
+
+		<h3>Spam prevention</h3>
+		<p class="flow">We ask that you verify you are a real person by copying the words in this image into the box below.</p>
+
+		<script type="text/javascript"
+		   src="http://api.recaptcha.net/challenge?k={{RECAPTCHA_PUBLIC_KEY}}">
+		</script>
+
+		<noscript>
+		   <iframe src="http://api.recaptcha.net/noscript?k={{RECAPTCHA_PUBLIC_KEY}}"
+		       height="300" width="500" frameborder="0"></iframe><br>
+		   <textarea name="recaptcha_challenge_field" rows="3" cols="40">
+		   </textarea>
+		   <input type="hidden" name="recaptcha_response_field" 
+		       value="manual_challenge">
+		</noscript>
+
+		<input type="submit" value="Create Account">
+	</form>
+{% endblock %}

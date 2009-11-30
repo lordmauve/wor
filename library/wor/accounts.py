@@ -79,7 +79,7 @@ class AccountManager(Persistent):
 		If no match, raises AuthenticationFailure."""
 
 		try:
-			account = self.accounts[username]
+			account = self.get_account(username)
 		except KeyError:
 			account = None
 
@@ -90,10 +90,10 @@ class AccountManager(Persistent):
 		return account
 
 	def is_username_taken(self, username):
-		return username in self.accounts
+		return username.lower() in self.accounts
 
 	def get_account(self, username):
-		return self.accounts[username]
+		return self.accounts[username.lower()]
 
 	def create_account(self, username, password, realname=None, email=None):
 		"""Create an account in this manager and returns the new account.
@@ -104,7 +104,7 @@ class AccountManager(Persistent):
 		if self.is_username_taken(username):
 			raise DuplicateUsername("The username '%s' is already taken." % username)
 		account = Account(username, password, realname, email)
-		self.accounts[username] = account
+		self.accounts[username.lower()] = account
 		return account
 
 	def generate_password(self, chars=12):

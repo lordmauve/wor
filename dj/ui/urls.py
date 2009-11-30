@@ -1,8 +1,9 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('ui.views',
-	(r'^login$', 'login'),
+	(r'^$', 'login'),
 	(r'^game$', 'game'),
+	url(r'^register$', 'register', name='register'),
 )
 
 urlpatterns += patterns('', 
