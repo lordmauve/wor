@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Editing {{region}}{% endblock %}
+
+{% block in_head %}
+	<link rel="stylesheet" type="text/css" href="/css/editor.css">
+{% endblock %}
+
+{% block content %}
+	<h2>Editing {{region}}</h2>
+	
+	<p><a href="/editor/">Edit a different region</a></p>
+	<iframe id="panel" name="panel">
+	</iframe>
+
+	<div id="map">
+		<div id="map-layer">
+			{% for wx, wy, x, y, z, loc in locations %}
+				{% if loc %}
+				<div class="loc" style="left: {{x}}px; top: {{y}}px; z-index: {{z}}">
+					<a href="/editor/{{region_id}}/{{wx}},{{wy}}/" target="panel">{{loc.get_title}}</a>
+				</div>
+				{% else %}
+				<div class="emptyloc" style="left: {{x}}px; top: {{y}}px; z-index: {{z}}">
+					<a href="/editor/{{region_id}}/new/{{wx}},{{wy}}/" target="panel"><img src="/icons/add.png" alt="+"></a>
+				</div>
+				{% endif %}
+			{% endfor %}
+		</div>
+	</div>
+{% endblock %}
