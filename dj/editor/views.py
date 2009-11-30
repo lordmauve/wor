@@ -14,8 +14,12 @@ def regions(request):
 
 
 def screen_pos(wx, wy):
+	# spaced out
 	tw = 117
 	th = 73
+	# packed tight
+#	tw = 100
+#	th = 64
 	sx = int((wx + 0.5 * wy) * tw + 0.5)
 	sy = -int((wy * 0.5 * 3 ** 0.5) * th + 0.5)
 	z = 10000 - wy
@@ -54,15 +58,27 @@ def edit_location(request, region_id, x, y):
 	if request.method == 'POST':
 		form = LocationForm(request.POST)
 		if form.is_valid():
-			location.title = form.cleaned_data['title']
-			location.description = form.cleaned_data['description']
+			if form.cleaned_data['type'] != location.internal_name():
+				ltype = Location.get_class(form.cleaned_data['type'])
+				
+				l = ltype(
+					title=form.cleaned_data['title'],
+					description=form.cleaned_data['description']
+				)
+				#TODO: copy any other data
+				location.region.set_location((int(x), int(y)), l)
+			else:
+				location.title = form.cleaned_data['title']
+				location.description = form.cleaned_data['description']
 			# TODO: commit message
 			db.commit()
-			return HttpResponseRedirect('/editor/%s/' % region_id)
+			sx, sy, sz = screen_pos(location.pos.x, location.pos.y)
+			return HttpResponseRedirect('/editor/%s/' % region_id + '#%d,%d' % (sx, sy))
 	else:
 		form = LocationForm(initial={
 			'title': location.title,
 			'description': location.description,
+			'type': location.internal_name(),
 		})
 
 	return render_to_response('editor/location.html', {'location': location, 'form': form})
@@ -75,14 +91,16 @@ def new_location(request, region_id, x, y):
 	if request.method == 'POST':
 		form = LocationForm(request.POST)
 		if form.is_valid():
-			l = Location(
+			ltype = Location.get_class(form.cleaned_data['type'])
+			l = ltype(
 				title=form.cleaned_data['title'],
 				description=form.cleaned_data['description']
 			)
 			region.set_location(coords, l)
 			# TODO: commit message
 			db.commit()
-			return HttpResponseRedirect('/editor/%s/' % region_id)
+			sx, sy, sz = screen_pos(*coords)
+			return HttpResponseRedirect('/editor/%s/' % region_id + '#%d,%d' % (sx, sy))
 	else:
 		form = LocationForm()
 
