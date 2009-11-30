@@ -1,14 +1,14 @@
 ////////////
 // Main function: Called to initiate loading the page contents
 
-var api = "http://" + document.domain + "/api";
+var api = "/api";
 
 function load_game()
 {
 	update_player_details();
 	update_player_actions();
 	update_map();
-	update_messages();
+	MessagePane.update();
 }
 
 ////////////
@@ -40,6 +40,31 @@ function basic_ajax_get(url, callback)
 	req.open("GET", api + url, true, account, password);
 	req.setRequestHeader("X-WoR-Actor", actid);
 	req.send("");
+}
+
+function get_json(url, callback, postdata)
+{
+	var req = get_ajax_object();
+	var actid = document.getElementById("actorid").value;
+
+	req.onreadystatechange = function () {
+		if (req.readyState == 4 && req.status == 200) {
+			if (typeof JSON !== 'undefined')
+				callback(JSON.parse(req.responseText));
+			else
+				callback(eval('(' + req.responseText + ')'));
+		}
+	};
+
+	if (postdata) {
+		req.open("POST", api + url, true);
+		req.setRequestHeader("X-WoR-Actor", actid);
+		req.send(postdata);
+	} else {
+		req.open("GET", api + url, true);
+		req.setRequestHeader("X-WoR-Actor", actid);
+		req.send();
+	}
 }
 
 function get_side_panel(panel_id)
@@ -137,6 +162,49 @@ function parse_input_table(str, cols)
 	}
 	return result;
 }
+
+function ordinal(num) {
+	if (num % 10 == 1 && num % 100 != 11)
+		return num + 'st';
+	else if (num % 10 == 2 && num % 100 != 12)
+		return num + 'nd';
+	else if (num % 10 == 3 && num % 100 != 13)
+		return num + 'rd';
+	return num + 'th';
+}
+
+String.prototype.padLeft = function (len, char) {
+	var s = this;
+	while (s.length < len)
+		s = char + s;
+	return s;
+};
+
+MONTH_NAMES = ['January', 'Februrary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+Date.prototype.toLocaleDateString = function () {
+	var month_names = MONTH_NAMES;
+	return ordinal(this.getDate()) + ' ' + month_names[this.getMonth()] + ' ' + this.getFullYear();
+};
+
+Date.prototype.toLocaleTimeString = function () {
+	var h = this.getHours();
+	if (h >= 12)
+		var suffix = 'pm';
+	else
+		var suffix = 'am';
+
+	if (h > 12)
+		h -= 12;
+	else if (h == 0)
+		h = 12;
+
+	return h + ':' + new String(this.getMinutes()).padLeft(2, '0') + suffix;
+};
+
+Date.prototype.toLocaleString = function () {
+	return this.toLocaleDateString() + ' ' + this.toLocaleTimeString();
+};
 
 function lpad(str, padding, len)
 {
