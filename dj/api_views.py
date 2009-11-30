@@ -13,12 +13,10 @@ import codecs
 import datetime
 
 from django.http import HttpResponse, Http404, HttpResponseNotAllowed
-from Database import DB, retry_process
+from wor.db import db
 
-from Item import Item
-from Player import Player
-from Actor import Actor
-from Location import Location
+from wor.items.base import Item
+from wor.world.location import Location
 
 from Context import Context
 import GameUtil
@@ -35,47 +33,38 @@ class JSONResponse(HttpResponse):
 account = 'mauve'
 
 def actors(request):
-	cur = DB.cursor()
-	cur.execute("SELECT actor.id, actor.name"
-				+ " FROM actor, account_actor, account"
-				+ " WHERE actor.id = account_actor.actor_id"
-				+ "   AND account_actor.account_id = account.account_id"
-				+ "   AND account.username = %(username)s",
-				{ 'username': account })
-
-	acts = {}
-	row = cur.fetchone()
-	while row != None:
-		acts[row[0]] = row[1]
-		row = cur.fetchone()
+	accounts = db.accounts()
+	acts = []
+	for player in accounts.get_account(account).get_players():
+		acts[player.id] = player.name
 	return JSONResponse(acts)
 
 
 def item_names(request, name=None):
 	if name is None:
-		return JSONResponse(dict((icls.__name__, icls.name_for()) for icls in Item.list_all_classes()))
+		return JSONResponse(dict((internal, icls.name_for()) for internal, icls in Item.list_all_classes().items()))
 	else:
-		return JSONResponse({name: Item.get_class(name).name_for()})
+		return JSONResponse(Item.get_class(name).name_for())
 
 
 def get_actor(request):
 	"""Retrieve the current actor from the request"""
-	pid = int(request.META['HTTP_X_WOR_ACTOR'])
-	player = Player.load(pid)
-	if player is None:
-		raise KeyError('Invalid player id')
+	try:
+		pid = int(request.META['HTTP_X_WOR_ACTOR'])
+		player = db.world().get_actor(pid)
+	except KeyError:
+		player = db.accounts().get_account(request.session['account']).get_players()[0]
 	Context.context = player
 	return player
 
 
 def actor_detail(request, op, target=None):
 	player = get_actor(request)
-	Context.context = player
+
 	if target is None: 
 		actor = player
 	else:
-		actor = Actor.load(int(target))
-
+		actor = db.world().get_actor(pid)
 
 	ctx = Context(player)
 	if op == 'desc':
@@ -88,11 +77,10 @@ def actor_detail(request, op, target=None):
 
 def actor_log(request, target=None):
 	player = get_actor(request)
-	Context.context = player
 	if target is None: 
 		actor = player
 	else:
-		actor = Actor.load(int(target))
+		actor = db.world().get_actor(pid)
 
 	since = 0 #request.META.get('X-WoR-Messages-Since', getattr(actor, 'last_action', 0))
 
@@ -111,15 +99,10 @@ def actions(request):
 			player.perform_action(request.POST['action'], request.POST)
 
 		# Save any game state that might have changed
-		GameUtil.save()
+		db.commit()
 		return JSONResponse('OK')
 	else:
 		return HttpNotAllowed(['GET', 'POST'])
-
-
-def neighbourhood(request):
-	player = get_actor(request)
-	target = player.loc()._id
 
 
 def location(request, op, location_id=None):

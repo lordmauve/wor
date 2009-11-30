@@ -16,6 +16,8 @@ urlpatterns = patterns('api_views',
 	(r'^api/location/neighbourhood', 'neighbourhood'),
 
 	(r'^api/item/(\d+)/desc', 'item'),
+
+	(r'^', include('ui.urls')),
 )
 
 urlpatterns += patterns('', 

@@ -66,7 +66,16 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'dj.urls'
 
-TEMPLATE_DIRS = []
-INSTALLED_APPS = []
+import os.path
+def relpath(p):
+	return os.path.abspath(os.path.join(os.path.dirname(__file__), p))
+
+TEMPLATE_DIRS = [
+	relpath('templates'),	
+]
+
+INSTALLED_APPS = [
+	'dj.ui',
+]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
