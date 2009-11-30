@@ -47,7 +47,7 @@ class Context(object):
 		if context == actor:
 			return OWNER
 
-		if context.loc()._id == actor.loc()._id:
+		if context.loc() is actor.loc():
 			return STRANGER_VISIBLE
 
 		return STRANGER_INVISIBLE
