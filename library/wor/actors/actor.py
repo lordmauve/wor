@@ -7,11 +7,8 @@ from persistent import Persistent
 from persistent.list import PersistentList
 from BTrees.IOBTree import IOBTree
 
-import Util
 import Context
-from Item import Item
 from Logger import log
-from Location import Location
 from Action import Action
 from Cost import Cost
 
@@ -75,9 +72,11 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 
 	def held_item(self):
 		"""Return the item(s) currently held by the actor"""
-		if getattr(self, 'holding', None) is None:
-			return None
-		return Item.load(self.holding)
+		return getattr(self, 'holding', None)
+
+	def set_held_item(self, item):
+		"""Set the held item"""
+		self.holding = item
 
 	def change_item_action(self, data):
 		if 'id' not in data:
