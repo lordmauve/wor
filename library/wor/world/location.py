@@ -2,7 +2,6 @@ import functools
 
 from persistent import Persistent
 
-from Action import *
 from Cost import Cost
 from Util import no_d
 from Logger import log
@@ -10,18 +9,7 @@ import Context
 import types
 
 from wor.jsonutil import JSONSerialisable
-
-
-class ActionMove(Action):
-	def __init__(self, actor, direction, cost=Cost(ap=1)):
-		super(ActionMove, self).__init__('move-' + direction, actor, caption='Move %s' % direction.upper(), cost=cost, group='move')
-		self.direction = direction
-
-	def action(self, data):
-		dest = getattr(self.actor.loc(), self.direction)()
-		
-		self.actor.message('You move %s' % self.direction)
-		self.actor.move_to(dest)
+from wor.actions.movement import ActionMove
 
 
 class NullLocation(object):
@@ -235,20 +223,22 @@ class Location(Persistent, JSONSerialisable):
 	local_directions_name = [ 'r', 'ur', 'ul', 'l', 'll', 'lr' ]
 
 	# Actions
-	def external_actions(self, acts, player, name=None):
+	def external_actions(self, player):
 		"""Add to acts a list of actions that we could perform"""
+
+		actions = []
 		for i in range(0, 6):
 			# FIXME: This is awkward -- why are both arrays needed?
 			n = self.local_directions_name[i]
 			if self.could_go(player, n):
 				l = self.local_directions[i](self)
-				uid = Action.make_id(self, "move_" + n)
 				cost = self.move_cost(player, l)
 
 				# Create the action function
 				a = no_d(functools.partial(player.move_to, l.pos))
 				# Create the action itself
-				acts[uid] = ActionMove(player, n.upper(), cost=Cost(ap=cost))
+				actions.append(ActionMove(player, n.upper(), cost=Cost(ap=cost)))
+		return actions
 
 	# Who's here?
 	def actors(self):

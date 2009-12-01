@@ -1,12 +1,11 @@
-####
-# ActionMake: Subclass of an Action object for making stuff
-
-from Action import Action
+from base import Action
 from Cost import Cost
 from Logger import log
 
 
 class ActionMake(Action):
+	"""An action for making stuff according to a plan."""
+
 	def __init__(self, player, item, plan):
 		uid = Action.make_id(item, plan.name)
 		super(ActionMake, self).__init__(

@@ -7,8 +7,6 @@ from wor.world.location import Location
 from wor.items.container import Inventory
 from wor.items.martial import Punch
 
-from Action import Action
-from Cost import Cost
 from SimpleTimedCounter import SimpleTimedCounter
 from Position import Position
 
@@ -17,9 +15,7 @@ import Util
 from Context import Context
 
 
-class ActionChangeItem(Action):
-	def action(self, data):
-		self.actor.change_item_action(data)
+from wor.actions.inventory import ActionChangeItem
 
 
 class DuplicatePlayerName(Exception):
@@ -80,76 +76,50 @@ class Player(Actor):
 			pos = pos.pos
 		self.position = pos
 
-	####
-	# Actions
-	def get_actions(self, fuid=None):
-		"""Create and return a hash of all possible actions this
-		player might perform"""
-		acts = {}
-		if self.ap <= 0:
-			# No actions are possible at negative AP
-			return acts
-		
-		if fuid is None:
-			action_id = None
-			name = None
-		else:
-			action_id = fuid.split('.')
-			action_id[1] = int(action_id[1])
-			name = action_id[2]
-		
-		# What can we do of ourselves?
-		# We could say "Boo!" (debug action)
-		# FIXME: Remove this
-		if Util.match_id(action_id, self, "sayboo"):
-			uid = Action.make_id(self, "sayboo")
-			acts[uid] = Action(uid, self, caption="Say Boo",
-							   action=lambda d: self.say_boo(),
-							   group="player")
+	def get_actions(self):
+		"""Create and return a hash of all possible actions this player might perform.
 
-		# We can change the held item.
-		if Util.match_id(action_id, self, "changeitem"):
-			uid = Action.make_id(self, "changeitem")
-			acts[uid] = ActionChangeItem(
-				uid, self,
-				caption="Change",
-				cost=Cost(),
-				group="inventory",
-				action=lambda d: self.change_item_action(d),
-				parameters=['id']
-			)
+		"""
+		# No actions are possible at negative AP
+		if self.ap <= 0:
+			return {}
+
+		actions = [
+			ActionChangeItem(self) # We can change the held item
+		]
 
 		# What can we do to the item we're holding?
 		item = self.held_item()
-		# Match any action at this stage
-		if item is not None and Util.match_id(action_id, item):
-			item.external_actions(acts, self, name)
+		if item:
+			actions += item.external_actions(self)
 		
 		# What can we do to the items we're wearing?
 		# FIXME: Fill in here
 		
 		# What can we do to the current location?
 		loc = self.loc()
-		if Util.match_id(action_id, loc):
-			loc.external_actions(acts, self, name)
+		if loc:
+			actions += loc.external_actions(self)
 		
 		# What can we do to actors here?
 		for actor in self.loc().actors():
-			if Util.match_id(action_id, actor):
-				actor.external_actions(acts, self, name)
+			actions += actor.external_actions(self)
 
 		# What can we do to actors nearby?
 		# FIXME: Fill in here
 		
-		return acts
+		return actions
 
 	def perform_action(self, action_id, data):
 		"""Despatch an action to the target object. The action_id is a
 		full one."""
 		actions = self.get_actions()
-		if action_id in actions:
+		for a in actions:
+			if a.get_uid() != action_id:
+				continue
+			a.perform(data)
 			self.last_action = time.time()
-			actions[action_id].perform(data)
+			return
 		else:
 			raise KeyError("Unknown action")
 

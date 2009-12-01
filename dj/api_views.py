@@ -90,8 +90,8 @@ def actions(request):
 	player = get_actor(request)
 	if request.method == 'GET':
 		# List of actions
-		acts = player.get_actions()
-		data = [act.context_get(player.get_context()) for id, act in acts.iteritems()]
+		actions = player.get_actions()
+		data = [act.context_get(player.get_context()) for act in actions]
 		return JSONResponse(data)
 	elif request.method == 'POST':
 		if 'action' in request.POST:
