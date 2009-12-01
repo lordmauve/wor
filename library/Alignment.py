@@ -9,7 +9,7 @@ class Alignment:
 	METAL = 4
 	
 	def __init__(self, align):
-		self.align = align
+		self.align = int(align)
 
 	def beats(self, align):
 		return (self.align + 1) % 5 == align.align

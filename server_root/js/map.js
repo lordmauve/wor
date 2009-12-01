@@ -187,11 +187,11 @@ var Map = {
 
 		var html = '';
 
-		if (this.loc.actors) {
+		if (this.loc.actors.length) {
 			html += '<div class="playersection">';
 			for (var i = 0; i < this.loc.actors.length; i++) {
 				var a = this.loc.actors[i];
-				html += '<p>' + a.name + '</p>';
+				html += '<p><img src="/icons/icon-' + a.alignment.toLowerCase() + '.png" class="alignicon" /> ' + a.name + '</p>';
 			}
 			html += '</div>';
 		}

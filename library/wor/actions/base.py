@@ -31,7 +31,10 @@ class Action(object):
 		ret['uid'] = self.get_uid()
 		ret['caption'] = self.get_caption()
 		ret['group'] = self.group
-		ret['parameters'] = self.get_parameters()
+
+		params = self.get_parameters()
+		if params:
+			ret['parameters'] = params
 
 		return ret
 

@@ -10,6 +10,7 @@ from wor.items.martial import Punch
 from SimpleTimedCounter import SimpleTimedCounter
 from Position import Position
 
+from Alignment import Alignment
 from Logger import log
 import Util
 from Context import Context
@@ -44,14 +45,14 @@ class Player(Actor):
 	def get_context(self):
 		return Context(self)
 
-	context_fields = ['name', 'id', 'hp', 'maxhp', 'position', 'align', 'is_zombie', 'ap_counter']
+	context_fields = ['name', 'id', 'hp', 'maxhp', 'is_zombie']
 
-	def context_get(self, context):
-		ret = super(Player, self).context_get(context)
-		auth = context.authz_actor(self)
-#		fields = ['is_zombie']
-
-		return ret
+	def context_extra(self, context):
+		return {
+			'ap': '%d/%d' % (self.ap_counter.value, self.ap_counter.maximum),
+			'hp': '%d/%d' % (self.hp, self.maxhp),
+			'alignment': Alignment(self.align).name()
+		}
 
 	def __ap_getter(self):
 		"""Action points"""
