@@ -7,9 +7,11 @@ function load_game()
 {
 	update_player_details();
 	update_player_actions();
-	update_map();
+	Map.update();
 	MessagePane.update();
 }
+
+Event.observe(document, 'dom:loaded', load_game);
 
 ////////////
 // Library functions
@@ -73,12 +75,11 @@ function get_side_panel(panel_id)
 	
     // FIXME: Add persistent client-side storage for user
 	// configuration of where panels should go.
-	var panel = document.getElementById(panel_id);
-	if(!panel)
+	var panel = $(panel_id);
+	if (!panel)
 	{
-		var new_panel = "<div id='" + panel_id + "' class='panel'></div>";
-		document.getElementById("left_panel").innerHTML += new_panel;
-		panel = document.getElementById(panel_id);
+		panel = new Element('div', {id: panel_id, 'class': 'panel'});
+		$('panel').insert(panel);
 	}
 	return panel;
 }

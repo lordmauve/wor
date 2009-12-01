@@ -1,0 +1,87 @@
+body {
+	font-family: 'Trebuchet MS', sans-serif;
+}
+
+#panel {
+	position: absolute;
+	left: 5px;
+	top: 5px;
+
+	width: 250px;
+}
+
+#map {
+	margin-left: 300px;
+	position: relative;
+}
+
+
+#map-bubble {
+	position: absolute;
+	z-index: 100000;
+
+	background-color: white;
+	border: solid black 1px;
+	padding: 5px;
+
+	width: 460px;
+	
+	-moz-border-radius: 6px;
+}
+
+#panel .panel h3,
+#map-bubble h3 {
+	margin: 0 3px 5px;
+	font-weight: normal;
+	font-size: 20px;
+	color: #444;
+}
+
+#scrollpane {
+	max-height: 300px;
+	overflow: auto;
+}
+
+#map-bubble #bubble-tail {
+	position: absolute;
+	bottom: -58px;
+	left: 216px;
+}
+
+#map-bubble .playersection {
+	border: solid #d5c480 1px;
+	background-color: #fff7d5;
+	padding: 5px 8px;
+
+	-moz-border-radius: 4px;
+}
+
+#map-bubble p {
+	margin: 0;
+}
+
+
+#panel .panel {
+	background-color: white;
+	border: solid black 1px;
+
+	color: #666;
+
+	-moz-border-radius: 6px;
+
+	margin-bottom: 8px;
+}
+
+#panel .panel p {
+	background: url('/img/panel-rule.png') no-repeat top center;
+	padding-top: 5px;
+	margin: 5px 0;
+}
+
+#panel .panel p span {
+	margin: 0 1em;
+}
+
+#panel .panel p img {
+	vertical-align: -2px;
+}

@@ -11,22 +11,14 @@ function update_player_details()
 
 function load_basic_player(player)
 {
-	// Set up the first panel: Basic player info
-	var top_panel = document.getElementById("top_panel");
-	// Success! Create a Player
-	// Despatch the request for the currently-held item ASAP
-	//update_held_item(player.holding);
+	var panel = get_side_panel('player');
+	
+	var html = "<h3>" + player.name + "</h3>";
 
-	panel = "<table><tr>";
-	panel += "<td class='header'><b>" + player.name + "</b></td>";
-	panel += "<td class='header'>AP " + player.ap + "/" + player.ap_counter.maximum + "</td>";
-	panel += "<td class='header'>HP " + player.hp + "/" + player.maxhp + "</td>";
-	panel += "</tr></table>";
+	html += "<p><span>" + player.ap_counter.value + "/" + player.ap_counter.maximum + " AP</span>";
+	html += "<span>" + player.hp + "/" + player.maxhp + ' <img src="/img/hp.png" alt="HP"></span></p>';
 
-	top_panel.innerHTML = panel;
-
-	// Error here: Server didn't return 200
-	//top_panel.innerHTML = "Error loading player details.\n<div>" + req.responseText + "</div>";
+	panel.update(html);
 }
 
 ////////////

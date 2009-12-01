@@ -98,7 +98,7 @@ class Location(Persistent, JSONSerialisable):
 			cls._loc_cache = loc_map
 			return loc_map
 
-	context_fields = ['title', 'pos', 'actors', 'description']
+	context_fields = ['title', 'pos', 'actors', 'description', 'class_name']
 
 	def context_get_(self, context):
 		"""Return a dictionary of properties of this object, given the
