@@ -9,6 +9,7 @@ import platform
 import stat
 
 import psycopg2
+import psycopg2.extensions
 
 def preconditions(args):
 	"""Test that the installation environment is correct, with the
@@ -42,8 +43,7 @@ def create_database(db, variables, suffix=""):
 		# PG doesn't allow CREATE DATABASE to be used inside a transaction
 		# Python API doesn't allow there not to be a transaction
 		# Hack, hack...
-		sql = ("COMMIT TRANSACTION; " \
-			   + "CREATE DATABASE %(DB_NAME)s%(db_suffix)s" \
+		sql = ("CREATE DATABASE %(DB_NAME)s%(db_suffix)s" \
 			   + " OWNER %(DB_USER)s" \
 			   + " ENCODING 'UTF8';\n") % variables
 		try:
@@ -60,7 +60,7 @@ def create_database(db, variables, suffix=""):
 					else:
 						print "Please respond Y or N"
 				if decision:
-					cur.execute("COMMIT TRANSACTION; DROP DATABASE %(DB_NAME)s%(db_suffix)s" % variables)
+					cur.execute("DROP DATABASE %(DB_NAME)s%(db_suffix)s" % variables)
 				else:
 					success = True
 			else:
@@ -102,6 +102,7 @@ def postgres(variables):
 
 	db = psycopg2.connect(database = "template1",
 						  user = "postgres")
+	db.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 	cur = db.cursor()
 	sql = "CREATE ROLE %(DB_USER)s WITH UNENCRYPTED PASSWORD '%(DB_PASS)s';\n" % variables
 	try:
