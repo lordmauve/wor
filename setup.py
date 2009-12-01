@@ -22,11 +22,18 @@ class ConfVar(object):
 		self.default = default
 		self.re = re.compile("@%s@" % self.key)
 
-	def ask(self, write_defaults=None):
-		rv = self.ask_impl()
+	def ask(self, write_defaults=None, standalone=False):
+		if standalone:
+			rv = self.ask_default()
+		else:
+			rv = self.ask_impl()
 		if write_defaults is not None:
 			write_defaults.write('"%s": """%s""",\n' % (self.key, str(self.value)))
 		return rv
+
+	def ask_default(self):
+		self.value = self.default
+		return True
 
 	def ask_impl(self):
 		"""Ask the user for input, return True if we pass validation.
@@ -65,6 +72,14 @@ class CVPassword(ConfVar):
 	def __init__(self, key, prompt):
 		ConfVar.__init__(self, key, prompt, '')
 
+	def ask_default(self):
+		while len(pwd) < 12:
+			c = os.urandom(1)
+			if c.isalnum() or c in "!$%^&*()_-=+:;{}[]'@#~|<>,.?/":
+				pwd += c
+		self.value = pwd
+		return True
+
 	def ask_impl(self):
 		self.value = getpass.getpass("%s:" % self.prompt)
 		return True
@@ -74,11 +89,19 @@ class CVBoolean(ConfVar):
 	def __init__(self, key, prompt, default=True):
 		ConfVar.__init__(self, key, prompt, default)
 
-	def ask_impl(self):
+	def _check_default(self):
 		if self.default == "True":
 			self.default = True
 		elif self.default == "False":
 			self.default = False
+
+	def ask_default(self):
+		self._check_default()
+		self.value = self.default
+		return True
+
+	def ask_impl(self):
+		self._check_default()
 		if self.default:
 			sys.stdout.write("%s (Y/n): " % (self.prompt,))
 		else:
@@ -149,6 +172,7 @@ variables = [
 	CVFixed('LANDSCAPE_SEED_1', random.randint(0, 1<<31)),
 	CVBlock('TERRAIN_SERVER', 'Set up terrain server', True),
 	CVBlock('USE_HTTPS', 'Configure authentication server with HTTPS', False),
+	CVBlock('ENABLE_AUTHZ', 'Require authorisation for REST API interaction', True),
 	]
 
 value_by_key = {}
