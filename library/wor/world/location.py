@@ -87,29 +87,21 @@ class Location(Persistent, JSONSerialisable):
 			cls._loc_cache = loc_map
 			return loc_map
 
-	context_fields = ['title', 'pos', 'actors', 'description', 'class_name']
+	context_fields = ['pos', 'actors', 'description', 'class_name']
 
-	def context_get_(self, context):
-		"""Return a dictionary of properties of this object, given the
-		current authZ context"""
-		ret = {'type': self.__class__.__name__,
-				'id': str(self.pos)}
+	def context_extra(self, context):
+		return {
+			'title': self.get_title()
+		}
 
+	def context_authz(self, context):
 		auth = context.authz_location(self)
+		if auth == Context.ADMIN:
+			return
+
 		if context.visible(auth):
-			ret['actors'] = self.actors()
-			ret['description'] = self.description
-
-			if auth == Context.ADMIN:
-				fields = Context.all_fields(self)
-			elif auth == Context.OWNER:
-				fields = ['name']
-			elif auth == Context.STRANGER_VISIBLE:
-				fields = ['name']
-		else:
-			fields = []
-
-		return self.build_context(ret, fields)
+			return ['title', 'actors', 'class_name', 'description']
+		return []
 
 	def power(self, name):
 		"""Return the value of the named power attribute"""

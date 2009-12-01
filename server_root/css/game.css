@@ -85,3 +85,7 @@ body {
 #panel .panel p img {
 	vertical-align: -2px;
 }
+
+.alignicon {
+	vertical-align: -7px;
+}

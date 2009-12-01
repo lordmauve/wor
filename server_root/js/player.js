@@ -13,10 +13,10 @@ function load_basic_player(player)
 {
 	var panel = get_side_panel('player');
 	
-	var html = "<h3>" + player.name + "</h3>";
+	var html = '<h3><img src="/icons/icon-' + player.alignment.toLowerCase() + '.png" class="alignicon" /> ' + player.name + "</h3>";
 
-	html += "<p><span>" + player.ap_counter.value + "/" + player.ap_counter.maximum + " AP</span>";
-	html += "<span>" + player.hp + "/" + player.maxhp + ' <img src="/img/hp.png" alt="HP"></span></p>';
+	html += "<p><span>" + player.ap + " AP</span>";
+	html += "<span>" + player.hp + ' <img src="/img/hp.png" alt="HP"></span></p>';
 
 	panel.update(html);
 }
