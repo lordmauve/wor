@@ -50,11 +50,15 @@ function get_json(url, callback, postdata)
 	var actid = document.getElementById("actorid").value;
 
 	req.onreadystatechange = function () {
-		if (req.readyState == 4 && req.status == 200) {
-			if (typeof JSON !== 'undefined')
-				callback(JSON.parse(req.responseText));
-			else
-				callback(eval('(' + req.responseText + ')'));
+		if (req.readyState == 4) {
+			if (req.status == 200) {
+				if (typeof JSON !== 'undefined')
+					callback(JSON.parse(req.responseText));
+				else
+					callback(eval('(' + req.responseText + ')'));
+			} else {
+				handle_api_error(req);
+			}
 		}
 	};
 
@@ -67,6 +71,12 @@ function get_json(url, callback, postdata)
 		req.setRequestHeader("X-WoR-Actor", actid);
 		req.send();
 	}
+}
+
+function handle_api_error(req) {
+	var container = new Element('div', {id: 'api-error'}).update('<h3>API Error</h3>');
+	container.insert(new Element('div', {id: 'response-wrapper'}).update(req.responseText));
+	document.body.insert(container);
 }
 
 function get_side_panel(panel_id)
@@ -84,85 +94,6 @@ function get_side_panel(panel_id)
 	return panel;
 }
 
-function parse_input(str)
-{
-	// Parse a standard key/value input stream, and return an array of the
-	// objects read
-	var result = new Array();
-	var accumulator = new Object();
-
-    var lines = str.split("\n");
-    for(var n in lines)
-    {
-		var line = lines[n];
-		var kv = new Array();
-		if(line[0] == ' ')
-		{
-			accumulator[kv[0]] += "\n" + line;
-		}
-		else if(line == '-')
-		{
-			result.push(accumulator);
-			accumulator = new Object();
-			hasdata = false;
-		}
-		else if(line == '')
-		{ }
-		else
-		{
-			kv = line.split(":", 2);
-			accumulator[kv[0]] = kv[1];
-			hasdata = true;
-		}
-    }
-
-    if(hasdata)
-	{
-		result.push(accumulator);
-	}
-	return result;
-}
-
-function parse_input_table(str, cols)
-{
-	var result = new Array();
-
-	var lines = str.split("\n");
-	var row = new Array();
-	for(var i in lines)
-	{
-		var line = lines[i];
-		if(line[0] == ' ')
-		{
-			row[cols-1] += line + "\n";
-		}
-		else if(line == '')
-		{ }
-		else
-		{
-			if(row.length > 0)
-				result.push(row);
-
-			// JavaScript's split() method isn't actually sane when
-			// given a limit. It splits the whole string, then returns
-			// only the first n elements, discarding the remainder.
-
-			// Therefore, we split an unlimited number of elements
-			// here, and then splice the ones on the end back
-			// together.
-
-			row = line.split(':');
-			last_elt = row.slice(cols-1).join(':');
-			row.splice(cols-1,row.length,last_elt);
-		}
-	}
-
-	if(row.length > 0)
-	{
-		result.push(row);
-	}
-	return result;
-}
 
 function ordinal(num) {
 	if (num % 10 == 1 && num % 100 != 11)
