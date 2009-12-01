@@ -2,7 +2,6 @@
 
 import math
 from Logger import log
-import Action
 
 plans = []
 
@@ -29,6 +28,9 @@ def visible_plans(who):
 		if p.precondition(who):
 			rv.append(p)
 	return rv
+
+class PlanFailed(Exception):
+	"""The plan could not be made for some reason"""
 
 class Plan(object):
 	def __init__(self, name, materials, makes, ap, ap10=None,
@@ -69,7 +71,7 @@ class Plan(object):
 		total = int(total)
 		# Test that we can actually make it
 		if not self.can_be_made(who, total):
-			return Action.FAIL
+			raise PlanFailed("You cannot make this item.")
 
 		# Take the AP
 		# See http://worldofrodney.org/index.php/Dev:Low-level_Infrastructure#Build_system
@@ -85,7 +87,7 @@ class Plan(object):
 		# FIXME: Make success() return the number of duplicates that were
 		# actually made, instead.
 		if not self.success(self, who, total):
-			return Action.FAIL
+			raise PlanFailed("This plan failed.")
 
 		# Add the results
 		for iname, quant in self.makes.iteritems():

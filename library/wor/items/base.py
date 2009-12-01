@@ -8,8 +8,9 @@ from persistent import Persistent
 import Util
 import BaseConfig
 from Plan import Plan, makeable_plans
-from ActionMake import ActionMake
 import Context
+
+from wor.actions.make import ActionMake
 
 # We must do this to run the code that defines all possible plans.
 # Can't be done in Plan, for circular reference reasons.

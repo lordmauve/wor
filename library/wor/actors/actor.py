@@ -9,23 +9,14 @@ from BTrees.IOBTree import IOBTree
 
 import Context
 from Logger import log
-from Action import Action
-from Cost import Cost
 
 from Triggerable import Triggerable
 from TriggerDeath import TriggerDeath
 
+
+from wor.actions.combat import ActionAttack
 from wor.jsonutil import JSONSerialisable
 
-
-class ActionAttack(Action):
-	def __init__(self, player, target, cost=Cost(ap=1)):
-		super(ActionAttack, self).__init__('attack(%d)' % target.id, target, caption="Attack %s" % target.name, group="outsider")
-		self.target = target
-		self.player = player
-
-	def action(self, data):
-		self.player.attack(self.target)
 
 
 class MessageLog(IOBTree):
@@ -63,6 +54,9 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 
 		# When HP passes zero, going down, call the dead() function
 		hp_trigger = TriggerDeath(self)
+
+	def get_name(self):
+		return self.name
 
 	def _set_position(self, pos):
 		from wor.db import db
@@ -159,15 +153,12 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 
 		return list(self.messages.get_messages(since))
 
-	def external_actions(self, acts, player, name=None):
+	def external_actions(self, player):
 		"""Create and return a hash of all possible actions the
-		given player might perform on this actor"""
-
-		if name is None:
-			requested = [ "attack" ]
-		else:
-			requested = [ name ]
-
+		given player might perform on this actor.
+		
+		"""
+		actions = []
 		weap = player.held_item()
 
 		# They could attack us...
@@ -175,8 +166,9 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 			and self.id is not player.id
 			and self.is_combative(player)):
 			
-			act = ActionAttack(player, self)
-			acts[act.uid] = act
+			actions.append(ActionAttack(player, self))
+
+		return actions
 
 	def luck_coefficient(self):
 		luck_factor = self.power('luck')

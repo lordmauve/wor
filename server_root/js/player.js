@@ -35,6 +35,8 @@ var inventory_parameter = "";
 function load_player_act(actions)
 {
 	var actions_panel = get_side_panel("player_actions");
+	actions_panel.update('');
+
 	var inventory_found = false;
 
 	var fragments = [];
@@ -128,8 +130,5 @@ function act_response(resp)
 	// what we're told to (one update per line)
 
 	// FIXME: Or, for now, just trigger a full set of updates
-	update_player_details();
-	update_player_actions();
-	MessagePane.update();
-	update_map();
+	load_game();
 }

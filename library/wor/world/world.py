@@ -123,7 +123,7 @@ class World(Persistent):
 		if previous:
 			oldregion = self.get_region(previous.layer)
 			if region == oldregion:
-				oldregion.move_actor(actor, dest)
+				oldregion.move_actor(actor, previous, dest)
 			else:
 				oldregion.actor_leave(actor)
 				region.actor_enter(actor, dest)
