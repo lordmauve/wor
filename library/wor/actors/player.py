@@ -110,14 +110,14 @@ class Player(Actor):
 		# We can change the held item.
 		if Util.match_id(action_id, self, "changeitem"):
 			uid = Action.make_id(self, "changeitem")
-			act_html = "Use item <input id='%s_id' size='3' />. " % uid
 			acts[uid] = ActionChangeItem(
-				uid, self, caption="Change", cost=Cost(),
+				uid, self,
+				caption="Change",
+				cost=Cost(),
 				group="inventory",
 				action=lambda d: self.change_item_action(d),
-				html=act_html, parameters=['id']
-				)
-			acts[uid].html += acts[uid].make_button_for()
+				parameters=['id']
+			)
 
 		# What can we do to the item we're holding?
 		item = self.held_item()

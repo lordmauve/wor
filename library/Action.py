@@ -8,7 +8,7 @@ FAIL = -1
 class Action(object):
 	def __init__(self, uid, actor, caption="Use", cost=Cost(ap=1),
 				 action=None,
-				 group="none", html=None, parameters=[]):
+				 group="none", parameters=[]):
 		self.uid = uid
 		self.actor = actor
 		self.caption = caption
@@ -16,13 +16,9 @@ class Action(object):
 		self.action_callback = action
 		self.group = group
 		self.parameters = parameters
-		self.html = html
-		if html is None:
-			self.html = self.make_button_for()
 
 	def context_get(self, context):
 		ret = {}
-		ret['html'] = self.html
 		ret['cost'] = str(self.cost)
 		ret['uid'] = self.uid
 		ret['caption'] = self.caption
@@ -46,33 +42,3 @@ class Action(object):
 		if hasattr(object, 'internal_name'):
 			return "%s.%s.%s" % (object.internal_name(), object.id, act)
 		return "%s.%s.%s" % (object.__class__.__name__, object.id, act)
-
-	@staticmethod
-	def make_button(caption, uid, cost=Cost(), parameters=[]):
-		"""Make a button, with appropriate caption and JavaScript to
-		despatch the request."""
-		action_params = '"' + uid + '"'
-		for it in parameters:
-			action_params += ', "' + uid + '_' + it + '"'
-		aptext = ""
-		cost = str(cost)
-		if cost:
-			aptext = " (%s)" % cost
-			
-		return ("<button onclick='post_action(%(params)s)'>"
-				+ "%(caption)s%(aptext)s</button>") % {
-			'uid': uid,
-			'caption': caption,
-			'aptext': aptext,
-			'params': action_params
-			}
-
-	def make_button_for(self, caption=None, cost=None, parameters=None):
-		"""Make a button for this Action object."""
-		if caption is None:
-			caption = self.caption
-		if cost is None:
-			cost = self.cost
-		if parameters is None:
-			parameters = self.parameters
-		return self.make_button(caption, self.uid, cost, parameters)

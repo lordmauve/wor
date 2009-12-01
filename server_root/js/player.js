@@ -60,20 +60,38 @@ function load_player_act(actions)
 		{
 			var panel = get_item_panel();
 			var actions = document.getElementById("held_item_actions");
-			fragments.push(act.html);
+			fragments.push(act);
 		}
 		else
 		{
-			fragments.push(act.html);
+			new Action(act);
 		}
 	}
 	if(inventory_found)
 	{
 		fragments.push("<button onclick='show_items()'>Change item</button>");
 	}
-
-	actions_panel.innerHTML = fragments.join('<hr>');
 }
+
+var Action = Class.create({
+	initialize: function (act) {
+		this.act = act;
+		var label = act.caption;
+		if (act.cost)
+			label += ' (' + act.cost + ')';
+
+		var button = document.createElement('button', {'class': 'action'}).update(label);
+		var actions_panel = get_side_panel("player_actions");
+		actions_panel.insert(button);
+
+		Event.observe(button, 'click', this.perform.bindAsEventListener(this));
+	},
+	
+	perform: function () {
+		post_action(this.act.uid);
+	}
+});
+
 
 ////////////////////
 // Action handling

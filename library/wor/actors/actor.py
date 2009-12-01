@@ -18,6 +18,16 @@ from TriggerDeath import TriggerDeath
 from wor.jsonutil import JSONSerialisable
 
 
+class ActionAttack(Action):
+	def __init__(self, player, target, cost=Cost(ap=1)):
+		super(ActionAttack, self).__init__('attack(%d)' % target.id, target, caption="Attack %s" % target.name, group="outsider")
+		self.target = target
+		self.player = player
+
+	def action(self, data):
+		self.player.attack(self.target)
+
+
 class MessageLog(IOBTree):
 	"""A message log for an actor.
 
@@ -149,8 +159,6 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 
 		return list(self.messages.get_messages(since))
 
-	####
-	# Actions infrastructure: Things the player can do to this actor
 	def external_actions(self, acts, player, name=None):
 		"""Create and return a hash of all possible actions the
 		given player might perform on this actor"""
@@ -160,19 +168,16 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 		else:
 			requested = [ name ]
 
+		weap = player.held_item()
+
 		# They could attack us...
-		if ("attack" in requested
+		if weap and ("attack" in requested
 			and self.id is not player.id
 			and self.is_combative(player)):
 			
-			uid = Action.make_id(self, "attack")
-			acts[uid] = Action(
-				uid, self, caption="Attack %s" % self.name, cost=Cost(ap=1), group="outsider",
-				action=lambda: player.attack(self)
-				)
+			act = ActionAttack(player, self)
+			acts[act.uid] = act
 
-	####
-	# Luckiness
 	def luck_coefficient(self):
 		luck_factor = self.power('luck')
 		if luck_factor < 0:

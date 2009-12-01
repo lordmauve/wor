@@ -56,6 +56,8 @@ def login(request):
 
 
 def game(request):
+	if 'account' not in request.session:
+		return HttpResponseRedirect('/')
 	account = db.accounts().get_account(request.session['account'])
 	player = account.get_players()[0]
 	return render_to_response('game.html', {'actor': player, 'account': account})

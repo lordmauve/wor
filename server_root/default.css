@@ -82,12 +82,7 @@ table#map tr.hex_corner td {
 }
 
 div.message {
-	border: 3px solid #aaa;
-	background-color: #ccc;
-	padding: 0px 6px;
-	margin: 3px;
-	border-radius: 12px;
-	-moz-border-radius: 12px;
+	margin: 3px 5px;
 }
 
 div.msg_type_rodney {
@@ -109,4 +104,29 @@ span.timestamp {
 	font-style: italic;
 	font-size: 65%;
 	display: block;
+}
+
+#api-error {
+	border: solid black 1px;
+	background-color: white;
+	position: absolute;
+	width: 80%;
+	height: 80%;
+	top: 10%;
+	left: 10%;
+	z-index: 5000000;
+
+	-moz-border-radius: 6px;
+}
+
+#api-error h3 {
+	color: #800;
+	font-weight: normal;
+	font-size: 20px;
+	margin: 0 0 0.5em;
+}
+
+#response-wrapper {
+	height: 95%;
+	overflow: auto;
 }
