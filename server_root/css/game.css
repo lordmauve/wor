@@ -1,5 +1,6 @@
 body {
 	font-family: 'Trebuchet MS', sans-serif;
+	background: url('/img/page-bg.png') white repeat-x top left;
 }
 
 #panel {
@@ -25,12 +26,25 @@ body {
 	padding: 5px;
 
 	width: 460px;
+
+	left: -176px;
+	bottom: 150px;
+
+	color: #444;
+
+	text-align: left;
 	
 	-moz-border-radius: 6px;
 }
 
+#map-bubble .description {
+	font-size: 12px;
+	margin: 0 5px 6px;
+	text-align: justify;
+}
+
 #panel .panel h3,
-#map-bubble h3 {
+#map-bubble > h3 {
 	margin: 0 3px 5px;
 	font-weight: normal;
 	font-size: 20px;
@@ -40,6 +54,12 @@ body {
 #scrollpane {
 	max-height: 300px;
 	overflow: auto;
+}
+
+#map-bubble #bubble-close {
+	position: absolute;
+	top: 8px;
+	right: 8px;
 }
 
 #map-bubble #bubble-tail {
@@ -54,6 +74,7 @@ body {
 	padding: 5px 8px;
 
 	-moz-border-radius: 4px;
+	color: black;
 }
 
 #map-bubble p {
@@ -88,4 +109,73 @@ body {
 
 .alignicon {
 	vertical-align: -7px;
+}
+
+.collapsible {
+	background: url('/icons/collapsible-closed.png') no-repeat 5px 7px;
+}
+
+.collapsible:hover,
+.collapsible-open {
+	background: url('/icons/collapsible-open.png') no-repeat 4px 8px;
+}
+
+.collapsible .head {
+	padding-left: 20px;
+}
+
+.collapsible .head h3 {
+	display: inline;
+	font-size: 17px;
+	font-weight: normal;
+	margin-right: 1em;
+}
+
+.collapsible .head span {
+	font-size: 12px;
+}
+
+.collapsible .contents {
+	margin: 2px 0 2px 20px;
+}
+
+#movement {
+	position: absolute;
+	left: 50%;
+	top: 100px;
+}
+
+#movement .action {
+	position: absolute;
+	width: 6em;
+}
+
+#movement #action-move-LR {
+	top: 45px;
+	left: 5px;
+}
+
+#movement #action-move-LL {
+	top: 45px;
+	right: 5px;
+}
+
+#movement #action-move-L {
+	top: 0px;
+	right: 25px;
+}
+
+#movement #action-move-R {
+	top: 0px;
+	left: 25px;
+}
+
+#movement #action-move-UR {
+	top: -45px;
+	left: 5px;
+}
+
+#movement #action-move-UL {
+	top: -45px;
+	right: 5px;
 }
