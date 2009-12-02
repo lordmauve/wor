@@ -34,7 +34,15 @@ var inventory_parameter = "";
 
 function load_player_act(actions)
 {
+	var move_panel = $('movement');
+	if (!move_panel) {
+		move_panel = new Element('div', {id: 'movement'});
+		$('map').appendChild(move_panel);
+	}
+
 	var actions_panel = get_side_panel("player_actions");
+
+	move_panel.update('');
 	actions_panel.update('');
 
 	var inventory_found = false;
@@ -64,9 +72,10 @@ function load_player_act(actions)
 			var actions = document.getElementById("held_item_actions");
 			fragments.push(act);
 		}
-		else
-		{
-			new Action(act);
+		else if (act.group == 'movement') {
+			new Action(act, move_panel);
+		} else {
+			new Action(act, actions_panel);
 		}
 	}
 	if(inventory_found)
@@ -76,15 +85,14 @@ function load_player_act(actions)
 }
 
 var Action = Class.create({
-	initialize: function (act) {
+	initialize: function (act, parent) {
 		this.act = act;
 		var label = act.caption;
 		if (act.cost)
 			label += ' (' + act.cost + ')';
 
-		var button = document.createElement('button', {'class': 'action'}).update(label);
-		var actions_panel = get_side_panel("player_actions");
-		actions_panel.insert(button);
+		var button = new Element('button', {'class': 'action', 'id': 'action-' + act.uid}).update(label);
+		parent.insert(button);
 
 		Event.observe(button, 'click', this.perform.bindAsEventListener(this));
 	},

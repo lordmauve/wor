@@ -8,6 +8,7 @@ var Map = {
 
 	load_neighbourhood: function (raw_locations) {
 		var locations = Array();
+		LocationBubble.close();
 
 		// Initialise the centre hex (FIXME: assumes that at least
 		// one hex was returned)
@@ -69,6 +70,12 @@ var Map = {
 		var cellid = "map" + x + "-" + y;
 
 		var tile = $(cellid);
+		if (!loc) {
+			if (tile) {
+				tile.remove();
+			}
+			return;
+		}
 		if (tile == null)
 		{
 			var tile = new Element('div', {'class': 'loc', id: cellid});
@@ -157,48 +164,113 @@ var Map = {
 		return Array(r, d);
 	},
 
+	show_bubble: function (event) {
+		// if the event came from the tile and not the
+		// bubble, update
+		if (event.element().hasClassName('loc'))
+			LocationBubble.show(this);
+	},
+};
 
+var LocationBubble = {
 	bubble: null,	
 
-	show_bubble: function (event) {
-		if (!Map.bubble) {
-			var bubble = new Element('div', {id: 'map-bubble'});
-			bubble.insert(new Element('h3').update(this.loc.title));
-
-			var scrollpane = new Element('div', {'id': 'scrollpane'});
-			bubble.insert(scrollpane);
-
-			var tail = new Element('img', {'src': '/img/bubble-tail.png', id: 'bubble-tail'});
-			bubble.insert(tail);
-
-			document.body.appendChild(bubble);
-
-			Map.bubble = bubble;
-		} else {
-			var bubble = Map.bubble;
-			bubble.select('h3')[0].update(this.loc.title);
-		}
-
-		var pos = this.cumulativeOffset();
-		bubble.setStyle({
-			left: (pos.left - 175) + 'px',
-			top: (pos.top - bubble.offsetHeight - 5) + 'px',
-		});
-
-		var html = '';
-
-		if (this.loc.actors.length) {
-			html += '<div class="playersection">';
-			for (var i = 0; i < this.loc.actors.length; i++) {
-				var a = this.loc.actors[i];
-				html += '<p><img src="/icons/icon-' + a.alignment.toLowerCase() + '.png" class="alignicon" /> ' + a.name + '</p>';
-			}
-			html += '</div>';
-		}
-
-		$('scrollpane').update(html);
+	show: function (tile) {
+		LocationBubble.close();
+		LocationBubble.create();
+		tile.appendChild(LocationBubble.bubble);
+		LocationBubble.update(tile.loc);
 	},
 
-	hide_bubble: function () {
+	update: function (loc) {
+		var bubble = LocationBubble.bubble;
+		bubble.select('h3')[0].update(loc.title);
+
+		$('scrollpane').update('');
+
+		if (loc.description) {
+			$('scrollpane').insert(new Element('p', {'class': 'description'}).update(loc.description));
+		}
+
+		if (loc.actors.length) {
+			var other_players = new Element('div', {'class': 'playersection'});
+		
+			var section_title = loc.actors.length + ' other players';
+			var section_summary = loc.actors[0].name;
+			if (loc.actors.length == 2)
+				section_summary = loc.actors[0].name + ' and ' + loc.actors[1].name;
+			else if (loc.actors.length > 2) {
+				var n_others = (loc.actors.length - 2);
+				section_summary = loc.actors[0].name + ', ' + loc.actors[1].name + ' and ' + n_others + (n_others == 1) ? 'other.' : 'others.';
+			}
+	
+			var player_tree = new CollapsibleTree(other_players, section_title, section_summary);
+			for (var i = 0; i < loc.actors.length; i++) {
+				var a = loc.actors[i];
+				var p = new Element('p');
+				p.update('<img src="/icons/icon-' + a.alignment.toLowerCase() + '.png" class="alignicon" /> ' + a.name + '');
+				player_tree.insert(p);
+			}
+	
+			$('scrollpane').insert(other_players);
+		}
+
+	},
+	
+	create: function () {
+		var bubble = new Element('div', {id: 'map-bubble'});
+		bubble.insert(new Element('h3'));
+
+		var scrollpane = new Element('div', {'id': 'scrollpane'});
+		bubble.insert(scrollpane);
+
+		var tail = new Element('img', {'src': '/img/bubble-tail.png', id: 'bubble-tail'});
+		bubble.insert(tail);
+
+		var close = new Element('img', {'src': '/icons/close.png', id: 'bubble-close'});
+		bubble.insert(close);
+		Event.observe(close, 'click', LocationBubble.close);
+
+		LocationBubble.bubble = bubble;
+	},
+
+	close: function () {
+		if (LocationBubble.bubble)
+			LocationBubble.bubble.remove();
+		LocationBubble.bubble = null;
 	}
-};
+}
+
+// An expandable/collapsible tree widget
+var CollapsibleTree = Class.create({
+	initialize: function(parent, title, summary) {
+		this.container = new Element('div', {'class': 'collapsible'});
+		this.titlebox = new Element('div', {'class': 'head'});
+		this.panel = new Element('div', {'class': 'contents'});
+
+		this.titlebox.insert(new Element('h3').update(title));
+		this.summary = new Element('span').update(summary);
+		this.titlebox.insert(this.summary);
+
+		this.container.insert(this.titlebox);
+		this.container.insert(this.panel);
+		this.panel.hide();
+
+		parent.insert(this.container);
+
+		this.titlebox.observe('click', this.toggle.bindAsEventListener(this));
+	},
+
+	insert: function (obj) {
+		this.panel.insert(obj);	
+	},
+	
+	toggle: function (event) {
+		this.summary.toggle();
+		this.panel.toggle();
+//		if (this.panel.visible()) {
+//			this.container.addClassName('collapsible-open');
+//		}
+//		else this.container.removeClassName('collapsible-open');
+	}
+});
