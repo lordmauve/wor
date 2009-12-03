@@ -3,6 +3,18 @@ body {
 	background: url('/img/page-bg.png') white repeat-x top left;
 }
 
+body#night {
+	background: url('/img/page-bg-night.png') black repeat-x top left;
+}
+
+body#sunrise {
+	background: url('/img/page-bg-sunrise.png') #b4b4b4 repeat-x top left;
+}
+
+body#sunset {
+	background: url('/img/page-bg-sunset.png') #b4b4b4 repeat-x top left;
+}
+
 #panel {
 	position: absolute;
 	left: 5px;
@@ -84,6 +96,7 @@ body {
 
 #panel .panel {
 	background-color: white;
+	background-color: rgba(255, 255, 255, 0.4);
 	border: solid black 1px;
 
 	color: #666;
