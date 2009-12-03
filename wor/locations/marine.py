@@ -3,7 +3,7 @@ from wor.world.location import Location
 
 class Sea(Location):
 	title = "Sea"
-	def can_actor_enter(self, act):
+	def can_enter(self, act):
 		return False
 
 class Lake(Sea):

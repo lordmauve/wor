@@ -1,6 +1,16 @@
+class Everything(object):
+	def __contains__(self, key):
+		return True
+
+
 class JSONSerialisable(object):
 	"""A mix-in class that provides tools for serialising to a JSON
 	object (actually a python dict intended for JSON)"""
+
+	def context_authz(self, context):
+		"""Returns a list of the context properties that can be
+		seen in the given context, or None for no restriction."""
+		return None
 
 	def context_get(self, context):
 		"""Helper function for writing context_get methods. Take the
@@ -10,37 +20,52 @@ class JSONSerialisable(object):
 		of the attribute is a method, call it (and assume that it has
 		no additional parameters)."""
 		ret = {}
-		if hasattr(self, 'context_fields'):
-			for k in self.context_fields:
-				v = getattr(self, k)
-				if hasattr(v, 'context_get'):
-					# If the attribute is an object that understands
-					# context_get, use that.
-					try:
-						ret[k] = v.context_get(context)
-					except TypeError:
-						ret[k] = v.context_get()
-				elif callable(v):
-					result = v()
-					if isinstance(result, list):
-						ret[k] = [i.context_get(context) for i in result]
-					else:
-						ret[k] = v()
-				else:
-					ret[k] = str(v)
-			return ret
+		
+		# build authorised fields list
+		auth = self.context_authz(context)
 			
-		for k, v in self.__dict__.items():
-			if k.startswith('_'):
-				continue
+		if auth is None:
+			auth = Everything()
+		else:
+			auth = set(auth)
 
-			if hasattr(v, 'context_get'):
-				# If the attribute is an object that understands
-				# context_get, use that.
-				try:
-					ret[k] = v.context_get(context)
-				except TypeError:
-					ret[k] = v.context_get()
-			else:
-				ret[k] = str(v)
+		if hasattr(self, 'context_fields'):
+			# build the context from a list of fields
+			for k in self.context_fields:
+				if k not in auth:
+					continue
+				ret[k] = self.__context_property(getattr(self, k), context)
+				v = getattr(self, k)
+
+			# add in context_extra
+			if hasattr(self, 'context_extra'):
+				extra = self.context_extra(context)
+				for k in extra:
+					if k in auth:
+						ret[k] = extra[k]
+			return ret
+
+		# fall back to building the context from the instance dictionary			
+		for k, v in self.__dict__.items():
+			if k not in auth or k.startswith('_'):
+				continue
+			ret[k] = self.__context_property(v, context, call_callables=False)
 		return ret
+
+	def __context_property(self, v, context, call_callables=True):
+		"""Resolve the most appropriate context value for property"""
+		if hasattr(v, 'context_get'):
+			# If the attribute is an object that understands
+			# context_get, use that.
+			try:
+				return v.context_get(context)
+			except TypeError:
+				return v.context_get()
+		elif callable(v) and call_callables:
+			result = v()
+			if isinstance(result, list):
+				return [i.context_get(context) for i in result]
+			else:
+				return result
+		else:
+			return str(v)
