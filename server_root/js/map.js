@@ -1,7 +1,8 @@
 // Map-drawing functions
-var DISPLAY_RANGE = 2;
 
 var Map = {
+	locations: [],
+
 	update: function () {
 		get_json("/location/neighbourhood", Map.load_neighbourhood);
 	},
@@ -38,6 +39,7 @@ var Map = {
 
 		// Now, for each hex in the grid, go round and set its
 		// properties
+		var newlocations = [];
 		for(var r = 0; r < locations.length; r++)
 		{
 			for(var d = 0; d < locations[r].length; d++) {
@@ -45,9 +47,16 @@ var Map = {
 				var xy = Map.rd_to_xy(r, d);
 				var x = xy[0];
 				var y = xy[1];
-				Map.set_location(x, y, loc)
+				newlocations.push(Map.set_location(x, y, loc))
 			}
 		}
+
+		// delete additional locations
+		for (var i = newlocations.length; i < Map.locations.length; i++) {
+			if (Map.locations[i])
+				Map.locations[i].remove();
+		}
+		Map.locations = newlocations;
 	},
 
 	TILE_WIDTH: 117,
@@ -67,14 +76,16 @@ var Map = {
 	},
 
 	set_location: function (x, y, loc) {
+		// sets the location at (x, y), returning the corresponding HTML Element
+		// or null if the location was empty
 		var cellid = "map" + x + "-" + y;
 
 		var tile = $(cellid);
-		if (!loc) {
+		if (!loc || loc == 'unknown') {
 			if (tile) {
 				tile.remove();
 			}
-			return;
+			return null;
 		}
 		if (tile == null)
 		{
@@ -95,6 +106,8 @@ var Map = {
 		});
 
 		tile.loc = loc;
+
+		return $(cellid);
 	},
 
 	// Convert [r, d] "polar" coordinates to an internal (x, y) pair
