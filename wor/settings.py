@@ -58,7 +58,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
-ROOT_URLCONF = 'dj.urls'
+ROOT_URLCONF = 'wor.urls'
 
 import os.path
 def relpath(p):
@@ -69,7 +69,7 @@ TEMPLATE_DIRS = [
 ]
 
 INSTALLED_APPS = [
-	'dj.ui',
+	'wor.ui',
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
