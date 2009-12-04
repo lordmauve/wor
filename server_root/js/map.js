@@ -101,8 +101,11 @@ var Map = {
 			Event.observe(tile, 'click', Map.show_bubble.bindAsEventListener(tile)); 
 		}
 
+		var tilesrc = loc.class_name.toLowerCase();
+		if (document.body.id)
+			tilesrc = document.body.id + '/' + tilesrc;
 		tile.setStyle({
-			backgroundImage: "url('/tiles/" + loc.class_name.toLowerCase() + ".png')"
+			backgroundImage: "url('/tiles/" + tilesrc + ".png')"
 		});
 
 		tile.loc = loc;
