@@ -13,7 +13,7 @@ var Player = {
 
 		var panel = get_side_panel('player');
 		
-		var html = '<h3><img src="/icons/icon-' + player.alignment.toLowerCase() + '.png" class="alignicon" /> ' + player.name + "</h3>";
+		var html = '<h3 class="' + player.alignment.toLowerCase() + '"><img src="/icons/icon-' + player.alignment.toLowerCase() + '.png" class="alignicon" /> ' + player.name + "</h3>";
 
 		html += "<p><span>" + player.ap + " AP</span>";
 		html += "<span>" + player.hp + ' <img src="/img/hp.png" alt="HP"></span></p>';

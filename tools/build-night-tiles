@@ -36,8 +36,12 @@ def filter_all(filters, path):
 			continue
 		im = Image.open(os.path.join(path, dayt))
 		for filter in filters:
+			dst = os.path.join(path, filter.outfile(dayt))
+			if os.path.exists(dst):
+				print "Skipping existing tile", dst
+				continue
 			out = filter.filter(im)
-			out.save(os.path.join(path, filter.outfile(dayt)))
+			out.save(dst)
 
 
 filter_all(FILTERS, 'server_root/tiles/')
