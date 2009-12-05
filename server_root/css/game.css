@@ -99,16 +99,21 @@ body#sunset {
 	background-color: rgba(255, 255, 255, 0.4);
 	border: solid black 1px;
 
-	color: #666;
+	color: black;
 
 	-moz-border-radius: 6px;
 
 	margin-bottom: 8px;
 }
 
+#messages {
+	font-size: 90%;
+}
+
 #night #panel .panel {
 	background-color: rgba(0, 0, 0, 0.4);
 	border-color: #448;
+	color: #66A;
 }
 
 #panel .panel p {
@@ -199,4 +204,75 @@ body#sunset {
 
 .actor {
 	position: absolute;
+}
+
+/* for messagebox */
+
+#messagebox {
+	position: absolute;
+	z-index: 100000;
+
+	background-color: white;
+	border: solid black 1px;
+	padding: 5px 15px;
+
+	width: 460px;
+
+	color: #444;
+
+	text-align: left;
+	
+	-moz-border-radius: 6px;
+}
+
+#messagebox h3 {
+	margin: 0;
+	font-weight: normal;
+}
+
+#messagebox h3.error {
+	color: #800;
+}
+
+#messagebox p {
+	margin: 0.5em 0;
+}
+
+#messagebox #close {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+}
+
+#washout {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+	z-index: 99999;
+        background-color: black;
+        opacity: 0.6;
+        filter: alpha(opacity=0.6);
+        cursor: pointer;
+}
+
+.fire {
+	color: #800000;
+}
+
+.wood {
+	color: #1d6b1d;
+}
+
+.metal {
+	color: #4d4d4d;
+}
+
+.earth {
+	color: #803300;
+}
+
+.water {
+	color: #1d5a69;
 }

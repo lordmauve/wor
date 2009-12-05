@@ -87,19 +87,38 @@ function load_player_act(actions)
 
 var Action = Class.create({
 	initialize: function (act, parent) {
+		this.form = new Element('form', {'class': 'action', 'id': 'action-' + act.uid});
+
 		this.act = act;
 		var label = act.caption;
 		if (act.cost)
 			label += ' (' + act.cost + ')';
 
-		var button = new Element('button', {'class': 'action', 'id': 'action-' + act.uid}).update(label);
-		parent.insert(button);
+		this.parameters = [];
+		if (act.parameters) 
+			act.parameters.each(function (p) {
+				var field = this.parameter_to_field(p);
+				this.parameters.push(field);
+				this.form.insert(field);
+			}.bind(this));
 
+		var button = new Element('button').update(label);
 		Event.observe(button, 'click', this.perform.bindAsEventListener(this));
+		this.form.insert(button);
+
+		parent.insert(this.form);
+	},
+
+	parameter_to_field: function (p) {
+		if (p.type == 'SayField')
+			return new Element('input', {'name': p.name});
 	},
 	
-	perform: function () {
-		post_action(this.act.uid);
+	perform: function (evt) {
+		evt.stop();
+		var data = this.form.serialize();
+		data = 'action=' + this.act.uid + '&' + data;
+		get_json('/actor/self/actions/', act_response, data);
 	}
 });
 
@@ -130,14 +149,50 @@ function post_action()
 function post_action_data(fuid, data)
 {
 	data['action'] = fuid;
-	get_json('/actor/self/actions/', act_response, $H(data).toQueryString());
+	get_json('/actor/self/actions/', act_response, data);
 }
 
 function act_response(resp)
 {
-	// Go through the response one line at a time, and update
-	// what we're told to (one update per line)
+	if (resp.error) {
+		//show message box
+		DialogBox.show(resp.error);
+	}
+	else if (resp.message) {
+		if (resp.message != 'None')
+			DialogBox.show(resp.message);
+
+		// Go through the response one line at a time, and update
+		// what we're told to (one update per line)
+	}
 
 	// FIXME: Or, for now, just trigger a full set of updates
 	load_game();
 }
+
+var DialogBox = {
+	box: null,
+	show_error: function (message) {
+		DialogBox.show(message, 'Error');
+		DialogBox.box.select('h3')[0].addClassName('error');
+	},
+	show: function (message, title) {
+		var box = new Element('div', {'id': 'messagebox'});
+		if (title) {
+			box.insert(new Element('h3').update(title));
+		}
+		var p = new Element('p');
+		p.appendChild(document.createTextNode(message));
+		box.insert(p);
+
+		var close = new Element('img', {'src': '/icons/close.png', id: 'close'});
+		box.insert(close);
+		Event.observe(close, 'click', Lightbox.hide);
+		DialogBox.box = box;
+
+		Lightbox.show(box, DialogBox.onhide);
+	},
+	onhide: function () {
+		DialogBox.box.remove();
+	}
+};

@@ -17,6 +17,7 @@ from Context import Context
 
 
 from wor.actions.inventory import ActionChangeItem
+from wor.actions import social
 
 
 class DuplicatePlayerName(Exception):
@@ -86,7 +87,8 @@ class Player(Actor):
 			return {}
 
 		actions = [
-			ActionChangeItem(self) # We can change the held item
+			ActionChangeItem(self), # We can change the held item
+			social.ActionSay(self), # We can change the held item
 		]
 
 		# What can we do to the item we're holding?
@@ -111,6 +113,14 @@ class Player(Actor):
 		
 		return actions
 
+	def external_actions(self, player):
+		acts = super(Player, self).external_actions(player)
+
+		acts += [
+			social.ActionProd(player, self),
+		]
+		return acts
+
 	def perform_action(self, action_id, data):
 		"""Despatch an action to the target object. The action_id is a
 		full one."""
@@ -118,9 +128,9 @@ class Player(Actor):
 		for a in actions:
 			if a.get_uid() != action_id:
 				continue
-			a.perform(data)
+			message = a.perform(data)
 			self.last_action = time.time()
-			return
+			return message
 		else:
 			raise KeyError("Unknown action")
 
