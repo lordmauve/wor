@@ -91,7 +91,8 @@ class Location(Persistent, JSONSerialisable):
 
 	def context_extra(self, context):
 		return {
-			'title': self.get_title()
+			'title': self.get_title(),
+			'timeofday': self.region.get_time_of_day()
 		}
 
 	def context_authz(self, context):
@@ -100,7 +101,7 @@ class Location(Persistent, JSONSerialisable):
 			return
 
 		if context.visible(auth):
-			return ['title', 'actors', 'class_name', 'description']
+			return ['title', 'actors', 'class_name', 'description', 'timeofday']
 		return []
 
 	def power(self, name):
