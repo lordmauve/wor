@@ -18,6 +18,11 @@ class NullLocation(object):
 	id = None
 	move_ap = 1
 
+	def no(self, who):
+		return NullLocation(self.pos)
+
+	local_directions = [no] * 6 
+
 	def __init__(self, pos):
 		self.pos = pos
 

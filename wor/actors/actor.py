@@ -61,6 +61,8 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 	def get_name(self):
 		return self.name
 
+	__str__ = get_name
+
 	def _set_position(self, pos):
 		from wor.db import db
 		db.world()._move_actor(self, self._position, pos)

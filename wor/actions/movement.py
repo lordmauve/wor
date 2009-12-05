@@ -16,7 +16,7 @@ class ActionMove(Action):
 	def get_caption(self):
 		return 'Move ' + self.direction.upper()
 
-	def action(self, data):
+	def action(self):
 		dest = getattr(self.actor.loc(), self.direction.lower())()
 		assert dest
 		self.actor.move_to(dest)

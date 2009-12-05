@@ -1,6 +1,30 @@
 from Cost import Cost
 
 
+class ValidationError(Exception):
+	"""The action parameters did not validate."""
+
+
+class SayField(object):
+	"""An input field corresponding to a 'say' message box"""
+	def __init__(self, name, default=''):
+		self.name = name
+		self.default = ''
+
+	def clean(self, value):
+		v = value.strip()
+		if not v:
+			raise ValidationError("You must enter a message.")
+		return v
+
+	def context_get(self):
+		return {
+			'name': self.name,
+			'type': self.__class__.__name__,
+			'default': self.default,
+		}
+
+
 class Action(object):
 	"""Something that the user can be invited to do.
 
@@ -27,22 +51,42 @@ class Action(object):
 		
 	def context_get(self, context):
 		ret = {}
-		ret['cost'] = str(self.cost)
+		if self.cost:
+			ret['cost'] = str(self.cost)
 		ret['uid'] = self.get_uid()
 		ret['caption'] = self.get_caption()
 		ret['group'] = self.group
 
 		params = self.get_parameters()
 		if params:
-			ret['parameters'] = params
+			ps = []
+			for p in params:
+				if isinstance(p, str) or isinstance(p, unicode):
+					ps.append(p)
+				else:
+					ps.append(p.context_get())
+			ret['parameters'] = ps
 
 		return ret
 
+	def get_kwargs(self, data):
+		kw = {}
+		params = self.get_parameters()
+		if not params:
+			return {}
+		for p in params:
+			if isinstance(p, str) or isinstance(p, unicode):
+				continue
+			val = p.clean(data.get(p.name, ''))
+			kw[p.name] = val
+		return kw	
+
 	def perform(self, data):
-		rv = self.action(data)
-		if not rv:
+		kwargs = self.get_kwargs(data)
+		message = self.action(**kwargs)
+		if self.cost:
 			self.cost.charge(self.actor)
-		return rv
+		return message
 
 	def action(self, data):
 		pass

@@ -93,6 +93,7 @@ div.msg_type_rodney {
 div.msg_type_sound {
 	border-color: #ff0;
 	background-color: #ffc;
+	background-color: rgba(255, 240, 180, 0.1);
 }
 
 div.msg_type_zombie {
