@@ -52,6 +52,20 @@ class Context(object):
 
 		return STRANGER_INVISIBLE
 
+	def authz_object(self, object):
+		"""Return the degree of data that can be returned w.r.t. the
+		current context."""
+		if self.is_admin():
+			return ADMIN
+
+		if self.player is object.owner:
+			return OWNER
+
+		if self.player.position == object.position:
+			return STRANGER_VISIBLE
+
+		return STRANGER_INVISIBLE
+
 	def authz_location(self, loc):
 		"""Return the degree of data that can be returned w.r.t. the
 		current context."""

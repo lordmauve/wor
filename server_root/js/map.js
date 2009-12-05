@@ -285,6 +285,25 @@ var LocationBubble = {
 			$('scrollpane').insert(other_players);
 		}
 
+		if (loc.objects.length) {
+			for (var i = 0; i < loc.objects.length; i++) {
+				var o = loc.objects[i];
+				var objectsection = new Element('div', {'class': 'objectsection'});
+				var obj_tree = new CollapsibleTree(objectsection, o.name);
+				if (o.description) {
+					o.description.split('\n\n').each(function (para) {
+						var p = new Element('p', {'class': 'description'});
+						p.appendChild(document.createTextNode(para));
+						obj_tree.insert(p);
+					});
+				}
+				$A(o.actions).each(function (act) {
+					new Action(act, obj_tree);
+				});
+				$('scrollpane').insert(objectsection);
+			}
+		}
+
 	},
 	
 	create: function () {

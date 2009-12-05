@@ -79,7 +79,8 @@ class Player(Actor):
 		self.position = pos
 
 	def get_actions(self):
-		"""Create and return a hash of all possible actions this player might perform.
+		"""List actions this player might perform that are not
+		listed as the context of another actor or object.
 
 		"""
 		# No actions are possible at negative AP
@@ -106,11 +107,23 @@ class Player(Actor):
 		
 		# What can we do to actors here?
 		for actor in self.loc().actors():
-			actions += actor.external_actions(self)
+			if actor != self:
+				actions += actor.external_actions(self)
 
 		# What can we do to actors nearby?
 		# FIXME: Fill in here
 		
+		return actions
+
+	def get_contextual_actions(self):
+		"""Return a list of actions that the player can perform
+		on some other actor or object"""
+
+		actions = []
+
+		for obj in self.loc().objects():
+			actions += obj.external_actions(self)
+
 		return actions
 
 	def external_actions(self, player):
@@ -124,7 +137,7 @@ class Player(Actor):
 	def perform_action(self, action_id, data):
 		"""Despatch an action to the target object. The action_id is a
 		full one."""
-		actions = self.get_actions()
+		actions = self.get_actions() + self.get_contextual_actions()
 		for a in actions:
 			if a.get_uid() != action_id:
 				continue

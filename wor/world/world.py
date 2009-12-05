@@ -1,3 +1,5 @@
+import re
+
 from persistent import Persistent
 from persistent.mapping import PersistentMapping
 from persistent.list import PersistentList
@@ -25,6 +27,7 @@ class Region(Persistent):
 
 		self.locations = PersistentMapping() # Position has to have a total order for this
 		self.actors = PersistentMapping()
+		self.objects = PersistentMapping() 
 
 		self.set_location((0,0), Location('Centre of ' + self.get_title()))
 
@@ -46,6 +49,12 @@ class Region(Persistent):
 
 	def get_actors_at(self, pos):
 		return list(self.actors.get(pos, []))
+	
+	def get_objects_at(self, pos):
+		return list(self.objects.get(pos, []))
+
+	def num_actors(self):
+		return len(self.actors)
 
 	def _remove_actor(self, actor):
 		"""Removes an actor from its current location"""
@@ -56,6 +65,16 @@ class Region(Persistent):
 	def _add_actor(self, actor, dest):
 		"""Adds an actor at the given position"""
 		self.actors.setdefault(dest, PersistentList()).append(actor)
+
+	def _remove_object(self, object):
+		"""Removes an object from its current location"""
+		self.objects[object.position].remove(object)
+		if len(self.objects[object.position]) == 0:
+			del(self.objects[object.position])
+
+	def _add_object(self, object, dest):
+		"""Adds an object at the given position"""
+		self.objects.setdefault(dest, PersistentList()).append(object)
 
 	def actor_enter(self, actor, dest):
 		"""Called when an actor enters from another region"""
@@ -91,6 +110,7 @@ class World(Persistent):
 	def __init__(self):
 		self.regions = PersistentMapping()
 		self.actors = IOBTree()
+		self.objects = IOBTree()
 		self.players_by_name = OOBTree()
 
 	def get_region(self, name):
@@ -120,6 +140,9 @@ class World(Persistent):
 	def _move_actor(self, actor, previous, dest):
 		"""Move the actor from 'previous' to 'to'.
 
+		This calls hook methods on the region to allow region subclasses to
+		handle actors arriving or departing.
+
 		You should not need to call this method directly.
 		It is called automatically by assigning to actor.position.
 		"""
@@ -135,6 +158,31 @@ class World(Persistent):
 		else:
 			region.spawn_actor(actor, dest)
 		actor._position = dest
+
+	def _move_object(self, object, previous, dest):
+		"""Move the object from 'previous' to 'to'.
+
+		You should not need to call this method directly.
+		It is called automatically by assigning to object.position.
+		"""
+		assert object.id
+		region = self.get_region(dest.layer)
+		if previous:
+			oldregion = self.get_region(previous.layer)
+			oldregion._remove_object(object)
+		else:
+			region._add_object(object, dest)
+		object._position = dest
+	
+	def spawn_object(self, obj, dest):
+		if not hasattr(obj, 'id'):
+			# register the actor in the index
+			try:
+				obj.id = self.objects.maxKey() + 1
+			except ValueError:
+				obj.id = 1
+			self.objects[obj.id] = obj
+		obj.position = dest	# triggers move_actor to handle spawning into a region
 
 	def spawn_actor(self, actor, dest):
 		"""Add a new actor to the world at dest"""
@@ -238,3 +286,13 @@ class World(Persistent):
 
 					this_ring.append(loc)
 		return locs + this_ring
+
+	def find_region_key(self, name):
+		"""Find an appropriate and available region key for a region named 'name'"""
+		stem = re.sub(r'\s+', '-', name.lower())
+		key = stem
+		count = 0
+		while key in self.regions:
+			count += 1
+			key = '%s-%d' % (stem, count)
+		return key
