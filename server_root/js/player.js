@@ -1,25 +1,26 @@
 ////////////
 // Base player state
 
-// Global to hold the details of the player, for use by other functions
-var player;
+var Player = {
+	player: null, // hold the details of the player, for use by other functions
 
-function update_player_details()
-{
-	get_json("/actor/self/desc", load_basic_player);
-}
+	update: function () {
+		get_json("/actor/self/desc", Player.load);
+	},
 
-function load_basic_player(player)
-{
-	var panel = get_side_panel('player');
-	
-	var html = '<h3><img src="/icons/icon-' + player.alignment.toLowerCase() + '.png" class="alignicon" /> ' + player.name + "</h3>";
+	load: function (player) { 
+		Player.player = player;
 
-	html += "<p><span>" + player.ap + " AP</span>";
-	html += "<span>" + player.hp + ' <img src="/img/hp.png" alt="HP"></span></p>';
+		var panel = get_side_panel('player');
+		
+		var html = '<h3><img src="/icons/icon-' + player.alignment.toLowerCase() + '.png" class="alignicon" /> ' + player.name + "</h3>";
 
-	panel.update(html);
-}
+		html += "<p><span>" + player.ap + " AP</span>";
+		html += "<span>" + player.hp + ' <img src="/img/hp.png" alt="HP"></span></p>';
+
+		panel.update(html);
+	}
+};
 
 ////////////
 // Actions

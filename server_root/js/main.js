@@ -5,7 +5,7 @@ var api = "/api";
 
 function load_game()
 {
-	update_player_details();
+	Player.update();
 	update_player_actions();
 	Map.update();
 	MessagePane.update();

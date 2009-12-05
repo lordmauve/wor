@@ -75,10 +75,19 @@ var Map = {
 		return {x: sx, y: sy, z: z};
 	},
 
+	set_time_of_day: function (tod) {
+		if (tod == 'daytime')
+			document.body.id = '';
+		else
+			document.body.id = tod;
+	},
+
 	set_location: function (x, y, loc) {
 		// sets the location at (x, y), returning the corresponding HTML Element
 		// or null if the location was empty
 		var cellid = "map" + x + "-" + y;
+		if (x == 0 && y == 0 && loc.timeofday)
+			Map.set_time_of_day(loc.timeofday);
 
 		var tile = $(cellid);
 		if (!loc || loc == 'unknown') {
@@ -108,9 +117,46 @@ var Map = {
 			backgroundImage: "url('/tiles/" + tilesrc + ".png')"
 		});
 
+		Map.update_actors(tile, loc.actors);
+
 		tile.loc = loc;
 
 		return $(cellid);
+	},
+
+	update_actors: function (tile, actors) {
+		tile.select('img.actor').each(function (x) {x.remove();});
+	
+		if (actors.length == 1) {
+			Map.insert_actor(tile, 0, 0, actors[0]);
+		} else if (actors.length < 8) {
+			var ang = (3.141592 * 2) / actors.length;
+			actors.each(function (a, i) {
+				var x = 40 * Math.sin(ang * i);
+				var y = 22 * Math.cos(ang * i);
+
+				Map.insert_actor(tile, x, y, a);
+			});
+		}
+	},
+
+	insert_actor: function(tile, x, y, a) {
+		var img = new Element('img', {'class': 'actor'});
+		if (a.id == Player.player.id) {
+			img.src = '/img/pc/me-' + a.alignment.toLowerCase() + '.png';
+			var xoff = -15;
+		} else {
+			img.src = '/img/pc/' + a.alignment.toLowerCase() + '.png';
+			var xoff = -7;
+		}
+		img.alt = a.name;
+		img.title = a.name;
+		img.setStyle({
+			left: (x + 53 + xoff) + 'px',
+			bottom: (y + 45) + 'px',
+			zIndex: (y + 45)
+		});
+		tile.insert(img);
 	},
 
 	// Convert [r, d] "polar" coordinates to an internal (x, y) pair
@@ -183,8 +229,13 @@ var Map = {
 	show_bubble: function (event) {
 		// if the event came from the tile and not the
 		// bubble, update
-		if (event.element().hasClassName('loc'))
+		var el = event.element();
+		if (el.hasClassName('loc'))
 			LocationBubble.show(this);
+		else if (el.hasClassName('actor')) {
+			LocationBubble.show(this);
+			//TODO: show the bubble for this actor?
+		}
 	},
 };
 
@@ -208,21 +259,24 @@ var LocationBubble = {
 			$('scrollpane').insert(new Element('p', {'class': 'description'}).update(loc.description));
 		}
 
-		if (loc.actors.length) {
+		//other actors only
+		var actors = loc.actors.filter(function (a) {return a.id != Player.player.id;});
+
+		if (actors.length) {
 			var other_players = new Element('div', {'class': 'playersection'});
 		
-			var section_title = loc.actors.length + ' other players';
-			var section_summary = loc.actors[0].name;
-			if (loc.actors.length == 2)
-				section_summary = loc.actors[0].name + ' and ' + loc.actors[1].name;
-			else if (loc.actors.length > 2) {
-				var n_others = (loc.actors.length - 2);
-				section_summary = loc.actors[0].name + ', ' + loc.actors[1].name + ' and ' + n_others + (n_others == 1) ? 'other.' : 'others.';
+			var section_title = actors.length + ' other player' + ((actors.length != 1) ? 's' : '');
+			var section_summary = actors[0].name;
+			if (actors.length == 2)
+				section_summary = actors[0].name + ' and ' + actors[1].name;
+			else if (actors.length > 2) {
+				var n_others = (actors.length - 2);
+				section_summary = actors[0].name + ', ' + actors[1].name + ' and ' + n_others + (n_others == 1) ? 'other.' : 'others.';
 			}
 	
 			var player_tree = new CollapsibleTree(other_players, section_title, section_summary);
-			for (var i = 0; i < loc.actors.length; i++) {
-				var a = loc.actors[i];
+			for (var i = 0; i < actors.length; i++) {
+				var a = actors[i];
 				var p = new Element('p');
 				p.update('<img src="/icons/icon-' + a.alignment.toLowerCase() + '.png" class="alignicon" /> ' + a.name + '');
 				player_tree.insert(p);
