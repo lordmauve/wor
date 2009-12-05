@@ -8,8 +8,9 @@ from Logger import log
 import Context
 import types
 
-from wor.jsonutil import JSONSerialisable
+from wor.jsonutil import JSONSerialisable, Everything
 from wor.actions.movement import ActionMove
+from wor.actions.enter import ActionExit
 
 
 class NullLocation(object):
@@ -87,12 +88,13 @@ class Location(Persistent, JSONSerialisable):
 			for k, v in locations.__dict__.items():
 				if (isinstance(v, type)
 					and issubclass(v, Location)
-					and v is not Location):
+					and v is not Location
+					and v is not InteriorLocation):
 					loc_map[v.internal_name()] = v
 			cls._loc_cache = loc_map
 			return loc_map
 
-	context_fields = ['pos', 'actors', 'description', 'class_name']
+	context_fields = ['pos', 'actors', 'objects', 'description', 'class_name']
 
 	def context_extra(self, context):
 		return {
@@ -106,7 +108,7 @@ class Location(Persistent, JSONSerialisable):
 			return
 
 		if context.visible(auth):
-			return ['title', 'actors', 'class_name', 'description', 'timeofday']
+			return Everything()
 		return []
 
 	def power(self, name):
@@ -236,12 +238,19 @@ class Location(Persistent, JSONSerialisable):
 				a = no_d(functools.partial(player.move_to, l.pos))
 				# Create the action itself
 				actions.append(ActionMove(player, n.upper(), cost=Cost(ap=cost)))
+
+		if hasattr(self.region, 'parent_building'):
+			actions.append(ActionExit(player, self.region.parent_building))
 		return actions
 
 	# Who's here?
 	def actors(self):
 		"""Return a list of the actors on this location"""
 		return self.region.get_actors_at(self.pos)
+
+	def objects(self):
+		"""Return a list of the objects on this location"""
+		return self.region.get_objects_at(self.pos)
 
 	def could_go(self, player, direction):
 		# FIXME: Add support for edge conditions
@@ -255,4 +264,20 @@ class Location(Persistent, JSONSerialisable):
 
 	def move_cost(self, player, destination):
 		return self.move_ap + destination.move_ap
+
+
+
+class InteriorLocation(Location):
+	"""Interior locations don't have much of a name; the region
+	title is a more suitable name."""
+	move_ap = 0
+
+	def get_title(self):
+		return self.title or self.region.get_title()
+
+	def power(self, name):
+		"""Players can see further from higher up"""
+		if name == 'sight':
+			return 10
+		return 0
 

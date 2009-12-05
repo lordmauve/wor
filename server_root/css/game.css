@@ -50,7 +50,7 @@ body#sunset {
 }
 
 #map-bubble .description {
-	font-size: 12px;
+	font-size: 13px;
 	margin: 0 5px 6px;
 	text-align: justify;
 }
@@ -80,7 +80,8 @@ body#sunset {
 	left: 216px;
 }
 
-#map-bubble .playersection {
+#map-bubble .playersection,
+#map-bubble .objectsection {
 	border: solid #d5c480 1px;
 	background-color: #fff7d5;
 	padding: 5px 8px;
@@ -169,7 +170,7 @@ body#sunset {
 
 #movement .action {
 	position: absolute;
-	width: 6em;
+	width: 5em;
 }
 
 #movement #action-move-LR {
@@ -255,6 +256,10 @@ body#sunset {
         opacity: 0.6;
         filter: alpha(opacity=0.6);
         cursor: pointer;
+}
+
+form.action {
+	text-align: right;
 }
 
 .fire {

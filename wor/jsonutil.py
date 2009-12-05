@@ -26,7 +26,7 @@ class JSONSerialisable(object):
 			
 		if auth is None:
 			auth = Everything()
-		else:
+		elif not isinstance(auth, Everything):
 			auth = set(auth)
 
 		if hasattr(self, 'context_fields'):

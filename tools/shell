@@ -8,7 +8,7 @@ import code
 def relpath(p):
 	return os.path.join(os.path.dirname(__file__), p)
 
-sys.path = sys.path[:1] + [relpath('../library'), relpath('../content')] + sys.path[1:]
+sys.path = sys.path[:1] + [relpath('..'), relpath('../library'), relpath('../content')] + sys.path[1:]
 
 from wor.db import db
 from wor.items.base import Item
