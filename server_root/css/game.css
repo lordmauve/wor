@@ -112,7 +112,6 @@ body#sunset {
 }
 
 #panel .panel p {
-	background: url('/img/panel-rule.png') no-repeat top center;
 	padding-top: 5px;
 	margin: 5px 0;
 }
@@ -196,4 +195,8 @@ body#sunset {
 #movement #action-move-UL {
 	top: -45px;
 	right: 5px;
+}
+
+.actor {
+	position: absolute;
 }
