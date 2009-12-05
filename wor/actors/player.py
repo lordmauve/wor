@@ -60,7 +60,7 @@ class Player(Actor):
 		return self.ap_counter.value
 
 	def __ap_setter(self, value):
-		self.ap_counter.value = value
+		self.ap_counter.set_value(value)
 
 	ap = property(__ap_getter, __ap_setter)
 
