@@ -81,7 +81,7 @@ def actor_log(request, target=None):
 	else:
 		actor = db.world().get_actor(pid)
 
-	since = 0 #request.META.get('X-WoR-Messages-Since', getattr(actor, 'last_action', 0))
+	since = request.META.get('X-WoR-Messages-Since', getattr(actor, 'last_action', 0))
 
 	return JSONResponse(actor.get_messages(since))
 

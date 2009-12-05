@@ -25,16 +25,19 @@ class MessageLog(IOBTree):
 	Messages are stored in a integer-indexed BTree for performance;
 	the indices are integer timestamps.
 	"""
-	def message(self, message, msg_type='message'):
+	def message(self, message, msg_type='message', sender=None):
 		"""Write a message to the actor's message log.
 		"""
 		t = int(time.time())
-		msg = (t, msg_type, message)
+		if sender:
+			msg = (t, msg_type, message, sender.name, getattr(sender, 'align', None))
+		else:
+			msg = (t, msg_type, message)
 		self.setdefault(t, PersistentList()).append(msg)
 
 	def get_messages(self, since):
 		msgs = []
-		for i in self.itervalues(since):
+		for i in self.itervalues(int(since)):
 			msgs += i
 		return msgs
 
@@ -137,7 +140,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 
 		return self.build_context(ret, fields)
 
-	def message(self, message, msg_type='message'):
+	def message(self, message, msg_type='message', sender=None):
 		"""Write a message to the actor's message log, creating it
 		if it does not yet exist.
 
@@ -145,7 +148,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 		if not hasattr(self, 'messages'):
 			self.messages = MessageLog()
 
-		self.messages.message(message, msg_type)
+		self.messages.message(message, msg_type, sender=sender)
 
 	def get_messages(self, since):
 		if not hasattr(self, 'messages'):
