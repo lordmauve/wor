@@ -7,6 +7,7 @@ from BTrees.OOBTree import OOBTree
 
 from Position import Position
 from wor.world.location import Location
+from wor.world.day import Day
 
 
 class Region(Persistent):
@@ -72,6 +73,10 @@ class Region(Persistent):
 		"""Called when an actor moves to a new location in the region."""
 		self._remove_actor(actor)
 		self._add_actor(actor, dest)
+
+	def get_time_of_day(self):
+		"""Return the effective time of day in this region."""
+		return Day.time_of_day()
 
 
 class InvalidRegion(KeyError):
