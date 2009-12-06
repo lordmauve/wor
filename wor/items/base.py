@@ -121,14 +121,16 @@ class Item(Persistent):
 
 		return False
 
-	def external_actions(self, acts, player, name=None):
+	def external_actions(self, player):
 		"""Retrieve the set of actions that can be performed on this
 		object whilst held."""
 		# Build system
+		acts = []
 		plans = makeable_plans(player, self)
 		for p in plans:
 			act = ActionMake(player, self, p)
-			acts[act.uid] = act
+			acts.append(act)
+		return acts
 
 	def context_get(self, context):
 		"""Return a dictionary of properties of this object, given the
