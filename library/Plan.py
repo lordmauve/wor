@@ -10,8 +10,8 @@ def makeable_plans(who, item):
 	from item."""
 	rv = []
 	for p in plans:
-		if (item.ob_type() not in p.materials
-			and item.ob_type() not in p.catalyst):
+		if (item.internal_name() not in p.materials
+			and item.internal_name() not in p.catalyst):
 			continue
 		if not p.can_be_made(who, 1):
 			continue

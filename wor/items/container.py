@@ -56,7 +56,7 @@ class ItemContainer(Persistent):
 			# We've been asked for an item by ID
 			item = db.get_for_id(key)
 			try:
-				if item in self.items[item.class_name()]:
+				if item in self.items[item.internal_name()]:
 					return item
 			except:
 				raise KeyError("Item '%d' not found in container." % key)

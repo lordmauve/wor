@@ -155,8 +155,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 		weap = player.held_item()
 
 		# They could attack us...
-		if weap and ("attack" in requested
-			and self.id is not player.id
+		if weap and (self.id is not player.id
 			and self.is_combative(player)):
 			
 			actions.append(ActionAttack(player, self))

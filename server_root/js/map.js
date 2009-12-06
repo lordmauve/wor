@@ -147,17 +147,20 @@ var Map = {
 		if (a.id == Player.player.id) {
 			img.src = '/img/pc/me-' + a.alignment.toLowerCase() + '.png';
 			var xoff = -15;
+			var name = a.name;
 		} else if (a.alignment) {
 			img.src = '/img/pc/' + a.alignment.toLowerCase() + '.png';
 			var xoff = -7;
+			var name = a.name;
 		} else if (a.class_name) {
 			parts = a.class_name.split('.')
 			var p = parts.pop();
 			img.src = '/img/npc/' + p.toLowerCase() + '.png';
 			var xoff = -7;
+			var name = a.short_name;
 		}
-		img.alt = a.name;
-		img.title = a.name;
+		img.alt = name;
+		img.title = name;
 		img.setStyle({
 			left: (x + 53 + xoff) + 'px',
 			bottom: (y + 45) + 'px',
