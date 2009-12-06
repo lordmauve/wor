@@ -142,8 +142,14 @@ body#sunset {
 	background: url('/icons/collapsible-open.png') no-repeat 4px 8px;
 }
 
+.collapsible-empty,
+.collapsible-empty:hover {
+	background-image: none;
+}
+
 .collapsible .head {
 	padding-left: 20px;
+	cursor: pointer;
 }
 
 .collapsible .head h3 {

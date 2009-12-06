@@ -34,6 +34,13 @@ class NPC(Mob):
 
 	context_fields = ['id', 'hp', 'class_name', 'short_name', 'full_name']
 
+	def context_extra(self, context):
+		ctx = {}
+		auth = context.authz_actor(self)
+		if context.visible(auth):
+			ctx['actions'] = [a.context_get(context) for a in self.external_actions(context.player)]
+		return ctx
+
 
 class HumanFemaleNPC(NPC):
 	def __init__(self, behaviour):
