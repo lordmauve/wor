@@ -1,3 +1,5 @@
+GP = 'currency.GoldPiece'
+
 class Cost(object):
 	"""A cost to perform an action, chargeable to a user."""
 	def __init__(self, ap=0, hp=0, gp=0):
@@ -18,12 +20,11 @@ class Cost(object):
 		return ', '.join(vs)
 
 	def can_afford(self, player):
-		return (player.has('GoldPiece', self.gp)
-				and player.hp > self.hp
-				and player.ap > self.ap)
+		return (player.inventory.has(GP, self.gp)
+				and player.hp > self.hp)
 
 	def charge(self, player):
 		player.ap -= self.ap
 		player.hp -= self.hp
 		if self.gp:
-			player.take_items('GoldPiece', self.gp)
+			player.inventory.take(GP, self.gp)

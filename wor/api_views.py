@@ -17,6 +17,7 @@ from wor.db import db
 
 from wor.items.base import Item
 from wor.world.location import Location
+from wor.actions.base import ActionFailed
 
 from Context import Context
 import Util
@@ -100,7 +101,7 @@ def actions(request):
 
 		try:
 			message = player.perform_action(request.POST['action'], request.POST)
-		except ValidationError, e:
+		except (ValidationError, ActionFailed), e:
 			return JSONResponse({'error': str(e)})
 
 		# Save any game state that might have changed

@@ -50,11 +50,15 @@ class Player(Actor):
 	context_fields = ['name', 'id', 'hp', 'maxhp', 'is_zombie']
 
 	def context_extra(self, context):
-		return {
+		ctx = {
 			'ap': '%d/%d' % (self.ap_counter.value, self.ap_counter.maximum),
 			'hp': '%d/%d' % (self.hp, self.maxhp),
 			'alignment': Alignment(self.align).name()
 		}
+		auth = context.authz_actor(self)
+		if context.visible(auth):
+			ctx['actions'] = [a.context_get(context) for a in self.external_actions(context.player)]
+		return ctx
 
 	def __ap_getter(self):
 		"""Action points"""
@@ -105,11 +109,6 @@ class Player(Actor):
 		loc = self.loc()
 		if loc:
 			actions += loc.external_actions(self)
-		
-		# What can we do to actors here?
-		for actor in self.loc().actors():
-			if actor != self:
-				actions += actor.external_actions(self)
 
 		# What can we do to actors nearby?
 		# FIXME: Fill in here
@@ -121,6 +120,11 @@ class Player(Actor):
 		on some other actor or object"""
 
 		actions = []
+		
+		# What can we do to actors here?
+		for actor in self.loc().actors():
+			if actor != self:
+				actions += actor.external_actions(self)
 
 		for obj in self.loc().objects():
 			actions += obj.external_actions(self)

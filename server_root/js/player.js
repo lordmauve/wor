@@ -96,22 +96,29 @@ var Action = Class.create({
 
 		this.parameters = [];
 		if (act.parameters) 
-			act.parameters.each(function (p) {
+			act.parameters.each(function (p, i) {
+				if (i)
+					this.form.appendChild(document.createTextNode(' '));
 				var field = this.parameter_to_field(p);
-				this.parameters.push(field);
-				this.form.insert(field);
+				if (field.nodeType == 1) {
+					this.parameters.push(field);
+					this.form.insert(field);
+				} else {
+					this.form.appendChild(field);
+				}
 			}.bind(this));
 
+		if (this.form.lastChild.nodeType == 3 || this.form.lastChild.nodeName.toLowerCase() == 'strong')
+			this.form.appendChild(document.createTextNode(' '));
 		var button = new Element('button').update(label);
-		Event.observe(button, 'click', this.perform.bindAsEventListener(this));
+		if (act.can_afford) {
+			Event.observe(button, 'click', this.perform.bindAsEventListener(this));
+		} else {
+			button.disabled = true;
+		}
 		this.form.insert(button);
 
 		parent.insert(this.form);
-	},
-
-	parameter_to_field: function (p) {
-		if (p.type == 'SayField')
-			return new Element('input', {'name': p.name});
 	},
 	
 	perform: function (evt) {
@@ -119,6 +126,25 @@ var Action = Class.create({
 		var data = this.form.serialize();
 		data = 'action=' + this.act.uid + '&' + data;
 		get_json('/actor/self/actions/', act_response, data);
+	},
+
+	parameter_to_field: function (p) {
+		if (!p.type)
+			return document.createTextNode(p);
+		// delegate to a type-specific function to get the HTML field
+		if (this['field_for_' + p.type])
+			return this['field_for_' + p.type](p);
+		return document.createTextNode('[' + p.type + ']');
+	},
+
+	field_for_SayField: function (p) {
+		return new Element('input', {'name': p.name});
+	},
+
+	field_for_ItemField: function (p) {
+		var s = new Element('strong');
+		s.appendChild(document.createTextNode(p.item));
+		return s;
 	}
 });
 

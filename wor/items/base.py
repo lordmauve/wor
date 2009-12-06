@@ -68,6 +68,9 @@ class Item(Persistent):
 			return '%d %s' % (self.count, self.name_for(count=item.count))
 		return self.name_for()
 
+	def description(self):
+		return getattr(self, 'desc', self.name_for())
+
 	@classmethod
 	def get_class(cls, name):
 		"""Obtain and cache an item class object by name"""
@@ -192,6 +195,15 @@ class AggregateItem(Item):
 		"""Create a new AggregateItem with the given unit count."""
 		super(AggregateItem, self).__init__()
 		self.count = count
+
+	def description(self):
+		if self.count == 1:
+			return getattr(self, 'desc', self.name_for())
+		else:
+			try:
+				return self.desc_plural % self.count
+			except AttributeError:
+				return self.name_for()
 
 	def merge(self, new_item):
 		"""Merge the given item with this item, if possible.  Return 

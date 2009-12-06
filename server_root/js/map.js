@@ -284,9 +284,11 @@ var LocationBubble = {
 			var player_tree = new CollapsibleTree(npcslist, section_title, section_summary);
 			for (var i = 0; i < npcs.length; i++) {
 				var a = npcs[i];
-				var p = new Element('p');
-				p.appendChild(document.createTextNode(a.full_name));
-				player_tree.insert(p);
+				var act_tree = new CollapsibleTree(player_tree, a.full_name, '');
+
+				$A(a.actions).each(function (act) {
+					new Action(act, act_tree);
+				});
 			}
 	
 			$('scrollpane').insert(npcslist);
@@ -310,9 +312,13 @@ var LocationBubble = {
 			var player_tree = new CollapsibleTree(other_players, section_title, section_summary);
 			for (var i = 0; i < actors.length; i++) {
 				var a = actors[i];
-				var p = new Element('p');
-				p.update('<img src="/icons/icon-' + a.alignment.toLowerCase() + '.png" class="alignicon" /> ' + a.name + '');
-				player_tree.insert(p);
+
+				var ptitle = '<img src="/icons/icon-' + a.alignment.toLowerCase() + '.png" class="alignicon" /> ' + a.name;
+				var act_tree = new CollapsibleTree(player_tree, ptitle, '');
+
+				$A(a.actions).each(function (act) {
+					new Action(act, act_tree);
+				});
 			}
 	
 			$('scrollpane').insert(other_players);
@@ -367,7 +373,7 @@ var LocationBubble = {
 // An expandable/collapsible tree widget
 var CollapsibleTree = Class.create({
 	initialize: function(parent, title, summary) {
-		this.container = new Element('div', {'class': 'collapsible'});
+		this.container = new Element('div', {'class': 'collapsible collapsible-empty'});
 		this.titlebox = new Element('div', {'class': 'head'});
 		this.panel = new Element('div', {'class': 'contents'});
 
@@ -386,14 +392,16 @@ var CollapsibleTree = Class.create({
 
 	insert: function (obj) {
 		this.panel.insert(obj);	
+		if (this.container.hasClassName('collapsible-empty'))
+			this.container.removeClassName('collapsible-empty');
 	},
 	
 	toggle: function (event) {
 		this.summary.toggle();
 		this.panel.toggle();
-//		if (this.panel.visible()) {
-//			this.container.addClassName('collapsible-open');
-//		}
-//		else this.container.removeClassName('collapsible-open');
+		if (this.panel.visible()) {
+			this.container.addClassName('collapsible-open');
+		}
+		else this.container.removeClassName('collapsible-open');
 	}
 });

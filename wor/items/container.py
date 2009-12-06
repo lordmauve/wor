@@ -58,7 +58,9 @@ class ItemContainer(Persistent):
 			else:
 				raise KeyError()
 		elif isinstance(key, str):
-			return self._item_types[key].copy()
+			i = self._get_first_item(key)
+			if i is None:
+				raise KeyError("No such item '%s' in container" % key)
 		else:
 			raise TypeError()
 
@@ -74,26 +76,25 @@ class ItemContainer(Persistent):
 
 		Use has() to test for the presence of items by class.
 		"""
-		if isinstance(key, Item):
-			return key._id in self._item_ids
+		if isinstance(key, str):
+			return key in self.items
 		elif isinstance(key, long) or isinstance(key, int):
 			return key in self._item_ids
 		else:
 			raise TypeError()
 
-	def has(self, itemclass, count=1):
+	def has(self, itype, count=1):
 		"""Test whether the container has 'count' of items of type
 		itemclass.
 
 		Parameters:
-		itemclass -- the class of the item to check for. Must be a leaf
-		             class (base classes will not be counted).
+		itemtype -- the class name of the item to look for.
 		count -- the number of items to look for.
 		
 		Returns: True if the container contains at least 'count' items
 		of class 'itemclass'.
 		"""
-		if itemclass not in self.items:
+		if itype not in self.items:
 			return False
 
 		# Since items have a count of 1 by default, we can just 
@@ -101,22 +102,32 @@ class ItemContainer(Persistent):
 		#
 		# TODO: Figure out if there's a way to internalize this in 
 		#       Item
-		if itemclass.aggregate:
-			# Note that we can only have a single aggregate of a 
+		itemclass = Item.get_class(itype)
+		if issubclass(itemclass, AggregateItem):
+			# Note that we should only have a single aggregate of a 
 			# given type per container
-			total = self.__get_first_item(itemclass).count
+			total = sum([i.count for i in self.items[itype]])
 		else:
-			total = len(self.items[itemclass])
+			total = len(self.items[itype])
 
 		return total >= count
 
 	def create(self, itype, count=1):
+		"""Create an item of type itype within this container,
+		and return the instance created.
+
+		If count is given, create the number specified - but only return
+		the last instance created.
+		"""
 		icls = Item.get_class(itype)
 		if issubclass(icls, AggregateItem):
-			self.add(icls(count=count))
+			inst = icls(count=count)
+			self.add(inst)
 		else:
 			for i in xrange(count):
-				self.add(icls())
+				inst = icls()
+				self.add(inst)
+		return inst
 
 	def add(self, item):
 		"""Add the given item to the container.
@@ -131,7 +142,7 @@ class ItemContainer(Persistent):
 		shouldDiscard = False
 
 		# get the first element of the type.
-		existing_item = self.__get_first_item(itype)
+		existing_item = self._get_first_item(itype)
 		if existing_item is not None:
 			# Now, try to merge the new item into it.  Note that if
 			# this is an aggregate, we'll only have one element in the
@@ -177,7 +188,9 @@ class ItemContainer(Persistent):
 		this inventory container to fulfil the request.
 		"""
 		# Try splitting the item
-		first_item = self.__get_first_item(itype)
+		first_item = self._get_first_item(itype)
+		if first_item is None:
+			raise Util.WorInsufficientItemsException("No %s in container. Could not remove %d items." % (itype, count))
 		split_item = first_item.split(count)
 
 		rv = None
@@ -190,10 +203,12 @@ class ItemContainer(Persistent):
 			if len(rv) < count:
 				raise Util.WorInsufficientItemsException(
 					"Attempted to remove %d items of type %s, but only %d were found"
-					% (count, itemclass, len(rv)))
+					% (count, itype, len(rv)))
 
-			self.items[itype] = items
-			
+			if remaining_items:
+				self.items[itype] = remaining_items
+			else:
+				del self.items[itype]
 		else:
 			# We successfully split, so return the result
 			rv = set([split_item,])
@@ -237,7 +252,7 @@ class ItemContainer(Persistent):
 			split_item = self.remove(item)
 		return split_item
 
-	def __get_first_item(self, itype):
+	def _get_first_item(self, itype):
 		"""Get an arbitrary item of the given type from the container.
 
 		Parameters:
@@ -245,7 +260,10 @@ class ItemContainer(Persistent):
 		Returns: an arbitrary item of that type from the container, or
 		None if no item of that type is present
 		"""
-		return self.items.get(itype, None)
+		try:
+			return self.items[itype][0]
+		except KeyError:
+			return None
 
 	def transfer_to(self, item, destination, count=1):
 		"""Transfer an item from this container to another.

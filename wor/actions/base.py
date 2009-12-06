@@ -5,6 +5,10 @@ class ValidationError(Exception):
 	"""The action parameters did not validate."""
 
 
+class ActionFailed(Exception):
+	"""The action could not be completed."""
+
+
 class SayField(object):
 	"""An input field corresponding to a 'say' message box"""
 	def __init__(self, name, default=''):
@@ -20,8 +24,16 @@ class SayField(object):
 	def context_get(self):
 		return {
 			'name': self.name,
-			'type': self.__class__.__name__,
 			'default': self.default,
+		}
+
+class ItemField(object):
+	def __init__(self, item):
+		self.item = item
+
+	def context_get(self):
+		return {
+			'item': self.item.name_for()
 		}
 
 
@@ -38,7 +50,7 @@ class Action(object):
 		self.actor = actor
 
 	def get_caption(self):
-		raise NotImplementedError("Subclasses must implement Action.get_caption")
+		return self.caption
 
 	def get_uid(self):
 		"""Return a unique ID identifying this action"""
@@ -56,18 +68,26 @@ class Action(object):
 		ret['uid'] = self.get_uid()
 		ret['caption'] = self.get_caption()
 		ret['group'] = self.group
+		ret['can_afford'] = self.can_afford()
 
 		params = self.get_parameters()
 		if params:
 			ps = []
 			for p in params:
-				if isinstance(p, str) or isinstance(p, unicode):
-					ps.append(p)
+				if hasattr(p, 'context_get'):
+					ctx = p.context_get()
+					ctx['type'] = p.__class__.__name__
+					ps.append(ctx)
 				else:
-					ps.append(p.context_get())
+					ps.append(p)
 			ret['parameters'] = ps
 
 		return ret
+
+	def can_afford(self):
+		if self.cost is None:
+			return True
+		return self.cost.can_afford(self.actor)
 
 	def get_kwargs(self, data):
 		kw = {}
@@ -75,17 +95,19 @@ class Action(object):
 		if not params:
 			return {}
 		for p in params:
-			if isinstance(p, str) or isinstance(p, unicode):
+			if not hasattr(p, 'name'):
 				continue
 			val = p.clean(data.get(p.name, ''))
 			kw[p.name] = val
 		return kw	
 
 	def perform(self, data):
+		if self.cost:
+			if not self.cost.can_afford(self.actor):
+				raise ActionFailed("You cannot afford it!")
+			self.cost.charge(self.actor)
 		kwargs = self.get_kwargs(data)
 		message = self.action(**kwargs)
-		if self.cost:
-			self.cost.charge(self.actor)
 		return message
 
 	def action(self, data):
