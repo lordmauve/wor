@@ -3,7 +3,7 @@ from base import Item
 
 class Punch(Item):
 	name = "punch"
-	plural = "punches"
+	name_plural = "punches"
 	damage = 1
 	sticky = True
 	group = "Weapons"
@@ -11,7 +11,7 @@ class Punch(Item):
 
 class Haymaker(Punch):
 	name = "haymaker"
-	plural = "haymakers"
+	name_plural = "haymakers"
 	damage = 1
 	sticky = True
 	tohit = -40

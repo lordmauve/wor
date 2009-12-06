@@ -1,0 +1,19 @@
+#!/usr/bin/python
+import sys
+import os
+import os.path
+
+def relpath(p):
+	return os.path.join(os.path.dirname(__file__), p)
+
+sys.path = sys.path[:1] + [relpath('..'), relpath('../library'), relpath('../content')] + sys.path[1:]
+
+from wor.db import db
+
+w = db.world()
+
+for r in w.regions.values():
+	#FIXME: load only mobs/NPCs
+	for a in r.get_cpu_controlled():
+		a.behaviour.update(a)
+	db.commit()

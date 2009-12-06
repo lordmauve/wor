@@ -47,9 +47,9 @@ class Item(Persistent):
 			name = cls.__name__.lower()
 			
 		if count > 1:
-			if hasattr(cls, 'plural'):
-				return cls.plural
-			else:
+			try:
+				return cls.name_plural % count
+			except AttributeError:
 				return name + "s"
 		return name
 
@@ -64,9 +64,7 @@ class Item(Persistent):
 		return unicode(self).encode('utf8')
 
 	def __unicode__(self):
-		if self.count > 1:
-			return '%d %s' % (self.count, self.name_for(count=item.count))
-		return self.name_for()
+		return self.name_for(count=self.count)
 
 	def description(self):
 		return getattr(self, 'desc', self.name_for())
@@ -113,7 +111,6 @@ class Item(Persistent):
 	def destroy(self):
 		"""Destroy this item, recycling it if necessary"""
 #		DBLogger.log_item_event(DBLogger.ITEM_DESTROY, self._id)
-		self.demolish()
 
 	def try_break(self):
 		"""Test this item for breakage, and return True if it broke"""
@@ -213,7 +210,7 @@ class AggregateItem(Item):
 		#
 		# TODO: Is this good, or do we need to support subclasses as 
 		#       well?
-		if self.ob_type() == new_item.ob_type():
+		if self.internal_name() == new_item.internal_name():
 			oq = self.count
 			self.count += int(new_item.count)
 #			DBLogger.log_item_event(DBLogger.ITEM_MERGE,
@@ -224,7 +221,7 @@ class AggregateItem(Item):
 			return True
 		else:
 			raise Util.WorError("Incompatible types (%s/%s) cannot be merged"
-								% (self.ob_type(), new_item.ob_type()))
+								% (self.internal_name(), new_item.internal_name()))
 		return False
 
 	def split(self, num_items):

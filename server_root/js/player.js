@@ -19,6 +19,18 @@ var Player = {
 		html += "<span>" + player.hp + ' <img src="/img/hp.png" alt="HP"></span></p>';
 
 		panel.update(html);
+
+		var tools = new Element('p');
+		Player.invbutton = new Element('button').update('Inventory');
+		Player.equipbutton = new Element('button').update('Equipment');
+
+		tools.insert(Player.invbutton);
+		panel.insert(tools);
+
+		Player.invbutton.observe('click', function (event) {
+			Event.stop(event);
+			Inventory.show();
+		});
 	}
 };
 
@@ -54,20 +66,10 @@ function load_player_act(actions)
 	{
 		var act = actions[i];
 
-		if(act.group == 'inventory')
-		{
-			action_id = act.uid.split('.');
-			if (action_id[2] == 'changeitem')
-			{
-				// Keep track of the details, but don't display
-				// anything
-				inventory_action = act.uid;
-				pos = act.parameters.indexOf('_');
-				inventory_parameters = act.parameters.slice(pos+1);
-				inventory_found = true;
-			}
-		}
-		else if(act.group == 'item')
+		if (act.group == 'inventory')
+			continue;
+
+		if (act.group == 'item')
 		{
 			var panel = get_item_panel();
 			var actions = document.getElementById("held_item_actions");
@@ -108,7 +110,7 @@ var Action = Class.create({
 				}
 			}.bind(this));
 
-		if (this.form.lastChild.nodeType == 3 || this.form.lastChild.nodeName.toLowerCase() == 'strong')
+		if (this.form.lastChild && (this.form.lastChild.nodeType == 3 || this.form.lastChild.nodeName.toLowerCase() == 'strong'))
 			this.form.appendChild(document.createTextNode(' '));
 		var button = new Element('button').update(label);
 		if (act.can_afford) {
@@ -145,6 +147,10 @@ var Action = Class.create({
 		var s = new Element('strong');
 		s.appendChild(document.createTextNode(p.item));
 		return s;
+	},
+
+	field_for_IntegerField: function (p) {
+		return new Element('input', {'name': p.name, 'size': '3'});
 	}
 });
 

@@ -1,4 +1,4 @@
-from base import Action
+from base import Action, ActionFailed, IntegerField
 from Cost import Cost
 
 class ActionChangeItem(Action):
@@ -13,5 +13,12 @@ class ActionChangeItem(Action):
 	def get_caption(self):
 		return u"Change item"
 
-	def action(self, data):
-		self.actor.change_item_action(data)
+	def get_parameters(self):
+		return [IntegerField('id')]
+
+	def action(self, id):
+		try:
+			item = self.actor.inventory[id]
+		except KeyError:
+			raise ActionFailed('Item not found.')
+		self.actor.set_held_item(item)

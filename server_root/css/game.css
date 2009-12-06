@@ -214,6 +214,7 @@ body#sunset {
 
 /* for messagebox */
 
+#inventory_panel,
 #messagebox {
 	position: absolute;
 	z-index: 100000;
@@ -231,6 +232,11 @@ body#sunset {
 	-moz-border-radius: 6px;
 }
 
+#inventory_panel {
+	width: 700px;
+}
+
+#inventory_panel h3,
 #messagebox h3 {
 	margin: 0;
 	font-weight: normal;
@@ -244,6 +250,7 @@ body#sunset {
 	margin: 0.5em 0;
 }
 
+#inventory_panel #close,
 #messagebox #close {
 	position: absolute;
 	top: 8px;

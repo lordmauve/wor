@@ -47,6 +47,13 @@ class Region(Persistent):
 		loc.region = self
 		loc.pos = Position(x, y, self.name)
 
+	def get_cpu_controlled(self):
+		"""Returns an iterable of actors that can be controlled."""
+		for acts in self.actors.values():
+			for act in acts:
+				if hasattr(act, 'behaviour'):
+					yield act
+
 	def get_actors_at(self, pos):
 		return list(self.actors.get(pos, []))
 	
