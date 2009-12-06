@@ -69,6 +69,13 @@ class WoRDB(object):
 
 	def commit(self):
 		transaction.commit()
+
+	def commit_subtransaction(self):
+		transaction.commit(True)
+
+	def abort_subtransaction(self):
+		transaction.abort(True)
+
 	
 	world = db_root_object('world', World)
 	accounts = db_root_object('accounts', AccountManager)

@@ -28,12 +28,33 @@ class SayField(object):
 		}
 
 class ItemField(object):
+	"""Display an item name"""
 	def __init__(self, item):
 		self.item = item
 
 	def context_get(self):
 		return {
 			'item': self.item.name_for()
+		}
+
+class IntegerField(object):
+	def __init__(self, name, default=None):
+		self.name = name
+		self.default = default
+
+	def clean(self, value):
+		if not value.strip() and self.default:
+			return self.default
+		try:
+			i = int(value.strip())
+		except ValueError:
+			raise ValidationError("You must enter an integer.")
+		return i
+
+	def context_get(self):
+		return {
+			'name': self.name,
+			'default': self.default,
 		}
 
 

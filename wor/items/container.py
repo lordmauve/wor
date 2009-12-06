@@ -54,10 +54,12 @@ class ItemContainer(Persistent):
 		# FIXME: Allow a class to be passed as key, as well
 		if isinstance(key, long) or isinstance(key, int):
 			# We've been asked for an item by ID
-			if key in self._item_ids:
-				return Item.load(key)
-			else:
-				raise KeyError()
+			item = db.get_for_id(key)
+			try:
+				if item in self.items[item.class_name()]:
+					return item
+			except:
+				raise KeyError("Item '%d' not found in container." % key)
 		elif isinstance(key, str):
 			i = self._get_first_item(key)
 			if i is None:
@@ -155,7 +157,7 @@ class ItemContainer(Persistent):
 		# If merge does not indicate we should discard the element, add
 		# it to our ID and type collections
 		if shouldDiscard:
-			item.demolish()
+			item.destroy()
 			# We don't need to set any changes here, as we've only
 			# updated the internal state of existing_item, and not
 			# modified the container itself.

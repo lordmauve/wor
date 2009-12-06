@@ -52,10 +52,14 @@ function get_json(url, callback, postdata)
 	req.onreadystatechange = function () {
 		if (req.readyState == 4) {
 			if (req.status == 200) {
-				if (typeof JSON !== 'undefined')
-					callback(JSON.parse(req.responseText));
-				else
-					callback(eval('(' + req.responseText + ')'));
+				if (typeof JSON !== 'undefined') {
+					var arg = JSON.parse(req.responseText);
+				} else {
+					var arg = eval('(' + req.responseText + ')');
+				}
+				//firebug doesn't catch errors in XHR events?
+				//so queue event on a short timer
+				setTimeout(function () {callback(arg);}, 10) 
 			} else {
 				handle_api_error(req);
 			}
