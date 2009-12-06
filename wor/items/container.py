@@ -30,6 +30,7 @@ class ItemContainer(Persistent):
 				ret.append({
 					'cls': item.internal_name(),
 					'id': db.id(item),
+					'description': item.description(),
 					'count': item.count,
 					'name': unicode(item),
 				})
