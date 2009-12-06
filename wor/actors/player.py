@@ -33,7 +33,8 @@ class Player(Actor):
 		return db.world().get_player(name)
 
 	def __init__(self, name, align):
-		super(Player, self).__init__(name)
+		super(Player, self).__init__()
+		self.name = name
 		self.align = align
 		# Start at 120AP, get one more every 6 minutes (240 per day),
 		# maximum 240.

@@ -175,6 +175,8 @@ class World(Persistent):
 		object._position = dest
 	
 	def spawn_object(self, obj, dest):
+		from wor.objects.base import WorldObject
+		assert isinstance(obj, WorldObject)
 		if not hasattr(obj, 'id'):
 			# register the actor in the index
 			try:
@@ -186,7 +188,9 @@ class World(Persistent):
 
 	def spawn_actor(self, actor, dest):
 		"""Add a new actor to the world at dest"""
+		from wor.actors.actor import Actor
 		from wor.actors.player import Player
+		assert isinstance(actor, Actor)
 		if not hasattr(actor, 'id'):
 			# register the actor in the index
 			try:

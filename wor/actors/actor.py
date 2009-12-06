@@ -48,10 +48,9 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 	TO_HIT_MIN = 0.05
 	TO_HIT_MAX = 0.95
 
-	def __init__(self, name):
+	def __init__(self):
 		"""Create a completely new actor"""
 		super(Actor, self).__init__()
-		self.name = name
 		self._position = None
 		self.hp = 1
 
@@ -59,7 +58,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 		hp_trigger = TriggerDeath(self)
 
 	def get_name(self):
-		return self.name
+		return getattr(self, 'name', self.__class__.__name__)
 
 	__str__ = get_name
 
