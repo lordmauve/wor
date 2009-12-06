@@ -140,13 +140,20 @@ var Map = {
 		}
 	},
 
+	available_npcs: ['Barmaid'],
+
 	insert_actor: function(tile, x, y, a) {
 		var img = new Element('img', {'class': 'actor'});
 		if (a.id == Player.player.id) {
 			img.src = '/img/pc/me-' + a.alignment.toLowerCase() + '.png';
 			var xoff = -15;
-		} else {
+		} else if (a.alignment) {
 			img.src = '/img/pc/' + a.alignment.toLowerCase() + '.png';
+			var xoff = -7;
+		} else if (a.class_name) {
+			parts = a.class_name.split('.')
+			var p = parts.pop();
+			img.src = '/img/npc/' + p.toLowerCase() + '.png';
 			var xoff = -7;
 		}
 		img.alt = a.name;
@@ -158,6 +165,7 @@ var Map = {
 		});
 		tile.insert(img);
 	},
+
 
 	// Convert [r, d] "polar" coordinates to an internal (x, y) pair
 	rd_to_xy: function (r, d) {
@@ -259,8 +267,33 @@ var LocationBubble = {
 			$('scrollpane').insert(new Element('p', {'class': 'description'}).update(loc.description));
 		}
 
+		var npcs = loc.actors.filter(function (a) {return !!a.class_name;});
+
+		if (npcs.length) {
+			var npcslist = new Element('div', {'class': 'playersection'});
+		
+			var section_title = npcs.length + ' other character' + ((npcs.length != 1) ? 's' : '');
+			var section_summary = npcs[0].short_name.substr(0, 1).toUpperCase() + npcs[0].short_name.substr(1);
+			if (npcs.length == 2)
+				section_summary += ' and ' + npcs[1].short_name;
+			else if (npcs.length > 2) {
+				var n_others = (npcs.length - 2);
+				section_summary +=  ', ' + npcs[1].short_name + ' and ' + n_others + (n_others == 1) ? 'other.' : 'others.';
+			}
+	
+			var player_tree = new CollapsibleTree(npcslist, section_title, section_summary);
+			for (var i = 0; i < npcs.length; i++) {
+				var a = npcs[i];
+				var p = new Element('p');
+				p.appendChild(document.createTextNode(a.full_name));
+				player_tree.insert(p);
+			}
+	
+			$('scrollpane').insert(npcslist);
+		}
+
 		//other actors only
-		var actors = loc.actors.filter(function (a) {return a.id != Player.player.id;});
+		var actors = loc.actors.filter(function (a) {return !a.class_name && a.id != Player.player.id;});
 
 		if (actors.length) {
 			var other_players = new Element('div', {'class': 'playersection'});
@@ -284,6 +317,7 @@ var LocationBubble = {
 	
 			$('scrollpane').insert(other_players);
 		}
+
 
 		if (loc.objects.length) {
 			for (var i = 0; i < loc.objects.length; i++) {
