@@ -66,6 +66,6 @@ class JSONSerialisable(object):
 			if isinstance(result, list):
 				return [i.context_get(context) for i in result]
 			else:
-				return result
+				return self.__context_property(result, context, False)
 		else:
-			return str(v)
+			return v

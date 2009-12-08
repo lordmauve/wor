@@ -201,7 +201,7 @@ class ItemContainer(Persistent):
 			# We can't split, so we've got a singular item class: grab
 			# the first count items from the list and remove them
 			items = self.items[itype]
-			rv, remaining_items = items[:count] + items[count:]
+			rv, remaining_items = items[:count], items[count:]
 
 			if len(rv) < count:
 				raise Util.WorInsufficientItemsException(

@@ -10,18 +10,22 @@ import BaseConfig
 from Plan import Plan, makeable_plans
 import Context
 
+from wor.db import db
 from wor.actions.make import ActionMake
+from wor.jsonutil import JSONSerialisable
 
 # We must do this to run the code that defines all possible plans.
 # Can't be done in Plan, for circular reference reasons.
 import Plans
+	
 
-
-class Item(Persistent):
+class Item(JSONSerialisable, Persistent):
 	"""An item. By default, all items are unique. Some items are
 	'aggregate' and represent a block of otherwise identical things --
 	e.g. coins -- and can be combined and split (see AggregateItem).
 	"""
+	__abstract = True	# declares the item as abstract so it won't appear in list_all_classes
+
 	group = "General"
 
 	# Default failure function is a mean life of 300, and equal
@@ -70,6 +74,10 @@ class Item(Persistent):
 		return getattr(self, 'desc', self.name_for())
 
 	@classmethod
+	def is_abstract(cls):
+		return getattr(cls, '_%s__abstract' % cls.__name__, False)
+
+	@classmethod
 	def get_class(cls, name):
 		"""Obtain and cache an item class object by name"""
 		items = Item.list_all_classes()
@@ -84,10 +92,7 @@ class Item(Persistent):
 		except AttributeError:
 			item_map = {}
 			for k, v in items.__dict__.items():
-				if (isinstance(v, type)
-					and issubclass(v, Item)
-					and v is not Item
-					and v is not AggregateItem):
+				if isinstance(v, type) and issubclass(v, Item) and not v.is_abstract():
 					item_map[v.internal_name()] = v
 			cls._item_cache = item_map
 			return item_map
@@ -132,12 +137,20 @@ class Item(Persistent):
 			acts.append(act)
 		return acts
 
-	def context_get(self, context):
+	context_fields = ['description', 'count']
+
+	def context_extra(self, context):	
+		return {
+			'name': unicode(self),
+			'cls': self.internal_name()
+		}
+
+	def context_get_(self, context):
 		"""Return a dictionary of properties of this object, given the
 		current authZ context"""
 		ret = {}
-		ret['id'] = str(self._id)
-		ret['type'] = self.ob_type()
+		ret['id'] = db.id(self)
+		ret['type'] = self.internal_name()
 
 		auth = context.authz_item(self)
 		if auth == Context.ADMIN:
@@ -161,33 +174,12 @@ class Item(Persistent):
 		return None
 
 
-	####
-	# Combat functions: Move this to a separate mix-in class?
-	def pre_attack(self, victim):
-		"""Called before any attack happens"""
-		pass
-
-	def base_damage_to(self, victim):
-		"""Return the base damage of this weapon"""
-		return self.damage
-
-	def weapon_break(self, user, victim):
-		"""Test for breakage after hitting someone. Return True if
-		we've broken."""
-		broken = user.unlucky(self.break_profile(life))
-		self.uses += 1
-		return broken
-
-	def miss_actor(self, user, victim):
-		"""What to do if we missed the victim"""
-		pass
-
-
 class AggregateItem(Item):
 	"""An item containing a number of identical objects.  Note that it 
 	   contains the underlying stuff in a conceptual sense only - rather 
 	   than containing 500 Gold objects, for example, it's simply a Gold 
 	   object with a 500 count"""
+	__abstract = True
 	aggregate = True
 
 	def __init__(self, count=1):

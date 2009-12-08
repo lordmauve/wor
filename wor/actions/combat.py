@@ -14,5 +14,5 @@ class ActionAttack(TargettedAction):
 		self.target = target
 		self.cost = cost
 
-	def action(self, data):
-		self.player.attack(self.target)
+	def action(self):
+		self.actor.attack(self.target)

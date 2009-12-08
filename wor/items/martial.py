@@ -1,7 +1,7 @@
-from base import Item
+from wor.items.weapons.base import Weapon
 
 
-class Punch(Item):
+class Punch(Weapon):
 	name = "punch"
 	name_plural = "punches"
 	damage = 1
