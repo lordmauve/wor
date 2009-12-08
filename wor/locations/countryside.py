@@ -1,4 +1,4 @@
-from wor.world.location import Location
+from wor.world.location import Location, Scenery
 
 
 class Plain(Location):
@@ -16,3 +16,38 @@ class Hills(Location):
 
 class Village(Location):
 	"""A small village"""
+
+
+class Copse(Location):
+	move_ap = 4
+
+
+class Cliffs(Location):
+	"""Chalk cliffs; these do not provide a actual barrier; just a cosmetic effect"""
+	move_ap = 2
+
+
+class Pond(Scenery):
+	pass
+
+
+class Road(Location):
+	pass
+
+
+class TradingPost(Location):
+	pass
+
+
+class Farm(Location):
+	pass
+
+
+class Wood(Location):
+	move_ap = 10
+
+class Mountain(Scenery):
+	pass
+
+class Peak(Scenery):
+	pass

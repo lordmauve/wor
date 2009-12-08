@@ -2,14 +2,17 @@
 .emptyloc {
 	width: 105px;
 	height: 100px;
-	padding: 1px;
 	text-align: center;
 	position: absolute;
 	color: rgba(255, 255, 255, 0.2);
 }
 
-.loc {
-	background: url('/tiles/default.png') no-repeat bottom center;
+.loc img.tile {
+	position: absolute;
+	bottom: 0;
+	margin: 0 auto;
+	left: 0;
+	right: 0;
 }
 
 .loc a {

@@ -109,13 +109,17 @@ var Map = {
 			
 			Event.observe(tile, 'click', Map.show_bubble.bindAsEventListener(tile)); 
 		}
+		else {
+			tile.select('.tile').each(function (x) {x.remove();});
+		}
 
-		var tilesrc = loc.class_name.toLowerCase();
+		var tilesrc = loc.class_name.toLowerCase() + '.png';
 		if (document.body.id)
 			tilesrc = document.body.id + '/' + tilesrc;
-		tile.setStyle({
-			backgroundImage: "url('/tiles/" + tilesrc + ".png')"
-		});
+		tilesrc = '/tiles/' + tilesrc;
+		
+		var im = new Element('img', {'src': tilesrc, 'class': 'tile'});
+		tile.appendChild(im);
 
 		Map.update_actors(tile, loc.actors);
 
@@ -241,12 +245,10 @@ var Map = {
 		// if the event came from the tile and not the
 		// bubble, update
 		var el = event.element();
-		if (el.hasClassName('loc'))
+		
+		//TODO: show the bubble for this actor icon clicked on?
+		if (el.up('div').hasClassName('loc'))
 			LocationBubble.show(this);
-		else if (el.hasClassName('actor')) {
-			LocationBubble.show(this);
-			//TODO: show the bubble for this actor?
-		}
 	},
 };
 

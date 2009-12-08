@@ -1,7 +1,13 @@
 from wor.world.location import Location
 
+
 class Town(Location):
-	title = "Town"
+	"""Town"""
+
 
 class Street(Location):
-	title = "Street"
+	"""Town street"""
+
+
+class Church(Location):
+	"""A church"""
