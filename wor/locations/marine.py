@@ -1,6 +1,10 @@
 from wor.world.location import Location
 
 
+class Pontoon(Location):
+	pass
+
+
 class Sea(Location):
 	title = "Sea"
 	def can_enter(self, act):

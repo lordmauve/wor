@@ -38,14 +38,18 @@ class NullLocation(object):
 
 
 class Location(Persistent, JSONSerialisable):
+	__abstract = True
+
 	move_ap = 1
 
 	pos = None
 	region = None
+	description = ''
 
-	def __init__(self, title=None, description=''):
+	def __init__(self, title=None, description=None):
 		self.title = title
-		self.description = ''
+		if description:
+			self.description = description
 
 	def get_title(self):
 		return self.title or self.__class__.__name__
@@ -68,6 +72,10 @@ class Location(Persistent, JSONSerialisable):
 			return NullLocation(pos)
 
 	@classmethod
+	def is_abstract(cls):
+		return getattr(cls, '_%s__abstract' % cls.__name__, False)
+
+	@classmethod
 	def internal_name(cls):
 		return cls.__module__.replace('wor.locations.', '') + '.' + cls.__name__
 
@@ -88,8 +96,7 @@ class Location(Persistent, JSONSerialisable):
 			for k, v in locations.__dict__.items():
 				if (isinstance(v, type)
 					and issubclass(v, Location)
-					and v is not Location
-					and v is not InteriorLocation):
+					and not v.is_abstract()):
 					loc_map[v.internal_name()] = v
 			cls._loc_cache = loc_map
 			return loc_map
@@ -270,14 +277,25 @@ class Location(Persistent, JSONSerialisable):
 class InteriorLocation(Location):
 	"""Interior locations don't have much of a name; the region
 	title is a more suitable name."""
+	__abstract = True
 	move_ap = 0
 
 	def get_title(self):
 		return self.title or self.region.get_title()
 
 	def power(self, name):
-		"""Players can see further from higher up"""
+		"""Players can see further inside as tiles are conceptually smaller"""
 		if name == 'sight':
 			return 10
 		return 0
 
+
+class Scenery(Location):
+	"""A tile that has no function and cannot be entered.
+	
+	These locations enrich the landscape and serve as impassable barriers.
+	"""
+	__abstract = True
+
+	def can_enter(self):
+		return False

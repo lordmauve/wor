@@ -23,3 +23,8 @@ body {
 	border: solid silver 1px;
 }
 
+
+#map .loc {
+	background-repeat: no-repeat;
+	background-position: bottom center;
+}
