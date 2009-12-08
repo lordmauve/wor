@@ -86,7 +86,7 @@ class Context(object):
 		if self.is_admin():
 			return admin
 
-		if context.has_item(item):
+		if context is item._owner:
 			return OWNER
 
 		return STRANGER_INVISIBLE

@@ -5,7 +5,6 @@ import time
 from wor.actors.actor import Actor
 from wor.world.location import Location
 from wor.items.container import Inventory
-from wor.items.martial import Punch
 
 from SimpleTimedCounter import SimpleTimedCounter
 from Position import Position
@@ -47,7 +46,7 @@ class Player(Actor):
 	def get_context(self):
 		return Context(self)
 
-	context_fields = ['name', 'id', 'hp', 'maxhp', 'is_zombie']
+	context_fields = ['name', 'id', 'hp', 'maxhp', 'is_zombie', 'held_item']
 
 	def context_extra(self, context):
 		ctx = {

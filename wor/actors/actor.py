@@ -2,6 +2,7 @@
 
 import types
 import time
+import random
 
 from persistent import Persistent
 from persistent.list import PersistentList
@@ -170,10 +171,10 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 			return 1.0 + luck_factor / 100.0
 
 	def lucky(self, q):
-		return random() < math.pow(q, self.luck_coefficient())
+		return random.random() < q ** self.luck_coefficient()
 
 	def unlucky(self, q):
-		return random() < math.pow(q, 1.0/self.luck_coefficient())
+		return random.random() < q ** (1.0/self.luck_coefficient())
 
 	####
 	# Combat
@@ -190,7 +191,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 		# Work out the relative skills of the attacker and victim
 		x = self.power("attack_skill") + victim.power("defend_skill")
 		# Compute the core function
-		f = x * math.sqrt(x*x - TO_HIT_SCALE * TO_HIT_SCALE)
+		f = x * (x ** 2 + self.TO_HIT_SCALE ** 2) ** 0.5
 		# Shift the function up, and scale so that its range is the
 		# open interval (0, 1)
 		f += 1.0
@@ -198,7 +199,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 		# Work out how to scale it to lie between the limits we set...
 		scale = self.TO_HIT_MAX - self.TO_HIT_MIN
 		# ... and do so
-		return TO_HIT_MIN + scale * f
+		return self.TO_HIT_MIN + scale * f
 
 	def modify_attack_damage(self, dam, victim, weapon):
 		"""Alter the damage done by us with the given weapon to the
@@ -213,7 +214,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 		# Put armour benefits in here
 		return dam
 
-	def take_damage(self, dam, weapon):
+	def take_damage(self, dam, attacker, weapon):
 		"""Actually take damage, from the given weapon. Return True if
 		we died."""
 		# Put insta-kill effects in here
@@ -246,11 +247,11 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 			damage = victim.modify_damage(damage, self, weapon)
 			# Do the damage
 			dead = victim.take_damage(damage, self, weapon)
-			# Check whether the weapon has broken
-			broken = weapon.weapon_break(self, victim)
+
+			weapon.on_hit(self, victim)
 		else:
 			# We missed
-			weapon.miss_actor(self, victim)
+			weapon.on_miss(self, victim)
 
 		# Has the victim died?
 		if not (dead or victim.hp <= 0):
