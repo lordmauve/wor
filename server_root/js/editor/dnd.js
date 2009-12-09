@@ -19,17 +19,18 @@ function Point(x, y) {
 }
 
 var DragAndDrop={
-	Controller: function (el) {
+	Controller: function (el, target) {
 		this.dragging = false;
+		if (!target)
+			target = el;
 
 		this.getPointerPos = function (evt) {
 			return new Point(Event.pointerX(evt), Event.pointerY(evt));
 		};
 		
 		this.startDrag = function (evt) {
-			el.parentNode.appendChild(el);	//bring to top
 			this.startmouse = this.getPointerPos(evt);
-			el.startpos = new Point(el.offsetLeft, el.offsetTop);
+			target.startpos = new Point(target.offsetLeft, target.offsetTop);
 			Event.observe(document, 'mousemove', this.drag);
 			Event.observe(document, 'mouseup', this.stopDrag);
 			Event.stop(evt);
@@ -67,8 +68,8 @@ var DragAndDrop={
 				this.onDragStart();
 				this.dragging = true;
 			}
-			var pos = el.startpos.add(delta)
-			el.setStyle({left: pos.x + 'px', top: pos.y + 'px'});
+			var pos = target.startpos.add(delta)
+			target.setStyle({left: pos.x + 'px', top: pos.y + 'px'});
 		}.bindAsEventListener(this);
 
 		this.onDragStart = function () {

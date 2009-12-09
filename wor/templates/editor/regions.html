@@ -1,8 +1,10 @@
-{% extends "base.html" %}
+{% extends "editor/base.html" %}
 
+{% block title %}Edit Regions{% endblock %}
 
 {% block content %}
 	<h2>Regions</h2>
+	<p><a href="{% url create-region %}">Create a new region</a></p>
 	<ul>
 		{% for name, region in regions %}
 			<li><a href="/editor/{{name}}/">{{region}}</a></li>

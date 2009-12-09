@@ -1,0 +1,14 @@
+{% extends "editor/base.html" %}
+
+{% block title %}Create a new region{% endblock %}
+
+{% block content %}
+	<h2>Create a new region</h2>
+	<p><a href="/editor/">Cancel</a></p>
+	<form action="" method="post">
+		{{form.as_p}}
+		<div class="buttons">
+			<input type="submit" value="Create">
+		</div>
+	</form>
+{% endblock %}

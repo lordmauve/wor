@@ -297,5 +297,5 @@ class Scenery(Location):
 	"""
 	__abstract = True
 
-	def can_enter(self):
+	def can_enter(self, actor):
 		return False

@@ -1,13 +1,15 @@
 from wor.actors.actor import Actor
 
-from wor.actors.behaviour import BehaviourStatic
+from wor.actors.behaviour import BehaviourAimlessWander
+
 
 class Mob(Actor):
-	behaviour = BehaviourStatic()
+	behaviour = BehaviourAimlessWander()
 
-	def __init__(self, behaviour):
+	def __init__(self, behaviour=None):
 		super(Actor, self).__init__()
-		self.behaviour = behaviour
+		if behaviour:
+			self.behaviour = behaviour
 
 	context_fields = ['id', 'hp', 'class_name']
 	

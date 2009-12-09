@@ -13,7 +13,7 @@
 {% block content %}
 	<h2>Editing {{region}}</h2>
 	
-	<p><a href="/editor/">Edit a different region</a></p>
+	<div id="toolbar"></div>
 	<iframe id="panel" name="panel">
 	</iframe>
 
@@ -21,11 +21,11 @@
 		<div id="map-layer">
 			{% for wx, wy, x, y, z, loc in locations %}
 				{% if loc %}
-				<div class="loc {{loc.class_name}}" style="left: {{x}}px; top: {{y}}px; z-index: {{z}}; background-image: url('/tiles/{{loc.class_name|lower}}.png')">
+				<div id="tile-{{wx}}-{{wy}}" class="loc {{loc.class_name}}" style="left: {{x}}px; top: {{y}}px; z-index: {{z}}; background-image: url('/tiles/{{loc.class_name|lower}}.png')">
 					<a href="/editor/{{region_id}}/{{wx}},{{wy}}/" target="panel">{{loc.get_title}}</a>
 				</div>
 				{% else %}
-				<div class="emptyloc" style="left: {{x}}px; top: {{y}}px; z-index: {{z}}">
+				<div id="tile-{{wx}}-{{wy}}" class="emptyloc" style="left: {{x}}px; top: {{y}}px; z-index: {{z}}">
 					<a href="/editor/{{region_id}}/new/{{wx}},{{wy}}/" target="panel"><img src="/icons/add.png" alt="+"></a>
 				</div>
 				{% endif %}
