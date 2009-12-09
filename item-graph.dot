@@ -1,0 +1,28 @@
+digraph {
+	graph [rankdir=LR];
+
+        node [shape=box,fontname="Arial",fontsize=10,style="filled",fillcolor="#EEFFEE",color="#88CC88"];
+
+	//list quests here
+	Woodsman;
+
+        node [shape=box,fontname="Arial",fontsize=10,style="filled",fillcolor="#EEEEFF",color="#8888CC"];
+
+	//list mobs here
+	Pidgeon;
+	Bear;
+
+        node [shape=box,fontname="Arial",fontsize=10,style="filled",fillcolor="#FFEEEE",color="#CC8888"];
+
+	//list items here
+	Feather;
+	BearHead;
+	Sheet;
+	Pillow;
+
+	// Now list the relationships
+
+	Sheet -> Pillow;
+	Pidgeon -> Feather -> Pillow;
+	Bear -> BearHead -> Woodsman;
+}
