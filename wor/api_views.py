@@ -1,15 +1,5 @@
 import sys
-try:
-	import json
-except ImportError:
-	try:
-		import simplejson as json
-	except ImportError:
-		print >>sys.stderr, "simplejson is required for Python <2.6"
-		print >>sys.stderr, "try easy_install simplejson or download from http://pypi.python.org/pypi/simplejson/"
-		sys.exit(3)
 
-import codecs
 import datetime
 
 from django.http import HttpResponse, Http404, HttpResponseNotAllowed
@@ -18,16 +8,10 @@ from wor.db import db
 from wor.items.base import Item
 from wor.world.location import Location
 from wor.actions.base import ActionFailed
+from wor.jsonutil import JSONResponse
 
 from Context import Context
 import Util
-
-
-class JSONResponse(HttpResponse):
-	def __init__(self, blob):
-		super(JSONResponse, self).__init__(mimetype='text/javascript; charset=UTF-8')
-		utf8_out = codecs.getwriter('utf8')(self)
-		json.dump(blob, utf8_out, indent=2) # indent=2 is for legibility while debugging - remove to save bandwidth
 
 
 account = 'mauve'

@@ -1,3 +1,16 @@
+import codecs
+from django.http import HttpResponse
+try:
+	import json
+except ImportError:
+	try:
+		import simplejson as json
+	except ImportError:
+		print >>sys.stderr, "simplejson is required for Python <2.6"
+		print >>sys.stderr, "try easy_install simplejson or download from http://pypi.python.org/pypi/simplejson/"
+		sys.exit(3)
+
+
 class Everything(object):
 	def __contains__(self, key):
 		return True
@@ -69,3 +82,10 @@ class JSONSerialisable(object):
 				return self.__context_property(result, context, False)
 		else:
 			return v
+
+
+class JSONResponse(HttpResponse):
+	def __init__(self, blob):
+		super(JSONResponse, self).__init__(mimetype='text/javascript; charset=UTF-8')
+		utf8_out = codecs.getwriter('utf8')(self)
+		json.dump(blob, utf8_out, indent=2) # indent=2 is for legibility while debugging - remove to save bandwidth

@@ -1,10 +1,27 @@
 body {
-	font-family: sans-serif;
+	font-family: 'Trebuchet MS', sans-serif;
+	margin: 0;
+}
+
+h1 {
+	margin: 0 0 -80px -15px;
+	position: relative;
+	z-index: 100;
+}
+
+h2 {
+	text-align: right;
+	background: #eee;
+	border: solid silver 1px;
+	border-left-style: none;
+	border-right-style: none;
+	padding: 3px 15px;
+	margin: 0 0 40px;
 }
 
 #map {
 	position: relative;
-	margin-left: 310px;
+	margin-left: 360px;
 	border: solid silver 1px;
 	overflow: hidden;
 	height: 500px;
@@ -16,15 +33,63 @@ body {
 	left: 45%;
 }
 
+#protopanel,
 #panel {
 	float: left;
-	width: 300px;
+	width: 360px;
 	height: 500px;
 	border: solid silver 1px;
 }
 
 
+#protopanel {
+	padding: 5px;
+	overflow: auto;
+}
+
+#protopanel img {
+	margin: 5px;
+}
+
+#protopanel img.selected {
+	border: solid red 2px;
+	background-color: #fdd;
+	margin: 3px;
+}
+
 #map .loc {
 	background-repeat: no-repeat;
 	background-position: bottom center;
+}
+
+.loc {
+	color: white;
+}
+
+#map.hidenames .loc a {
+	visibility: hidden;
+}
+
+#map.hidenames .loc:hover a {
+	visibility: visible;
+}
+
+#toolbar {
+	padding: 10px;
+}
+
+body #map {
+	background: url('/img/page-bg.png') white repeat-x top left;
+}
+
+body#night #map {
+	background: url('/img/page-bg-night.png') black repeat-x top left;
+}
+
+body#sunrise #map {
+	background: url('/img/page-bg-sunrise.png') #b4b4b4 repeat-x top left;
+}
+
+body#sunset #map {
+	background: url('/img/page-bg-sunset.png') #b4b4b4 repeat-x top left;
 }
