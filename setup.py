@@ -63,7 +63,7 @@ class CVPasswordFixed(CVFixed):
 		pwd = ''
 		while len(pwd) < 12:
 			c = os.urandom(1)
-			if c.isalnum() or c in "!$%^&*()_-=+:;{}[]'@#~|<>,.?/":
+			if c.isalnum() or c in "!$%^&*()_-=+:;{}[]@#~|<>,.?/":
 				pwd += c
 		CVFixed.__init__(self, key, pwd)
 
@@ -230,10 +230,13 @@ for p in args:
 if len(args) == 0:
 	args = [ 'web', 'database' ]
 
-if not installer.preconditions(args):
-	sys.exit(1)
-
+# NOTE: Moved the template substitutions here, so we can set up preconditions 
+#       based on variables (Darwin has one case where that's useful.  Okay, it's
+#       a hack.  Still... (DWB 11/30/09)
 template_substitution()
+
+if not installer.preconditions(args, value_by_key):
+	sys.exit(1)
 
 # Set up postgres
 if "database" in args:
