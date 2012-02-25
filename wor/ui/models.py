@@ -55,7 +55,7 @@ class ActorMessage(models.Model):
 
 class Item(models.Model):
 	id = models.IntegerField(primary_key=True)
-	type = models.CharField(max_length=-1)
+	type = models.CharField(max_length=255)
 	state = models.TextField() # This field type is a guess.
 	class Meta:
 		db_table = u'item'
@@ -63,9 +63,9 @@ class Item(models.Model):
 
 class ItemOwner(models.Model):
 	item = models.ForeignKey(Item)
-	owner_type = models.CharField(max_length=-1)
+	owner_type = models.CharField(max_length=255)
 	owner_id = models.IntegerField()
-	container = models.CharField(max_length=-1)
+	container = models.CharField(max_length=255)
 	class Meta:
 		db_table = u'item_owner'
 
