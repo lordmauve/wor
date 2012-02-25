@@ -1,4 +1,4 @@
-from Cost import Cost
+from wor.cost import Cost
 
 
 class ValidationError(Exception):

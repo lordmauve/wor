@@ -1,12 +1,7 @@
-import functools
-
 from persistent import Persistent
 
-from Cost import Cost
-from Util import no_d
-from Logger import log
+from wor.cost import Cost
 import Context
-import types
 
 from wor.jsonutil import JSONSerialisable, Everything
 from wor.actions.movement import ActionMove
@@ -241,8 +236,6 @@ class Location(Persistent, JSONSerialisable):
                 l = self.local_directions[i](self)
                 cost = self.move_cost(player, l)
 
-                # Create the action function
-                a = no_d(functools.partial(player.move_to, l.pos))
                 # Create the action itself
                 actions.append(ActionMove(player, n.upper(), cost=Cost(ap=cost)))
 

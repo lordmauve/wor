@@ -1,7 +1,6 @@
 """Plan: A plan for constructing stuff from other stuff"""
 
 import math
-from Logger import log
 
 plans = []
 
@@ -95,3 +94,4 @@ class Plan(object):
         
         # Run the postcondition
         self.postcondition(self, who, total)
+

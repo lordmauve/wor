@@ -1,22 +1,21 @@
 # coding: utf-8
 
-import os
-import os.path
-
+import random
 from persistent import Persistent
 
 import Util
 import BaseConfig
-from Plan import Plan, makeable_plans
+from wor.plan import makeable_plans
 import Context
 
 from wor.db import db
 from wor.actions.make import ActionMake
 from wor.jsonutil import JSONSerialisable
 
-# We must do this to run the code that defines all possible plans.
-# Can't be done in Plan, for circular reference reasons.
-import Plans
+
+class InsufficientItemsException(Exception):
+    """An attempt was made to remove a number of items from a
+    collection when that number was not present."""
     
 
 class Item(JSONSerialisable, Persistent):
@@ -97,9 +96,6 @@ class Item(JSONSerialisable, Persistent):
             cls._item_cache = item_map
             return item_map
 
-#    def __init__(self):
-#        DBLogger.log_item_event(DBLogger.ITEM_CREATE, self._id)
-
     def owner(self):
         """The notional owner of the item. For quantum items with
          multiple owners, this will be the owner that last touched it.
@@ -115,7 +111,7 @@ class Item(JSONSerialisable, Persistent):
 
     def destroy(self):
         """Destroy this item, recycling it if necessary"""
-#        DBLogger.log_item_event(DBLogger.ITEM_DESTROY, self._id)
+        #TODO
 
     def try_break(self):
         """Test this item for breakage, and return True if it broke"""
@@ -205,13 +201,7 @@ class AggregateItem(Item):
         # TODO: Is this good, or do we need to support subclasses as 
         #       well?
         if self.internal_name() == new_item.internal_name():
-            oq = self.count
             self.count += int(new_item.count)
-#            DBLogger.log_item_event(DBLogger.ITEM_MERGE,
-#                                    self._id,
-#                                    other_item=new_item._id,
-#                                    orig_quantity=oq,
-#                                    new_quantity=self.count)
             return True
         else:
             raise Util.WorError("Incompatible types (%s/%s) cannot be merged"
@@ -229,7 +219,7 @@ class AggregateItem(Item):
         # code.  I'll be in the corner trying to keep my head from 
         # exploding
         if self.count < num_items:
-            raise Util.WorInsufficientItemsException(
+            raise InsufficientItemsException(
                 "Cannot split %d items from an aggregate with only %d items"
                 % (num_items, self.count))
         else:
@@ -237,15 +227,8 @@ class AggregateItem(Item):
             new_obj = self.__class__(num_items)
 
             # And adjust the counts accordingly
-            oq = self.count
             self.count -= num_items
 
-            # Log the split
-#            DBLogger.log_item_event(DBLogger.ITEM_SPLIT,
-#                                    self._id,
-#                                    other_item=new_obj._id,
-#                                    orig_quantity=oq,
-#                                    new_quantity=self.count)
             return new_obj
 
         return None

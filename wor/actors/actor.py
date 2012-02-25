@@ -1,6 +1,5 @@
 """Generic actor: covers players, NPCs, monsters"""
 
-import types
 import time
 import random
 
@@ -9,7 +8,6 @@ from persistent.list import PersistentList
 from BTrees.IOBTree import IOBTree
 
 import Context
-from Logger import log
 
 from Triggerable import Triggerable
 from TriggerDeath import TriggerDeath

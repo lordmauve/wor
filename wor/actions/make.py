@@ -1,6 +1,5 @@
 from base import Action
-from Cost import Cost
-from Logger import log
+from wor.cost import Cost
 
 
 class ActionMake(Action):

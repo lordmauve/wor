@@ -1,17 +1,15 @@
 # coding: utf-8
 
 import time
+import logging
 
 from wor.actors.actor import Actor
 from wor.world.location import Location
 from wor.items.container import Inventory
 
 from SimpleTimedCounter import SimpleTimedCounter
-from Position import Position
 
 from Alignment import Alignment
-from Logger import log
-import Util
 from Context import Context
 
 
@@ -72,13 +70,13 @@ class Player(Actor):
     # Movement
     def move_to(self, pos):
         if isinstance(pos, Location):
-            log.warn("move_to() passed a Location, not a Position")
+            logging.warn("move_to() passed a Location, not a Position")
             pos = pos.pos
         self.position = pos
 
     def teleport_to(self, pos):
         if isinstance(pos, Location):
-            log.warn("teleport_to() passed a Location, not a Position")
+            logging.warn("teleport_to() passed a Location, not a Position")
             pos = pos.pos
         self.position = pos
 
