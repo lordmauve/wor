@@ -57,6 +57,7 @@ var Map = {
 				Map.locations[i].remove();
 		}
 		Map.locations = newlocations;
+                LocationBubble.show($('map0-0'));
 	},
 
 	TILE_WIDTH: 117,
