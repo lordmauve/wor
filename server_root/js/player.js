@@ -49,8 +49,8 @@ function load_player_act(actions)
 {
 	var move_panel = $('movement');
 	if (!move_panel) {
-		move_panel = new Element('div', {id: 'movement'});
-		$('map').appendChild(move_panel);
+		move_panel = new Element('div', {id: 'movement', 'class': 'panel'});
+		$('panel').appendChild(move_panel);
 	}
 
 	var actions_panel = get_side_panel("player_actions");
