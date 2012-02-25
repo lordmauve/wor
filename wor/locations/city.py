@@ -2,12 +2,12 @@ from wor.world.location import Location
 
 
 class Town(Location):
-	"""Town"""
+    """Town"""
 
 
 class Street(Location):
-	"""Town street"""
+    """Town street"""
 
 
 class Church(Location):
-	"""A church"""
+    """A church"""

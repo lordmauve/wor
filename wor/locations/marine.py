@@ -2,21 +2,21 @@ from wor.world.location import Location
 
 
 class Pontoon(Location):
-	pass
+    pass
 
 
 class Sea(Location):
-	title = "Sea"
-	def can_enter(self, act):
-		return False
+    title = "Sea"
+    def can_enter(self, act):
+        return False
 
 class Lake(Sea):
-	title = "Lake"
+    title = "Lake"
 
 
 class River(Sea):
-	"""A river"""
+    """A river"""
 
 
 class Shallows(Sea):
-	"""Shallow sea water. Swimmable perhaps?"""
+    """Shallow sea water. Swimmable perhaps?"""

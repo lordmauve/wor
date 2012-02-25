@@ -2,14 +2,14 @@ from wor.items.base import AggregateItem
 
 
 class Bolt(AggregateItem):
-	name = 'bolt'
+    name = 'bolt'
 
-	desc = 'a crossbow bolt'
-	desc_plural = '%d crossbow bolts'
+    desc = 'a crossbow bolt'
+    desc_plural = '%d crossbow bolts'
 
 
 class Arrow(AggregateItem):
-	name = 'arrow'
+    name = 'arrow'
 
-	desc = 'an iron-tipped, triple-fletched arrow'
-	desc_plural = '%d iron-tipped, triple-fletched arrows'
+    desc = 'an iron-tipped, triple-fletched arrow'
+    desc_plural = '%d iron-tipped, triple-fletched arrows'

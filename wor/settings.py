@@ -4,7 +4,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = [
-#	('Your name here', 'your-email@example.com'),
+#    ('Your name here', 'your-email@example.com'),
 ]
 
 MANAGERS = ADMINS
@@ -62,14 +62,14 @@ ROOT_URLCONF = 'wor.urls'
 
 import os.path
 def relpath(p):
-	return os.path.abspath(os.path.join(os.path.dirname(__file__), p))
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), p))
 
 TEMPLATE_DIRS = [
-	relpath('templates'),	
+    relpath('templates'),    
 ]
 
 INSTALLED_APPS = [
-	'wor.ui',
+    'wor.ui',
 ]
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.file'
