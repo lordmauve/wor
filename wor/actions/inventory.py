@@ -1,5 +1,5 @@
 from base import Action, ActionFailed, IntegerField
-from Cost import Cost
+from wor.cost import Cost
 
 class ActionChangeItem(Action):
     group = 'inventory'

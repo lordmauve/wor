@@ -1,4 +1,4 @@
-from Plan import Plan, plans
+from wor.plan import Plan, plans
 from Alignment import Alignment
 
 plans.append(Plan(

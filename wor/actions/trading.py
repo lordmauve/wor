@@ -1,7 +1,7 @@
 from wor.actions.base import Action, ItemField
 from wor.items.base import Item
 
-from Cost import Cost
+from wor.cost import Cost
 
 
 class ActionBuy(Action):

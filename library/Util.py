@@ -1,8 +1,6 @@
 ####
 # Simple utilities
 
-from Logger import log
-
 def render_info(info, req, prefix='', indent=0):
     """Recursively render the data in info into the request object"""
     for k, v in info.iteritems():
@@ -74,17 +72,12 @@ def parse_input(req):
             v = parts[1]
             result[k] = v
 
-    log.debug("Parsed input: " + repr(result))
     return result
 
 class WorError(Exception):
     """Base Exception for all WOR code.  Subclass if needed"""
     pass
 
-class WorInsufficientItemsException(WorError):
-    """An attempt was made to remove a number of items from a
-    collection when that number was not present."""
-    pass
 
 def no_d(f):
     """Generate a new function whose first parameter is discarded. Can

@@ -1,5 +1,5 @@
 from base import TargettedAction
-from Cost import Cost
+from wor.cost import Cost
 
 
 class ActionAttack(TargettedAction):

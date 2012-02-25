@@ -1,15 +1,9 @@
 from persistent import Persistent
 from persistent.list import PersistentList
-from persistent.mapping import PersistentMapping
 from BTrees.OOBTree import OOBTree
 
 from wor.db import db
-from wor.items.base import Item, AggregateItem
-
-from Logger import log
-#import DBLogger
-import Context
-import Util
+from wor.items.base import Item, AggregateItem, InsufficientItemsException
 
 
 class ItemContainer(Persistent):
@@ -166,8 +160,6 @@ class ItemContainer(Persistent):
             # to the container, and its ownership updated.
             item.set_owner(self.parent)
             self.items.setdefault(itype, PersistentList()).append(item)
-#            DBLogger.log_item_event(DBLogger.ITEM_ADD, item._id,
-#                                    container=self)
 
     def add_items(self, ilist):
         """Add a list of items to the container.
@@ -193,7 +185,7 @@ class ItemContainer(Persistent):
         # Try splitting the item
         first_item = self._get_first_item(itype)
         if first_item is None:
-            raise Util.WorInsufficientItemsException("No %s in container. Could not remove %d items." % (itype, count))
+            raise InsufficientItemsException("No %s in container. Could not remove %d items." % (itype, count))
         split_item = first_item.split(count)
 
         rv = None
@@ -204,7 +196,7 @@ class ItemContainer(Persistent):
             rv, remaining_items = items[:count], items[count:]
 
             if len(rv) < count:
-                raise Util.WorInsufficientItemsException(
+                raise InsufficientItemsException(
                     "Attempted to remove %d items of type %s, but only %d were found"
                     % (count, itype, len(rv)))
 
@@ -225,8 +217,6 @@ class ItemContainer(Persistent):
         items = self.items[itype]
         items.remove(item)
         item.set_owner(None)
-#        DBLogger.log_item_event(DBLogger.ITEM_REMOVE, item._id,
-#                                container=self)
         return item
     
     def split(self, item, num_items):

@@ -1,5 +1,5 @@
 from base import Action
-from Cost import Cost
+from wor.cost import Cost
 
 class ActionEnter(Action):
     cost = Cost(ap=1)

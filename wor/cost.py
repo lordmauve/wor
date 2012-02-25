@@ -28,3 +28,4 @@ class Cost(object):
         player.hp -= self.hp
         if self.gp:
             player.inventory.take(GP, self.gp)
+
