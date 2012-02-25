@@ -168,44 +168,46 @@ body#sunset {
 }
 
 #movement {
-	position: absolute;
-	left: 50%;
-	top: 100px;
+	position: relative;
+        height: 55px;
 }
 
 #movement .action {
 	position: absolute;
-	width: 5em;
+}
+
+#movement .action button {
+    font-size: 10px;
 }
 
 #movement #action-move-LR {
-	top: 45px;
-	left: 5px;
+	top: 40px;
+	right: 25px;
 }
 
 #movement #action-move-LL {
-	top: 45px;
-	right: 5px;
+	top: 40px;
+	left: 25px;
 }
 
 #movement #action-move-L {
+	top: 20px;
+	left: 0px;
+}
+
+#movement #action-move-R {
+	top: 20px;
+	right: 0px;
+}
+
+#movement #action-move-UR {
 	top: 0px;
 	right: 25px;
 }
 
-#movement #action-move-R {
-	top: 0px;
-	left: 25px;
-}
-
-#movement #action-move-UR {
-	top: -45px;
-	left: 5px;
-}
-
 #movement #action-move-UL {
-	top: -45px;
-	right: 5px;
+	top: 0;
+	left: 25px;
 }
 
 .actor {
