@@ -1,18 +1,33 @@
 body {
 	font-family: 'Trebuchet MS', sans-serif;
-	background: url('/img/page-bg.png') white repeat-x top left;
+/*	background: url('/img/page-bg.png') white repeat-x top left; */
+        min-height: 500px;
+        background-repeat: repeat-x;
+        background-image: -moz-linear-gradient(to bottom, #d7eef4 0px, white 500px);
+        background-color: white;
+
+        -webkit-transition-property: background-image, background-color;
+        -webkit-transition-duration: 3s;
+        -moz-transition-property: background-image, background-color;
+        -moz-transition-duration: 3s;
 }
 
 body#night {
-	background: url('/img/page-bg-night.png') black repeat-x top left;
+/*	background: url('/img/page-bg-night.png') black repeat-x top left; */
+        background-color: black;
+        background-image: -moz-linear-gradient(to bottom, #2f3259 0px, black 500px);
 }
 
 body#sunrise {
-	background: url('/img/page-bg-sunrise.png') #b4b4b4 repeat-x top left;
+/*	background: url('/img/page-bg-sunrise.png') #b4b4b4 repeat-x top left; */
+        background-color: #b4b4b4;
+        background-image: -moz-linear-gradient(to bottom, #f9ebd2 0px, #b4b4b4 500px);
 }
 
 body#sunset {
-	background: url('/img/page-bg-sunset.png') #b4b4b4 repeat-x top left;
+/*	background: url('/img/page-bg-sunset.png') #b4b4b4 repeat-x top left; */
+        background-color: #b4b4b4;
+        background-image: -moz-linear-gradient(to bottom, #f1b696 0px, #B4B4B4 500px);
 }
 
 #panel {
@@ -95,13 +110,18 @@ body#sunset {
 
 
 #panel .panel {
+        -webkit-transition-property: background-color, border-color;
+        -webkit-transition-duration: 3s;
+        -moz-transition-property: background-color, border-color;
+        -moz-transition-duration: 3s;
+
 	background-color: white;
 	background-color: rgba(255, 255, 255, 0.4);
 	border: solid black 1px;
 
 	color: black;
 
-	-moz-border-radius: 6px;
+	border-radius: 6px;
 
 	margin-bottom: 8px;
 }
