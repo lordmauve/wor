@@ -1,4 +1,16 @@
-from wor.cost import Cost
+class ActionTarget(object):
+    """Mix-in class for objects that can have actions bound to them."""
+    def external_actions(self, player):
+        acts = {}
+        dicts = [self] + list(self.__class__.__mro__)
+        for d in dicts:
+            for k, v in vars(d).items():
+                if isinstance(v, Action):
+                    if k not in acts:
+                        b = BoundAction(v, self, k)
+                        if b.valid(player):
+                            acts[k] = b
+        return acts.values()
 
 
 class ValidationError(Exception):
@@ -66,30 +78,83 @@ class Action(object):
 
     group = u"Miscellaneous"
     cost = None
+    caption = 'Unknown Action'
 
-    def __init__(self, actor):
-        self.actor = actor
+    def __init__(self, **kwargs):
+        """Instantiate the action.
 
-    def get_caption(self):
-        return self.caption
+        Any keyword arguments passed are assigned directly to the instance
+        dictionary. This is as a convenience to allow properties of the
+        action to be overridden at instantiation.
+        """
+        self.__dict__.update(kwargs)
 
     def get_uid(self):
         """Return a unique ID identifying this action"""
-        raise NotImplementedError("Subclasses must implement Action.get_uid")
+        mod = self.__class__.__module__
+        name = self.__class__.__name__
+        return '%s.%s' % (mod, name)
 
     def get_parameters(self):
         """Get a list of the input fields required
         to process this action."""
         return None
-        
+
+    def can_afford(self, actor):
+        if self.cost is None:
+            return True
+        return self.cost.can_afford(actor)
+
+    def get_caption(self, target):
+        return self.caption
+
+    def get_kwargs(self, data):
+        """Extract the parameters for the action."""
+        kw = {}
+        params = self.get_parameters()
+        if not params:
+            return {}
+        for p in params:
+            if not hasattr(p, 'name'):
+                continue
+            val = p.clean(data.get(p.name, ''))
+            kw[p.name] = val
+        return kw    
+
+    def perform(self, actor, target, data):
+        """Have the actor attempt to perform the action.
+
+        data are the parameters for the action.
+        """
+        if self.cost:
+            if not self.cost.can_afford(actor):
+                raise ActionFailed("You cannot afford it!")
+            self.cost.charge(actor)
+        kwargs = self.get_kwargs(data)
+        message = self.do(actor, target, **kwargs)
+        return message
+
+    def valid(self, actor, target):
+        """Determine whether the action can be performed by actor on target."""
+        return True
+
+    def do(self, actor, *args):
+        """Perform the action."""
+        return "Nothing happened."
+
+    @staticmethod
+    def make_id(object, act):
+        if hasattr(object, 'internal_name'):
+            return "%s.%s.%s" % (object.internal_name(), object.id, act)
+        return "%s.%s.%s" % (object.__class__.__name__, object.id, act)
+
     def context_get(self, context):
         ret = {}
         if self.cost:
             ret['cost'] = str(self.cost)
         ret['uid'] = self.get_uid()
-        ret['caption'] = self.get_caption()
+        ret['caption'] = self.caption
         ret['group'] = self.group
-        ret['can_afford'] = self.can_afford()
 
         params = self.get_parameters()
         if params:
@@ -105,56 +170,47 @@ class Action(object):
 
         return ret
 
-    def can_afford(self):
-        if self.cost is None:
-            return True
-        return self.cost.can_afford(self.actor)
 
-    def get_kwargs(self, data):
-        kw = {}
-        params = self.get_parameters()
-        if not params:
-            return {}
-        for p in params:
-            if not hasattr(p, 'name'):
-                continue
-            val = p.clean(data.get(p.name, ''))
-            kw[p.name] = val
-        return kw    
-
-    def perform(self, data):
-        if self.cost:
-            if not self.cost.can_afford(self.actor):
-                raise ActionFailed("You cannot afford it!")
-            self.cost.charge(self.actor)
-        kwargs = self.get_kwargs(data)
-        message = self.action(**kwargs)
-        return message
-
-    def action(self, data):
-        pass
-
-    @staticmethod
-    def make_id(object, act):
-        if hasattr(object, 'internal_name'):
-            return "%s.%s.%s" % (object.internal_name(), object.id, act)
-        return "%s.%s.%s" % (object.__class__.__name__, object.id, act)
+class PersonalAction(Action):
+    """An action that can only be performed by the actor itself."""
+    def valid(self, actor, target):
+        return actor is target
 
 
-class TargettedAction(Action):
-    """An action which is directed at another actor specifically.
+class LocalAction(Action):
+    """An action that can only be performed if actor is in the same place as target."""
+    def valid(self, actor, target):
+        return actor.pos == target.pos
 
-    """
-    caption = u'Do something mysterious to %s'
 
-    def __init__(self, actor, target):
-        super(TargettedAction, self).__init__(actor)
+class BoundAction(object):
+    """Bind an action to the object on which it operates."""
+    def __init__(self, action, target, name):
+        self.action = action
         self.target = target
+        self.name = name
+
+    def __repr__(self):
+        return '<BoundAction %s on %s>' % (self.name, self.target)
 
     def get_uid(self):
-        mod = self.__class__.__module__
-        name = self.__class__.__name__
-        return '%s.%s(%d)' % (mod.lower(), name.lower(), self.target.id)
+        try:
+            id = str(''.join('%02x' % ord(c) for c in self.target._p_oid))
+        except AttributeError:
+            id = str(self.target.id)
+        return '%s/%s' % (id, self.name)
 
-    def get_caption(self):
-        return self.caption % self.target.get_name()
+    def context_get(self, context):
+        ret = self.action.context_get(context)
+        ret['uid'] = self.get_uid()
+        ret['caption'] = self.action.get_caption(self.target)
+        ret['can_afford'] = self.action.can_afford(context.player)
+        return ret
+
+    def valid(self, actor):
+        """Determine whether the action can be performed by actor."""
+        return self.action.valid(actor, self.target)
+
+    def perform(self, actor, data):
+        """Perform the action on the bound target."""
+        return self.action.perform(actor, self.target, data)

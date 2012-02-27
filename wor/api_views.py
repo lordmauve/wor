@@ -1,8 +1,4 @@
-import sys
-
-import datetime
-
-from django.http import HttpResponse, Http404, HttpResponseNotAllowed
+from django.http import Http404
 from wor.db import db
 
 from wor.items.base import Item
@@ -11,7 +7,6 @@ from wor.actions.base import ActionFailed
 from wor.jsonutil import JSONResponse
 
 from Context import Context
-import Util
 
 
 account = 'mauve'

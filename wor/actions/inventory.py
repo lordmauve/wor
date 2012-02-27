@@ -1,24 +1,25 @@
-from base import Action, ActionFailed, IntegerField
-from wor.cost import Cost
+from base import PersonalAction, ActionFailed, IntegerField
 
-class ActionChangeItem(Action):
+
+class ActionChangeItem(PersonalAction):
     group = 'inventory'
-
-    def __init__(self, player):
-        super(ActionChangeItem, self).__init__(player)
-
-    def get_uid(self):
-        return 'change_item'
-
-    def get_caption(self):
-        return u"Change item"
+    caption = u"Change item"
 
     def get_parameters(self):
         return [IntegerField('id')]
 
-    def action(self, id):
+    def do(self, actor, target, id):
         try:
-            item = self.actor.inventory[id]
+            item = actor.inventory[id]
         except KeyError:
             raise ActionFailed('Item not found.')
-        self.actor.set_held_item(item)
+        actor.set_held_item(item)
+
+
+class ConsumeAction(PersonalAction):
+    group = 'inventory'
+    message = u"You consume the %s."
+
+    def do(self, actor, target):
+        target.destroy()
+        return self.message % self.target

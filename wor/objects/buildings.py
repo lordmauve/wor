@@ -1,8 +1,8 @@
-import re
 from wor.db import db
 from base import WorldObject
 
 from wor.actions.enter import ActionEnter
+
 
 class Building(WorldObject):
     """Buildings are enterable objects.
@@ -30,10 +30,7 @@ class Building(WorldObject):
         region.parent_building = self
         return region
 
-    def external_actions(self, player):
-        return [
-            ActionEnter(player, self)
-        ]
+    enter = ActionEnter()
 
 
 class Pub(Building):

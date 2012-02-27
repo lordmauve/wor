@@ -1,25 +1,32 @@
-from base import *
+from base import PersonalAction, LocalAction, SayField
 
 
-class ActionSay(Action):
+class ActionSay(PersonalAction):
     def get_parameters(self):
         return [SayField('to_say')]
 
-    def get_caption(self):
-        return u"Say"
+    caption = u"Say"
 
-    def get_uid(self):
-        return 'say'
-
-    def action(self, to_say):
-        for a in self.actor.loc().actors():
-            a.message(to_say, 'say', self.actor)
+    def do(self, actor, target, to_say):
+        for a in actor.loc().actors():
+            a.message(to_say, 'say', actor)
 
 
-class ActionProd(TargettedAction):
-    caption = u"Prod %s"
+class ActionWhisper(LocalAction):
+    caption = u"Whisper"
 
-    def action(self):
-        self.target.message('prods you.', 'action', self.actor)
-        return "You prodded %s." % self.target
+    def get_parameters(self):
+        return [SayField('to_say')]
+
+    def do(self, actor, target, to_say):
+        target.message(to_say, 'whisper', actor)
+        return "You whisper to %s." % target
+
+
+class ActionProd(LocalAction):
+    caption = u"Prod"
+
+    def do(self, actor, target):
+        target.message('prods you.', 'action', actor)
+        return "You prodded %s." % target
 
