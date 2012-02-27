@@ -37,6 +37,11 @@ var MessagePane = {
 			'&emsp;' + message + '</div>';
 	},
 
+	format_message_whisper: function (when, message, sender, alignment) {
+		return '<div class="message say">' + MessagePane.formatted_name(sender, alignment) + ' whispers<br>' +
+			'&emsp;<em>' + message + '</em></div>';
+	},
+
 	format_message_action: function (when, message, sender, alignment) {
 		return '<div class="message action">' + MessagePane.formatted_name(sender, alignment) + ' ' + message + '</div>';
 	},

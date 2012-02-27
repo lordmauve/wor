@@ -1,18 +1,21 @@
-from base import TargettedAction
+from base import Action
 from wor.cost import Cost
 
 
-class ActionAttack(TargettedAction):
+class ActionAttack(Action):
     """An action in which a player attacks a target with the weapon
     he is holding."""
 
     group = 'combat'
-    caption = u"Attack %s"
+    caption = u"Attack %(target)s"
+    cost = Cost(ap=1)
 
-    def __init__(self, player, target, cost=Cost(ap=1)):
-        super(ActionAttack, self).__init__(player, target)
-        self.target = target
-        self.cost = cost
+    def valid(self, actor, target):
+        weap = actor.held_item()
 
-    def action(self):
-        self.actor.attack(self.target)
+        # They could attack us...
+        return weap and (actor.id is not target.id
+            and target.is_combative(actor))
+
+    def do(self, actor, target):
+        actor.attack(target)

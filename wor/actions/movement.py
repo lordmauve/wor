@@ -4,20 +4,15 @@ from wor.cost import Cost
 
 class ActionMove(Action):
     group = 'movement'
+    direction = 'l'
+    cost = Cost(ap=1)
 
-    def __init__(self, actor, direction, cost=Cost(ap=1)):
-        super(ActionMove, self).__init__(actor)
-        self.direction = direction
-        self.cost = cost
-
-    def get_uid(self):
-        return 'move-' + self.direction
-
-    def get_caption(self):
+    @property
+    def caption(self):
         return 'Move ' + self.direction.upper()
 
-    def action(self):
-        dest = getattr(self.actor.loc(), self.direction.lower())()
+    def do(self, actor, target):
+        dest = getattr(actor.loc(), self.direction.lower())()
         assert dest
-        self.actor.move_to(dest)
+        actor.move_to(dest)
 

@@ -13,6 +13,7 @@ from Triggerable import Triggerable
 from TriggerDeath import TriggerDeath
 
 
+from wor.actions.base import ActionTarget
 from wor.actions.combat import ActionAttack
 from wor.jsonutil import JSONSerialisable
 
@@ -41,7 +42,7 @@ class MessageLog(IOBTree):
         return msgs
 
 
-class Actor(Persistent, Triggerable, JSONSerialisable):
+class Actor(Persistent, Triggerable, JSONSerialisable, ActionTarget):
     # Define constants for scaling the to-hit function
     TO_HIT_SCALE = 100
     TO_HIT_MIN = 0.05
@@ -145,21 +146,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable):
 
         return list(self.messages.get_messages(since))
 
-    def external_actions(self, player):
-        """Create and return a hash of all possible actions the
-        given player might perform on this actor.
-        
-        """
-        actions = []
-        weap = player.held_item()
-
-        # They could attack us...
-        if weap and (self.id is not player.id
-            and self.is_combative(player)):
-            
-            actions.append(ActionAttack(player, self))
-
-        return actions
+    attack = ActionAttack()
 
     def luck_coefficient(self):
         luck_factor = self.power('luck')

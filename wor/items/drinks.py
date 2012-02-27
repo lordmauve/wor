@@ -1,5 +1,7 @@
 import random 
 from base import Item, AggregateItem
+from wor.actions.inventory import ConsumeAction
+from wor.cost import Cost
 
 
 class Ale(AggregateItem):
@@ -10,6 +12,11 @@ class Ale(AggregateItem):
     desc_plural = '%d frothing tankards of nutty brown ale'
 
     group = "Drinks"
+
+    drink = ConsumeAction(
+        name="Drink",
+        cost=Cost(ap=1, hp=-3)
+    )
 
 
 class Tequila(Item):

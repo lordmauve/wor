@@ -1,7 +1,10 @@
+from wor.actions.base import ActionTarget
 from wor.jsonutil import JSONSerialisable
+from persistent import Persistent
 
 
-class WorldObject(JSONSerialisable):
+# FIXME: WorldObject should be Persistent
+class WorldObject(JSONSerialisable, ActionTarget):
     """A WorldObject is some object too large to pick up
     but smaller than a tile. Thus pubs, shops, boats, etc
     would all count as WorldObjects"""
@@ -47,6 +50,3 @@ class WorldObject(JSONSerialisable):
         if context.visible(auth):
             ctx['actions'] = [a.context_get(context) for a in self.external_actions(context.player)]
         return ctx
-
-    def external_actions(self, player):
-        return []

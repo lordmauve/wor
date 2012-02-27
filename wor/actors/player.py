@@ -79,6 +79,15 @@ class Player(Actor):
             logging.warn("teleport_to() passed a Location, not a Position")
             pos = pos.pos
         self.position = pos
+    
+    @property
+    def pos(self):
+        return self.position
+
+    change_item = ActionChangeItem()
+    say = social.ActionSay()
+    whisper = social.ActionWhisper()
+    prod = social.ActionProd()
 
     def get_actions(self):
         """List actions this player might perform that are not
@@ -87,12 +96,9 @@ class Player(Actor):
         """
         # No actions are possible at negative AP
         if self.ap <= 0:
-            return {}
+            return []
 
-        actions = [
-            ActionChangeItem(self), # We can change the held item
-            social.ActionSay(self), # We can change the held item
-        ]
+        actions = self.external_actions(self)
 
         # What can we do to the item we're holding?
         item = self.held_item()
@@ -128,14 +134,6 @@ class Player(Actor):
 
         return actions
 
-    def external_actions(self, player):
-        acts = super(Player, self).external_actions(player)
-
-        acts += [
-            social.ActionProd(player, self),
-        ]
-        return acts
-
     def perform_action(self, action_id, data):
         """Despatch an action to the target object. The action_id is a
         full one."""
@@ -143,7 +141,7 @@ class Player(Actor):
         for a in actions:
             if a.get_uid() != action_id:
                 continue
-            message = a.perform(data)
+            message = a.perform(self, data)
             self.last_action = time.time()
             return message
         else:

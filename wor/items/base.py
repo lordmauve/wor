@@ -4,21 +4,19 @@ import random
 from persistent import Persistent
 
 import Util
-import BaseConfig
-from wor.plan import makeable_plans
 import Context
 
 from wor.db import db
-from wor.actions.make import ActionMake
+from wor.actions.base import ActionTarget
 from wor.jsonutil import JSONSerialisable
 
 
 class InsufficientItemsException(Exception):
     """An attempt was made to remove a number of items from a
     collection when that number was not present."""
-    
 
-class Item(JSONSerialisable, Persistent):
+
+class Item(ActionTarget, JSONSerialisable, Persistent):
     """An item. By default, all items are unique. Some items are
     'aggregate' and represent a block of otherwise identical things --
     e.g. coins -- and can be combined and split (see AggregateItem).
@@ -121,17 +119,6 @@ class Item(JSONSerialisable, Persistent):
             return True
 
         return False
-
-    def external_actions(self, player):
-        """Retrieve the set of actions that can be performed on this
-        object whilst held."""
-        # Build system
-        acts = []
-        plans = makeable_plans(player, self)
-        for p in plans:
-            act = ActionMake(player, self, p)
-            acts.append(act)
-        return acts
 
     context_fields = ['description', 'count']
 

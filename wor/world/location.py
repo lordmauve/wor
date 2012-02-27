@@ -4,6 +4,7 @@ from wor.cost import Cost
 import Context
 
 from wor.jsonutil import JSONSerialisable, Everything
+from wor.actions.base import ActionTarget, BoundAction
 from wor.actions.movement import ActionMove
 from wor.actions.enter import ActionExit
 
@@ -32,7 +33,7 @@ class NullLocation(object):
         return False
 
 
-class Location(Persistent, JSONSerialisable):
+class Location(Persistent, JSONSerialisable, ActionTarget):
     __abstract = True
 
     move_ap = 1
@@ -237,10 +238,10 @@ class Location(Persistent, JSONSerialisable):
                 cost = self.move_cost(player, l)
 
                 # Create the action itself
-                actions.append(ActionMove(player, n.upper(), cost=Cost(ap=cost)))
+                actions.append(BoundAction(ActionMove(direction=n.upper(), cost=Cost(ap=cost)), self, 'move_' + n))
 
         if hasattr(self.region, 'parent_building'):
-            actions.append(ActionExit(player, self.region.parent_building))
+            actions.append(BoundAction(ActionExit(), self, 'exit'))
         return actions
 
     # Who's here?

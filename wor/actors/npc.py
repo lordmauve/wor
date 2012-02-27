@@ -57,19 +57,3 @@ class HumanMaleNPC(NPC):
         family = random_name_from_file('names/surnames.txt')
 
         super(HumanMaleNPC, self).__init__(given + ' ' + family, behaviour)
-
-
-class Seller(object):
-    """Mix-in class for NPCs that sell things.
-
-    NPCs that want to sell things should inherit from (Seller, NPC),
-    and provide an attribute 'sells', a list of tuples of the form
-    
-        (item_class, cost in GP)
-    """
-    sells = []
-    def external_actions(self, player):
-        acts = []
-        for item, price in self.sells:
-            acts.append(trading.ActionBuy(player, seller=self, item=item, price=price))
-        return acts
