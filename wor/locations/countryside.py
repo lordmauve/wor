@@ -1,4 +1,6 @@
+from wor.cost import Cost
 from wor.world.location import Location, Scenery
+from wor.actions.gathering import ForageAction
 
 
 class Plain(Location):
@@ -20,6 +22,14 @@ class Village(Location):
 
 class Copse(Location):
     move_ap = 4
+
+    forage = ForageAction(
+        cost=Cost(ap=5),
+        items=[
+            'natural.Twig',
+            'natural.Stick',
+        ]
+    )
 
 
 class Cliffs(Location):

@@ -229,7 +229,7 @@ class Location(Persistent, JSONSerialisable, ActionTarget):
     def external_actions(self, player):
         """Add to acts a list of actions that we could perform"""
 
-        actions = []
+        actions = super(Location, self).external_actions(player)
         for i in range(0, 6):
             # FIXME: This is awkward -- why are both arrays needed?
             n = self.local_directions_name[i]
