@@ -18,23 +18,35 @@ var Inventory = {
 			panel.update('');
 		}
 
-	/*	items.sort(function(a,b) {
-					if(a[3] == b[3]) return 0;
-					if(a[3] < b[3]) return -1;
+		items.sort(function(a,b) {
+					if(a.cls == b.cls) return 0;
+					if(a.cls < b.cls) return -1;
 					return 1;
-				});*/
+				});
 
 		panel.insert(new Element('h3').update('Inventory'));
 
 		var eventlistener = Inventory.onclick.bindAsEventListener(this);
 
+		var objectsection = new Element('div', {'id': 'inventory-items'});
+                panel.insert(objectsection);
 		for (var i = 0; i < items.length; i++){
 			var item = items[i];
-			var but = new Element('button');
-			but.appendChild(document.createTextNode(item.name));
-			panel.insert(but);
-			but.item = item;
-			but.observe('click', eventlistener);
+                        var div = new Element('div', {'class': 'item'});
+                        objectsection.insert(div);
+		        var obj_tree = new CollapsibleTree(div, item.name);
+
+                        if (item.description && item.description != item.name) {
+                            item.description.split('\n\n').each(function (para) {
+                                var p = new Element('p', {'class': 'description'});
+                                p.appendChild(document.createTextNode(para));
+                                obj_tree.insert(p);
+                            });
+                        }
+
+                        $A(item.actions).each(function (act) {
+                                new Action(act, obj_tree);
+                        });
 		}
 		
 		var close = new Element('img', {'src': '/icons/close.png', id: 'close'});

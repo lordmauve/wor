@@ -94,6 +94,20 @@ body#sunset {
 	left: 216px;
 }
 
+#inventory-items {
+    overflow: auto;
+    position: absolute;
+    top: 35px;
+    bottom: 15px;
+    left: 15px;
+    right: 15px;
+}
+
+#inventory-items .item {
+    margin-bottom: 3px;
+}
+
+#inventory-items .item,
 #map-bubble .playersection,
 #map-bubble .objectsection {
 	border: solid #d5c480 1px;
