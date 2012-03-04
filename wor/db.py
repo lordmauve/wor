@@ -1,15 +1,12 @@
-import os.path
-import thread
 import threading
+
+from django.conf import settings
 
 from ZODB import DB, FileStorage
 import transaction
 
 from wor.world.world import World
 from wor.accounts import AccountManager
-
-from BaseConfig import base_dir
-
 
 def db_root_object(name, cls):
     def __wrapped(self):
@@ -23,8 +20,8 @@ def db_root_object(name, cls):
 
 
 class WoRDB(object):
-    def __init__(self, filename='Data.fs'):
-        self.storage = FileStorage.FileStorage(os.path.join(base_dir, filename))
+    def __init__(self):
+        self.storage = FileStorage.FileStorage(settings.ZODB_PATH)
         self.db = DB(self.storage)
         self.cache = threading.local()
 

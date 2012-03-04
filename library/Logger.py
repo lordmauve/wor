@@ -2,12 +2,11 @@
 # Logger
 
 import os
-import sys
 import logging
 
-import BaseConfig
 from Context import log_ctx
 
+log_dir = '.'
 
 # Set up a custom formatter class
 class WoRLogFormatter(logging.Formatter):
@@ -24,7 +23,7 @@ class WoRLogFormatter(logging.Formatter):
 log = logging.getLogger('wor')
 log.setLevel(logging.DEBUG)
 
-filelog = logging.FileHandler(os.path.join(BaseConfig.log_dir, "debug"))
+filelog = logging.FileHandler(os.path.join(log_dir, "debug"))
 filelog.setLevel(logging.DEBUG)
 
 base_format = "%(asctime)s %(name)s %(levelname)s: %(message)s"
@@ -35,7 +34,7 @@ log.addHandler(filelog)
 # Set up a separate log to filter exceptions to
 exception_log = logging.getLogger('wor-exceptions')
 exception_log.setLevel(logging.DEBUG)
-exfile = logging.FileHandler(os.path.join(BaseConfig.log_dir, "exceptions"))
+exfile = logging.FileHandler(os.path.join(log_dir, "exceptions"))
 exfile.setLevel(logging.DEBUG)
 
 exfile.setFormatter(formatter)
