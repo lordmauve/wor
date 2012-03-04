@@ -226,7 +226,7 @@ class Location(Persistent, JSONSerialisable, ActionTarget):
     local_directions_name = [ 'r', 'ur', 'ul', 'l', 'll', 'lr' ]
 
     # Actions
-    def external_actions(self, player):
+    def external_actions(self, player, alias=None):
         """Add to acts a list of actions that we could perform"""
 
         actions = super(Location, self).external_actions(player)
@@ -238,10 +238,10 @@ class Location(Persistent, JSONSerialisable, ActionTarget):
                 cost = self.move_cost(player, l)
 
                 # Create the action itself
-                actions.append(BoundAction(ActionMove(direction=n.upper(), cost=Cost(ap=cost)), self, 'move_' + n))
+                actions.append(BoundAction(ActionMove(direction=n.upper(), cost=Cost(ap=cost)), self, 'move_' + n, alias=alias))
 
         if hasattr(self.region, 'parent_building'):
-            actions.append(BoundAction(ActionExit(), self, 'exit'))
+            actions.append(BoundAction(ActionExit(), self, 'exit', alias=alias))
         return actions
 
     # Who's here?

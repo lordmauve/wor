@@ -1,13 +1,13 @@
 class ActionTarget(object):
     """Mix-in class for objects that can have actions bound to them."""
-    def external_actions(self, player):
+    def external_actions(self, player, alias=None):
         acts = {}
         dicts = [self] + list(self.__class__.__mro__)
         for d in dicts:
             for k, v in vars(d).items():
                 if isinstance(v, Action):
                     if k not in acts:
-                        b = BoundAction(v, self, k)
+                        b = BoundAction(v, self, k, alias=None)
                         if b.valid(player):
                             acts[k] = b
         return acts.values()
@@ -185,20 +185,24 @@ class LocalAction(Action):
 
 class BoundAction(object):
     """Bind an action to the object on which it operates."""
-    def __init__(self, action, target, name):
+    def __init__(self, action, target, name, alias=None):
         self.action = action
         self.target = target
         self.name = name
+        self.alias = alias
 
     def __repr__(self):
         return '<BoundAction %s on %s>' % (self.name, self.target)
 
     def get_uid(self):
+        if self.alias:
+            return '%s-%s' % (self.alias, self.name)
+
         try:
             id = str(''.join('%02x' % ord(c) for c in self.target._p_oid))
         except AttributeError:
             id = str(self.target.id)
-        return '%s/%s' % (id, self.name)
+        return '%s-%s' % (id, self.name)
 
     def context_get(self, context):
         ret = self.action.context_get(context)

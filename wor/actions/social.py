@@ -8,7 +8,7 @@ class SocialAction(LocalAction):
     location.
     """
     def valid(self, actor, target):
-        return actor is not target and super(SocialAction, self).is_valid()
+        return actor is not target and super(SocialAction, self).valid(actor, target)
 
 
 class ActionSay(PersonalAction):
