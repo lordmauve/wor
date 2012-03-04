@@ -27,7 +27,7 @@ class Salmon(Ingredient):
     name_plural = '%d salmon'
 
     eat = ConsumeAction(
-        label=u'Eat',
+        caption=u'Eat',
         cost=Cost(ap=1, hp=-10),
         message='Mmm... sashimi.'
     )
@@ -38,7 +38,7 @@ class Perch(Ingredient):
     name_plural = '%d perch'
 
     eat = ConsumeAction(
-        label=u'Eat',
+        caption=u'Eat',
         cost=Cost(ap=1, hp=-6),
         message='Bleh... raw perch.'
     )
@@ -49,7 +49,7 @@ class Carp(Ingredient):
     name_plural = '%d carp'
 
     eat = ConsumeAction(
-        label=u'Eat',
+        caption=u'Eat',
         cost=Cost(ap=1, hp=-6),
         message='Raw carp... is not nice.'
     )
