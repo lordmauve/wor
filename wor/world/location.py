@@ -1,7 +1,6 @@
 from persistent import Persistent
 
 from wor.cost import Cost
-import Context
 
 from wor.jsonutil import JSONSerialisable, Everything
 from wor.actions.base import ActionTarget, BoundAction
@@ -32,6 +31,9 @@ class NullLocation(object):
     def can_enter(self, actor):
         return False
 
+    def visible(self, player):
+        return False
+
 
 class Location(Persistent, JSONSerialisable, ActionTarget):
     __abstract = True
@@ -49,6 +51,10 @@ class Location(Persistent, JSONSerialisable, ActionTarget):
 
     def get_title(self):
         return self.title or self.__class__.__name__
+
+    def visible(self, player):
+        """Is the location visible to player?"""
+        return player.position.hop_distance(self.pos) <= player.power('sight')
 
     @classmethod
     def class_name(cls):
@@ -105,12 +111,11 @@ class Location(Persistent, JSONSerialisable, ActionTarget):
             'timeofday': self.region.get_time_of_day()
         }
 
-    def context_authz(self, context):
-        auth = context.authz_location(self)
-        if auth == Context.ADMIN:
-            return
+    def context_authz(self, player):
+        if getattr(player, 'immortal', False):
+            return Everything()
 
-        if context.visible(auth):
+        if self.visible(player):
             return Everything()
         return []
 

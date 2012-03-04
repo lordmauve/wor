@@ -12,6 +12,12 @@ class WorldObject(JSONSerialisable, ActionTarget):
     description = ''
     _position = None
     owner = None
+
+    def visible(self, player):
+        """Is the object visible to player?"""
+        if self._position is None:
+            return player is self.owner
+        return player.position.hop_distance(self._position) <= player.power('sight')
     
     def get_name(self):
         return getattr(self, 'name', self.__class__.__name__)
@@ -40,13 +46,11 @@ class WorldObject(JSONSerialisable, ActionTarget):
 
     context_fields = []
 
-    def context_extra(self, context):
+    def context_extra(self, player):
         ctx = {
             'name': self.get_name(),
             'type': self.__class__.__name__,
             'description': self.get_description()
         }
-        auth = context.authz_object(self)
-        if context.visible(auth):
-            ctx['actions'] = [a.context_get(context) for a in self.external_actions(context.player)]
+        ctx['actions'] = [a.context_get(player) for a in self.external_actions(player)]
         return ctx

@@ -4,7 +4,7 @@ from wor.cost import Cost
 
 class ActionEnter(Action):
     cost = Cost(ap=1)
-    group = 'movement'
+    group = 'region'
     caption = u"Enter"
 
     def do(self, actor, target):
@@ -13,7 +13,7 @@ class ActionEnter(Action):
 
 class ActionExit(ActionEnter):
     cost = Cost(ap=1)
-    group = 'movement'
+    group = 'region'
     caption = "Leave %s"
 
     def get_caption(self, target):

@@ -189,7 +189,7 @@ body#sunset {
 
 #movement {
 	position: relative;
-        height: 55px;
+        padding-top: 55px;
 }
 
 #movement .action {

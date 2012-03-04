@@ -148,7 +148,7 @@ class Action(object):
             return "%s.%s.%s" % (object.internal_name(), object.id, act)
         return "%s.%s.%s" % (object.__class__.__name__, object.id, act)
 
-    def context_get(self, context):
+    def context_get(self, player):
         ret = {}
         if self.cost:
             ret['cost'] = str(self.cost)
@@ -183,6 +183,12 @@ class LocalAction(Action):
         return actor.pos == target.pos
 
 
+class OwnerAction(Action):
+    """An action that can only be performed by an item's owner."""
+    def valid(self, actor, target):
+        return target.owner() is actor
+
+
 class BoundAction(object):
     """Bind an action to the object on which it operates."""
     def __init__(self, action, target, name, alias=None):
@@ -204,11 +210,11 @@ class BoundAction(object):
             id = str(self.target.id)
         return '%s-%s' % (id, self.name)
 
-    def context_get(self, context):
-        ret = self.action.context_get(context)
+    def context_get(self, player):
+        ret = self.action.context_get(player)
         ret['uid'] = self.get_uid()
         ret['caption'] = self.action.get_caption(self.target)
-        ret['can_afford'] = self.action.can_afford(context.player)
+        ret['can_afford'] = self.action.can_afford(player)
         return ret
 
     def valid(self, actor):

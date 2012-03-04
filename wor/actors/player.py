@@ -10,7 +10,6 @@ from wor.items.container import Inventory
 from SimpleTimedCounter import SimpleTimedCounter
 
 from Alignment import Alignment
-from Context import Context
 
 
 from wor.actions.base import ActionFailed
@@ -42,20 +41,15 @@ class Player(Actor):
         self.inventory = Inventory(self)
         self.inventory.create('martial.Punch')
 
-    def get_context(self):
-        return Context(self)
-
     context_fields = ['name', 'id', 'hp', 'maxhp', 'is_zombie', 'held_item']
 
-    def context_extra(self, context):
+    def context_extra(self, player):
         ctx = {
             'ap': '%d/%d' % (self.ap_counter.value, self.ap_counter.maximum),
             'hp': '%d/%d' % (self.hp, self.maxhp),
             'alignment': Alignment(self.align).name()
         }
-        auth = context.authz_actor(self)
-        if context.visible(auth):
-            ctx['actions'] = [a.context_get(context) for a in self.external_actions(context.player)]
+        ctx['actions'] = [a.context_get(player) for a in self.external_actions(player)]
         return ctx
 
     def __ap_getter(self):

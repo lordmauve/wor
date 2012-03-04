@@ -7,8 +7,6 @@ from persistent import Persistent
 from persistent.list import PersistentList
 from BTrees.IOBTree import IOBTree
 
-import Context
-
 from Triggerable import Triggerable
 from TriggerDeath import TriggerDeath
 
@@ -86,6 +84,10 @@ class Actor(Persistent, Triggerable, JSONSerialisable, ActionTarget):
         """Return the item(s) currently held by the actor"""
         return getattr(self, 'holding', None)
 
+    def visible(self, player):
+        """Is the actor visible to player?"""
+        return self.position == player.position
+
     def set_held_item(self, item):
         """Set the held item"""
         self.holding = item
@@ -115,24 +117,6 @@ class Actor(Persistent, Triggerable, JSONSerialisable, ActionTarget):
         powr += self.loc().power(name)
 
         return powr
-
-    def context_get_(self, context):
-        """Return a dictionary of properties of this object, given the
-        current authZ context"""
-        ret = {}
-        ret['id'] = self.id
-
-        auth = context.authz_actor(self)
-        if auth == Context.ADMIN:
-            fields = Context.all_fields(self)
-        elif auth == Context.OWNER:
-            fields = [ 'ap', 'ap_counter', 'name', 'hp', 'maxhp', 'holding' ]
-        elif auth == Context.STRANGER_VISIBLE:
-            fields = [ 'name' ]
-        else:
-            fields = [ 'name' ]
-
-        return self.build_context(ret, fields)
 
     def message(self, message, msg_type='message', sender=None):
         """Write a message to the actor's message log, creating it
