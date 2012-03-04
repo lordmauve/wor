@@ -4,7 +4,6 @@ import random
 from persistent import Persistent
 
 import Util
-import Context
 
 from wor.db import db
 from wor.actions.base import ActionTarget
@@ -127,23 +126,6 @@ class Item(ActionTarget, JSONSerialisable, Persistent):
             'name': unicode(self),
             'cls': self.internal_name()
         }
-
-    def context_get_(self, context):
-        """Return a dictionary of properties of this object, given the
-        current authZ context"""
-        ret = {}
-        ret['id'] = db.id(self)
-        ret['type'] = self.internal_name()
-
-        auth = context.authz_item(self)
-        if auth == Context.ADMIN:
-            fields = Context.all_fields(self)
-        elif auth == Context.OWNER:
-            fields = ['name', 'damage', 'description']
-        else:
-            fields = ['name']
-
-        return self.build_context(ret, fields)
 
     def merge(self, new_item):
         """Merge the given item with this item, if possible.  Return 

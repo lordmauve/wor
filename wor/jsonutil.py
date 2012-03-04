@@ -6,9 +6,8 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print >>sys.stderr, "simplejson is required for Python <2.6"
-        print >>sys.stderr, "try easy_install simplejson or download from http://pypi.python.org/pypi/simplejson/"
-        sys.exit(3)
+        import sys
+        sys.exit("simplejson is required for Python <2.6")
 
 
 class Everything(object):
@@ -20,12 +19,12 @@ class JSONSerialisable(object):
     """A mix-in class that provides tools for serialising to a JSON
     object (actually a python dict intended for JSON)"""
 
-    def context_authz(self, context):
+    def context_authz(self, player):
         """Returns a list of the context properties that can be
         seen in the given context, or None for no restriction."""
         return None
 
-    def context_get(self, context):
+    def context_get(self, player):
         """Helper function for writing context_get methods. Take the
         list of fields, and add the corresponding attribute values of
         this object into the ret hash. If the value of the attribute
@@ -35,7 +34,7 @@ class JSONSerialisable(object):
         ret = {}
         
         # build authorised fields list
-        auth = self.context_authz(context)
+        auth = self.context_authz(player)
             
         if auth is None:
             auth = Everything()
@@ -47,12 +46,12 @@ class JSONSerialisable(object):
             for k in self.context_fields:
                 if k not in auth:
                     continue
-                ret[k] = self.__context_property(getattr(self, k), context)
+                ret[k] = self.__context_property(getattr(self, k), player)
                 v = getattr(self, k)
 
             # add in context_extra
             if hasattr(self, 'context_extra'):
-                extra = self.context_extra(context)
+                extra = self.context_extra(player)
                 for k in extra:
                     if k in auth:
                         ret[k] = extra[k]
@@ -62,7 +61,7 @@ class JSONSerialisable(object):
         for k, v in self.__dict__.items():
             if k not in auth or k.startswith('_'):
                 continue
-            ret[k] = self.__context_property(v, context, call_callables=False)
+            ret[k] = self.__context_property(v, player, call_callables=False)
         return ret
 
     def __context_property(self, v, context, call_callables=True):

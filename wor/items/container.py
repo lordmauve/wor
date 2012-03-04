@@ -31,6 +31,26 @@ class ItemContainer(Persistent):
 
         return ret
 
+    def self_get_equip(self, player):
+        """Retrieve contents of this container.
+
+        This view populates the response with actions that can be performed upon them.
+        """
+        ret = []
+        for ilist in self.items.values():
+            for item in ilist:
+                actions = item.external_actions(player)
+                ret.append({
+                    'cls': item.internal_name(),
+                    'id': db.id(item),
+                    'description': item.description(),
+                    'count': item.count,
+                    'name': unicode(item),
+                    'actions': [a.context_get(player) for a in actions]
+                })
+
+        return ret
+
     ####
     # Item access
     def __getitem__(self, key):

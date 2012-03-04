@@ -7,6 +7,7 @@ urlpatterns = patterns('api_views',
 
     (r'^api/actor/(?P<target>\d+)/(?P<op>desc|inventory|equipment)', 'actor_detail'),
     (r'^api/actor/(?P<target>\d+)/log', 'actor_log'),
+    (r'^api/actor/self/inventory', 'inventory'),
     (r'^api/actor/self/(?P<op>desc|inventory|equipment)', 'actor_detail'),
     (r'^api/actor/self/actions', 'actions'),
     (r'^api/actor/self/log', 'actor_log'),

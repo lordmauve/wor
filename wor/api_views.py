@@ -8,8 +8,6 @@ from wor.world.location import Location
 from wor.actions.base import ActionFailed
 from wor.jsonutil import JSONResponse
 
-from Context import Context
-
 
 account = 'mauve'
 
@@ -35,7 +33,6 @@ def get_actor(request):
         player = db.world().get_actor(pid)
     except KeyError:
         player = db.accounts().get_account(request.session['account']).get_players()[0]
-    Context.context = player
     return player
 
 
@@ -45,15 +42,20 @@ def actor_detail(request, op, target=None):
     if target is None: 
         actor = player
     else:
-        actor = db.world().get_actor(pid)
+        actor = db.world().get_actor(int(target))
 
-    ctx = Context(player)
     if op == 'desc':
-        return JSONResponse(actor.context_get(ctx))
+        return JSONResponse(actor.context_get(player))
     elif op == 'inventory':
-        return JSONResponse(actor.inventory.context_get_equip(ctx))
+        return JSONResponse(actor.inventory.context_get_equip(player))
     elif op == 'equipment':
-        return JSONResponse(actor.equipment.context_get_equip(ctx))
+        return JSONResponse(actor.equipment.context_get_equip(player))
+
+
+def inventory(request):
+    """A view of a player's own inventory."""
+    player = get_actor(request)
+    return JSONResponse(player.inventory.self_get_equip(player))
 
 
 def actor_log(request, target=None):
@@ -61,7 +63,7 @@ def actor_log(request, target=None):
     if target is None: 
         actor = player
     else:
-        actor = db.world().get_actor(pid)
+        actor = db.world().get_actor(int(target))
 
     since = request.GET.get('since', getattr(actor, 'last_action', 0))
 
@@ -75,7 +77,7 @@ def actions(request):
     if request.method == 'GET':
         # List of actions
         actions = player.get_actions()
-        data = [act.context_get(player.get_context()) for act in actions]
+        data = [act.context_get(player) for act in actions]
         return JSONResponse(data)
     elif request.method == 'POST':
         if 'action' not in request.POST:
@@ -100,9 +102,8 @@ def location(request, op, location_id=None):
     else:    
         location = Location.load(int(location_id))
 
-    ctx = Context(player)
     if op == 'desc':
-        return JSONResponse(location.context_get(ctx))
+        return JSONResponse(location.context_get(player))
     elif op == 'actions':
         return JSONResponse(None)
     else:
@@ -115,7 +116,6 @@ def neighbourhood(request):
 
     sight = player.power('sight')
 
-    ctx = Context(player)
     locs = []
 
     world = db.world()
@@ -123,7 +123,7 @@ def neighbourhood(request):
         if loc is None or loc == 'unknown':
             locs.append(loc)
         else:
-            locs.append(loc.context_get(ctx))
+            locs.append(loc.context_get(player))
 
     return JSONResponse(locs)
 

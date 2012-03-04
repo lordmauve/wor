@@ -27,11 +27,9 @@ class NPC(Mob):
 
     context_fields = ['id', 'hp', 'class_name', 'short_name', 'full_name']
 
-    def context_extra(self, context):
+    def context_extra(self, player):
         ctx = {}
-        auth = context.authz_actor(self)
-        if context.visible(auth):
-            ctx['actions'] = [a.context_get(context) for a in self.external_actions(context.player)]
+        ctx['actions'] = [a.context_get(player) for a in self.external_actions(player)]
         return ctx
 
 

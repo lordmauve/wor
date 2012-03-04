@@ -1,4 +1,4 @@
-from base import PersonalAction, ActionFailed, IntegerField
+from base import Action, PersonalAction, ActionFailed, IntegerField
 
 
 class ActionChangeItem(PersonalAction):
@@ -16,7 +16,7 @@ class ActionChangeItem(PersonalAction):
         actor.set_held_item(item)
 
 
-class ConsumeAction(PersonalAction):
+class ConsumeAction(Action):
     group = 'inventory'
     message = u"You consume %(target)s."
 
