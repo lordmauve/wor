@@ -18,6 +18,7 @@ class ActionChangeItem(PersonalAction):
 
 class ConsumeAction(Action):
     group = 'inventory'
+    caption = u"Consume"
     message = u"You consume %(target)s."
 
     def do(self, actor, target):
