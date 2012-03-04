@@ -18,8 +18,8 @@ class ActionChangeItem(PersonalAction):
 
 class ConsumeAction(PersonalAction):
     group = 'inventory'
-    message = u"You consume the %s."
+    message = u"You consume %(target)s."
 
     def do(self, actor, target):
         target.destroy()
-        return self.message % self.target
+        return self.message % {'target': target}

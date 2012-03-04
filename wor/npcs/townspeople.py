@@ -35,3 +35,7 @@ class Trader(HumanNPC):
         item='tools.PickAxe',
         cost=Cost(gp=35, ap=1),
     )
+    buy_rod = trading.ActionBuy(
+        item='tools.FishingRod',
+        cost=Cost(gp=25, ap=1),
+    )

@@ -1,8 +1,14 @@
 from wor.world.location import Location
-
+from wor.actions.gathering import FishingAction
 
 class Pontoon(Location):
-    pass
+    fish = FishingAction(
+        items=[
+            'food.Salmon',
+            'food.Perch',
+            'food.Carp'
+        ]
+    )
 
 
 class Sea(Location):

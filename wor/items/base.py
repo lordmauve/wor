@@ -195,7 +195,21 @@ class AggregateItem(Item):
                                 % (self.internal_name(), new_item.internal_name()))
         return False
 
-    def split(self, num_items):
+    def destroy_some(self, num=1):
+        """Remove some number from the total number of items."""
+        if self.count < num:
+            raise InsufficientItemsException(
+                "Cannot destroy %d items from an aggregate with only %d items"
+                % (num, self.count))
+        elif self.count == num:
+            return self.destroy()
+        else:
+            self.count -= num
+
+    destroy = destroy_some
+    destroy_all = Item.destroy
+
+    def split(self, num_items=1):
         """Splits the given number of items from this item.  If this is 
            an aggregate, the split instance should be returned.  If 
            not, None will be returned"""
@@ -209,6 +223,8 @@ class AggregateItem(Item):
             raise InsufficientItemsException(
                 "Cannot split %d items from an aggregate with only %d items"
                 % (num_items, self.count))
+        elif self.count == num_items:
+            return self
         else:
             # Clone this object
             new_obj = self.__class__(num_items)
@@ -217,5 +233,3 @@ class AggregateItem(Item):
             self.count -= num_items
 
             return new_obj
-
-        return None
