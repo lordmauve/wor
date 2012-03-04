@@ -3,11 +3,12 @@
 import random
 from persistent import Persistent
 
-import Util
-
-from wor.db import db
 from wor.actions.base import ActionTarget
 from wor.jsonutil import JSONSerialisable
+
+
+class IncompatibleItemsError(Exception):
+    """Incompatible item types cannot be merged."""
 
 
 class InsufficientItemsException(Exception):
@@ -173,7 +174,7 @@ class AggregateItem(Item):
             self.count += int(new_item.count)
             return True
         else:
-            raise Util.WorError("Incompatible types (%s/%s) cannot be merged"
+            raise IncompatibleItemsError("Incompatible types (%s/%s) cannot be merged"
                                 % (self.internal_name(), new_item.internal_name()))
         return False
 
