@@ -13,8 +13,10 @@ class Mob(Actor):
 
     context_fields = ['id', 'hp', 'class_name']
     
-    def class_name(self):
-        if self.taxonomy:
-            return self.taxonomy    
-        mod = self.__class__.__module__.replace('wor.', '')
-        return mod + '.' + self.__class__.__name__
+    @classmethod
+    def class_name(cls):
+        try:
+            return cls.taxonomy
+        except AttributeError:
+            mod = cls.__module__.replace('wor.', '')
+            return mod + '.' + cls.__name__
