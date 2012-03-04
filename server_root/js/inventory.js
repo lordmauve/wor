@@ -52,7 +52,7 @@ var Inventory = {
 	{
 		Event.stop(event);
 		var item = event.element().item;
-		get_json('/actor/self/actions/', act_response, 'action=change_item&id=' + item.id);
+		get_json('/actor/self/actions/', act_response, 'action=self-change_item&id=' + item.id);
 		Lightbox.hide();
 	}
 };
