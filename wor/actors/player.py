@@ -13,6 +13,7 @@ from Alignment import Alignment
 from Context import Context
 
 
+from wor.actions.base import ActionFailed
 from wor.actions.inventory import ActionChangeItem
 from wor.actions import social
 
@@ -145,7 +146,7 @@ class Player(Actor):
             self.last_action = time.time()
             return message
         else:
-            raise KeyError("Unknown action")
+            raise ActionFailed(u"I don't understand what you want to do.")
 
     def say_boo(self):
         """Test action"""

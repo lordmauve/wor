@@ -27,3 +27,7 @@ class Spade(Item):
 
 class PickAxe(Item):
     name = 'a pickaxe'
+
+
+class FishingRod(Item):
+    name = 'a fishing rod'
