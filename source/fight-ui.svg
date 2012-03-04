@@ -1,0 +1,800 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1024"
+   height="678"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47pre0 r21549"
+   sodipodi:docname="fight-ui.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:export-filename="/home/mauve/Projects/WoR/fight-ui.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+    <inkscape:perspective
+       id="perspective2824"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2834">
+      <rect
+         y="-77.066383"
+         x="-20.571463"
+         height="678"
+         width="1024"
+         id="rect2836"
+         style="opacity:0.5;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </clipPath>
+    <inkscape:perspective
+       id="perspective3638"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3659"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6272"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6293"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6326"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient5713">
+      <stop
+         style="stop-color:#cccccc;stop-opacity:1;"
+         offset="0"
+         id="stop5715" />
+      <stop
+         style="stop-color:#cccccc;stop-opacity:0;"
+         offset="1"
+         id="stop5717" />
+    </linearGradient>
+    <inkscape:perspective
+       id="perspective6408"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient4740">
+      <stop
+         style="stop-color:#e6e6e6;stop-opacity:1"
+         offset="0"
+         id="stop4742" />
+      <stop
+         style="stop-color:#cccccc;stop-opacity:1"
+         offset="1"
+         id="stop4744" />
+    </linearGradient>
+    <inkscape:perspective
+       id="perspective6549"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6571"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6621"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6707"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath6764">
+      <rect
+         ry="4"
+         rx="4"
+         y="218"
+         x="150"
+         height="332"
+         width="427"
+         id="rect6766"
+         style="color:#000000;fill:#666666;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.99999988;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </clipPath>
+    <inkscape:perspective
+       id="perspective6806"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5713"
+       id="linearGradient6919"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,0.82884565,-1117.8732,19.16079)"
+       x1="508.5"
+       y1="284.31119"
+       x2="529.5"
+       y2="284.31119" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5713"
+       id="linearGradient6921"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1038,41)"
+       x1="508.5"
+       y1="118.81121"
+       x2="529.5"
+       y2="118.81121" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5713"
+       id="linearGradient6923"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1038,0)"
+       x1="508.5"
+       y1="469.81122"
+       x2="529.5"
+       y2="469.81122" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4740"
+       id="linearGradient6925"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.68493146,0,0,0.85185185,182.54907,4.6110663)"
+       x1="529.37317"
+       y1="81.874695"
+       x2="528.37317"
+       y2="104.87469" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4740"
+       id="linearGradient6927"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.77070186,0,0,0.85185185,99.93204,4.6110663)"
+       x1="529.37317"
+       y1="81.874695"
+       x2="528.37317"
+       y2="104.87469" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4740"
+       id="linearGradient6929"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.93150678,0,0,0.85185185,21.032397,4.6110663)"
+       x1="529.37317"
+       y1="81.874695"
+       x2="528.37317"
+       y2="104.87469" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4740"
+       id="linearGradient6931"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.93150678,0,0,0.85185185,21.032397,4.6110663)"
+       x1="529.37317"
+       y1="81.874695"
+       x2="528.37317"
+       y2="104.87469" />
+    <filter
+       inkscape:collect="always"
+       id="filter6947">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="3.4377551"
+         id="feGaussianBlur6949" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="379.57146"
+     inkscape:cy="391.2418"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1680"
+     inkscape:window-height="975"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(20.571463,77.066383)">
+    <image
+       y="-143.06638"
+       x="-20.571463"
+       id="image2826"
+       height="768"
+       width="1024"
+       xlink:href="file:///home/mauve/Pictures/screenshots/wor-game4.jpg"
+       clip-path="url(#clipPath2834)" />
+    <rect
+       style="opacity:0.25;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect2830"
+       width="1024"
+       height="678"
+       x="-20.571463"
+       y="-77.066383" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot6478"
+       style="font-size:14px"
+       transform="translate(-20.571463,-143.06638)"><flowRegion
+         id="flowRegion6480"><rect
+           id="rect6482"
+           width="390"
+           height="325"
+           x="152"
+           y="205" /></flowRegion><flowPara
+         id="flowPara6484"></flowPara></flowRoot>    <flowRoot
+       xml:space="preserve"
+       id="flowRoot6486"
+       style="font-size:14px"
+       transform="translate(-20.571463,-143.06638)"><flowRegion
+         id="flowRegion6488"><rect
+           id="rect6490"
+           width="391"
+           height="321"
+           x="149"
+           y="208" /></flowRegion><flowPara
+         id="flowPara6492"></flowPara></flowRoot>    <g
+       id="g6830"
+       transform="translate(42.999994,37.000384)">
+      <rect
+         style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.99999988;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter6947);enable-background:accumulate"
+         id="rect6933"
+         width="695"
+         height="428"
+         x="100.92854"
+         y="11.43362"
+         rx="6"
+         ry="6" />
+      <rect
+         ry="6"
+         rx="6"
+         y="11.43362"
+         x="100.92854"
+         height="428"
+         width="695"
+         id="rect2838"
+         style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <text
+         id="text2840"
+         y="37.93362"
+         x="121.42854"
+         style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#333333;fill-opacity:1;fill-rule:nonzero;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         xml:space="preserve"><tspan
+           y="37.93362"
+           x="121.42854"
+           id="tspan2842"
+           sodipodi:role="line">Fight</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;text-anchor:end;fill:#333333;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         x="778.42853"
+         y="230.93362"
+         id="text2844"><tspan
+           sodipodi:role="line"
+           id="tspan2846"
+           x="778.42853"
+           y="230.93362">Your party</tspan></text>
+      <rect
+         ry="4"
+         rx="4"
+         y="52.433624"
+         x="566.92853"
+         height="143"
+         width="212"
+         id="rect2848"
+         style="opacity:0.5;color:#000000;fill:#e9c6af;fill-opacity:1;fill-rule:nonzero;stroke:#784421;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <rect
+         style="color:#000000;fill:#fff7d5;fill-opacity:1;fill-rule:nonzero;stroke:#d5c480;stroke-width:0.99999976;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect3624"
+         width="212"
+         height="143"
+         x="566.92853"
+         y="239.43362"
+         rx="4"
+         ry="4" />
+      <text
+         id="text3626"
+         y="44.933624"
+         x="776.42853"
+         style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:end;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:end;color:#000000;fill:#333333;fill-opacity:1;fill-rule:nonzero;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         xml:space="preserve"><tspan
+           y="44.933624"
+           x="776.42853"
+           id="tspan3628"
+           sodipodi:role="line">Enemy party</tspan></text>
+      <g
+         id="g6310"
+         transform="translate(-64.94462,-19.941041)">
+        <rect
+           transform="translate(79.87316,-76.000308)"
+           ry="2"
+           rx="2"
+           y="149.37494"
+           x="509"
+           height="331.00006"
+           width="20"
+           id="rect6996"
+           style="fill:#e6e6e6;fill-opacity:1;stroke:#999999;stroke-width:1;stroke-opacity:1" />
+        <rect
+           style="fill:url(#linearGradient6919);fill-opacity:1;stroke:#999999;stroke-width:1;stroke-opacity:1"
+           id="rect6998"
+           width="20"
+           height="256.66202"
+           x="-608.87317"
+           y="126.47989"
+           rx="2"
+           ry="1.9999999"
+           transform="scale(-1,1)" />
+        <rect
+           style="fill:url(#linearGradient6921);fill-opacity:1;stroke:#999999;stroke-width:1;stroke-opacity:1"
+           id="rect5699"
+           width="20"
+           height="20.662001"
+           x="-529"
+           y="149.48021"
+           rx="2"
+           ry="2"
+           transform="matrix(-1,0,0,1,79.87316,-76.000308)" />
+        <rect
+           ry="2"
+           rx="2"
+           y="459.48022"
+           x="-529"
+           height="20.662001"
+           width="20"
+           id="rect5697"
+           style="fill:url(#linearGradient6923);fill-opacity:1;stroke:#999999;stroke-width:1;stroke-opacity:1"
+           transform="matrix(-1,0,0,1,79.87316,-76.000308)" />
+        <path
+           transform="matrix(0.12328769,0,0,0.09677421,614.77042,71.438)"
+           d="m -133,97.512512 26.84679,46.499998 -53.69358,0 L -133,97.512512 z"
+           inkscape:randomized="0"
+           inkscape:rounded="0"
+           inkscape:flatsided="true"
+           sodipodi:arg2="-0.52359878"
+           sodipodi:arg1="-1.5707963"
+           sodipodi:r2="15.5"
+           sodipodi:r1="31"
+           sodipodi:cy="128.51251"
+           sodipodi:cx="-133"
+           sodipodi:sides="3"
+           id="path5742"
+           style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.99999988;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           sodipodi:type="star" />
+        <path
+           sodipodi:type="star"
+           style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.99999988;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           id="path5744"
+           sodipodi:sides="3"
+           sodipodi:cx="-133"
+           sodipodi:cy="128.51251"
+           sodipodi:r1="31"
+           sodipodi:r2="15.5"
+           sodipodi:arg1="-1.5707963"
+           sodipodi:arg2="-0.52359878"
+           inkscape:flatsided="true"
+           inkscape:rounded="0"
+           inkscape:randomized="0"
+           d="m -133,97.512512 26.84679,46.499998 -53.69358,0 L -133,97.512512 z"
+           transform="matrix(0.12328769,0,0,-0.09677421,614.77042,405.81139)" />
+      </g>
+      <g
+         id="g5571"
+         transform="translate(207.0554,328.05893)">
+        <rect
+           ry="3"
+           rx="3"
+           y="71.374695"
+           x="522.87317"
+           height="23"
+           width="50"
+           id="rect4738"
+           style="color:#000000;fill:url(#linearGradient6925);fill-opacity:1;fill-rule:nonzero;stroke:#999999;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <text
+           xml:space="preserve"
+           style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+           x="532.37317"
+           y="87.874695"
+           id="text4756"><tspan
+             sodipodi:role="line"
+             id="tspan4758"
+             x="532.37317"
+             y="87.874695">Flee</tspan></text>
+      </g>
+      <g
+         transform="translate(44.0554,328.05893)"
+         id="g6443">
+        <rect
+           style="color:#000000;fill:url(#linearGradient6927);fill-opacity:1;fill-rule:nonzero;stroke:#999999;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           id="rect6445"
+           width="82.000031"
+           height="23"
+           x="482.87314"
+           y="71.374695"
+           rx="3"
+           ry="3" />
+        <text
+           id="text6447"
+           y="87.874695"
+           x="493.37317"
+           style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+           xml:space="preserve"><tspan
+             y="87.874695"
+             x="493.37317"
+             id="tspan6449"
+             sodipodi:role="line">Inventory</tspan></text>
+      </g>
+      <flowRoot
+         clip-path="url(#clipPath6764)"
+         transform="translate(-34.57146,-163.06638)"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         id="flowRoot6517"
+         xml:space="preserve"><flowRegion
+           id="flowRegion6519"><rect
+             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+             y="207"
+             x="155"
+             height="331"
+             width="377"
+             id="rect6521" /></flowRegion><flowPara
+           id="flowPara6523">You draw... aim... TWANG! Your arrow strikes a hairy  gnome for 8 damage!</flowPara><flowPara
+           id="flowPara6525" /><flowPara
+           style="fill:#666666"
+           id="flowPara6665">You draw another arrow from your quiver.</flowPara><flowPara
+           id="flowPara6669" /><flowPara
+           style="fill:#800000"
+           id="flowPara6671">The gnome chieftain stabs darksatanic with a spear for 8 damage!</flowPara><flowPara
+           id="flowPara6733" /><flowPara
+           id="flowPara6735">darksatanic swings at the gnome chieftain, who neatly sidesteps the blow.</flowPara><flowPara
+           id="flowPara6737" /><flowPara
+           style="fill:#800000"
+           id="flowPara6739">A hairy gnome kicks Ulag Gnrok for 1 damage!</flowPara><flowPara
+           id="flowPara6741" /><flowPara
+           id="flowPara6743">You draw... aim... TWANG! Your arrow strikes a hairy gnome for 12 damage!</flowPara><flowPara
+           id="flowPara6745" /><flowPara
+           style="fill:#447821"
+           id="flowPara6747">A hairy gnome is dead!</flowPara><flowPara
+           id="flowPara6749"
+           style="fill:#447821" /><flowPara
+           id="flowPara6751"
+           style="fill:#666666">You draw another arrow from your quiver.</flowPara></flowRoot>      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         x="583.42853"
+         y="73.933624"
+         id="text6529"><tspan
+           sodipodi:role="line"
+           id="tspan6531"
+           x="583.42853"
+           y="73.933624">Gnome chieftain</tspan></text>
+      <text
+         id="text6533"
+         y="95.933617"
+         x="583.42853"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         xml:space="preserve"><tspan
+           y="95.933617"
+           x="583.42853"
+           id="tspan6535"
+           sodipodi:role="line">Hairy gnome</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         x="583.42853"
+         y="117.93362"
+         id="text6537"><tspan
+           sodipodi:role="line"
+           id="tspan6539"
+           x="583.42853"
+           y="117.93362">Angry gnome</tspan></text>
+      <image
+         y="280.93362"
+         x="574.42853"
+         id="image4422"
+         height="27"
+         width="24"
+         xlink:href="file:///home/mauve/Projects/WoR/icon-metal.png" />
+      <text
+         xml:space="preserve"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         x="604.11273"
+         y="298.40839"
+         id="text3347-7"><tspan
+           sodipodi:role="line"
+           id="tspan3349-1"
+           x="604.11273"
+           y="298.40839">darksatanic<tspan
+   style="font-size:15px;fill:#000000"
+   id="tspan4693" /></tspan></text>
+      <path
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/mauve/dev/wor/server_root/img/hp.png"
+         style="color:#000000;fill:#800000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 762.38347,76.71603 c -1.47052,-3.51524 -5.82723,-5.75983 -6.97432,-7.74998 -1.14085,-1.9793 1.03452,-5.79861 3.48716,-5.81321 2.41715,-0.0144 2.75066,0.6103 3.48716,2.08666 0,0 0.77674,-2.15582 3.48716,-2.08666 2.78205,0.071 4.77921,3.46189 3.48716,5.81321 -1.30701,2.37854 -5.69926,4.18289 -6.97432,7.74998 z"
+         id="path3565"
+         sodipodi:nodetypes="czzczzc" />
+      <text
+         id="text6635"
+         y="73.933617"
+         x="736.42853"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         xml:space="preserve"><tspan
+           y="73.933617"
+           x="736.42853"
+           id="tspan6637"
+           sodipodi:role="line">42</tspan></text>
+      <path
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/mauve/dev/wor/server_root/img/hp.png"
+         style="color:#000000;fill:#800000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 762.38347,98.71603 c -1.47052,-3.51524 -5.82723,-5.75983 -6.97432,-7.74998 -1.14085,-1.9793 1.03452,-5.79861 3.48716,-5.81321 2.41715,-0.0144 2.75066,0.6103 3.48716,2.08666 0,0 0.77674,-2.15582 3.48716,-2.08666 2.78205,0.071 4.77921,3.46189 3.48716,5.81321 -1.30701,2.37854 -5.69926,4.18289 -6.97432,7.74998 z"
+         id="path6645"
+         sodipodi:nodetypes="czzczzc" />
+      <path
+         sodipodi:nodetypes="czzczzc"
+         id="path6639"
+         d="m 762.38347,119.71603 c -1.47052,-3.51524 -5.82723,-5.75983 -6.97432,-7.74998 -1.14085,-1.9793 1.03452,-5.79861 3.48716,-5.81321 2.41715,-0.0144 2.75066,0.6103 3.48716,2.08666 0,0 0.77674,-2.15582 3.48716,-2.08666 2.78205,0.071 4.77921,3.46189 3.48716,5.81321 -1.30701,2.37854 -5.69926,4.18289 -6.97432,7.74998 z"
+         style="color:#000000;fill:#800000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         inkscape:export-filename="/home/mauve/dev/wor/server_root/img/hp.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
+      <text
+         id="text6647"
+         y="95.933617"
+         x="736.42853"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         xml:space="preserve"><tspan
+           y="95.933617"
+           x="736.42853"
+           id="tspan6649"
+           sodipodi:role="line">10</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         x="736.42853"
+         y="116.93362"
+         id="text6641"><tspan
+           sodipodi:role="line"
+           id="tspan6643"
+           x="736.42853"
+           y="116.93362">22</tspan></text>
+      <path
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/mauve/dev/wor/server_root/img/hp.png"
+         style="color:#000000;fill:#800000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 762.38347,301.71603 c -1.47052,-3.51524 -5.82723,-5.75983 -6.97432,-7.74998 -1.14085,-1.9793 1.03452,-5.79861 3.48716,-5.81321 2.41715,-0.0144 2.75066,0.6103 3.48716,2.08666 0,0 0.77674,-2.15582 3.48716,-2.08666 2.78205,0.071 4.77921,3.46189 3.48716,5.81321 -1.30701,2.37854 -5.69926,4.18289 -6.97432,7.74998 z"
+         id="path6659"
+         sodipodi:nodetypes="czzczzc" />
+      <text
+         id="text6661"
+         y="298.93362"
+         x="750.42853"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;text-anchor:end;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         xml:space="preserve"><tspan
+           y="298.93362"
+           x="750.42853"
+           id="tspan6663"
+           sodipodi:role="line">266</tspan></text>
+      <g
+         id="g6683"
+         transform="translate(-366.9446,328.05893)">
+        <rect
+           ry="3"
+           rx="3"
+           y="71.374695"
+           x="483.87314"
+           height="23"
+           width="61.000031"
+           id="rect6685"
+           style="color:#000000;fill:url(#linearGradient6929);fill-opacity:1;fill-rule:nonzero;stroke:#999999;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <text
+           xml:space="preserve"
+           style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+           x="493.37317"
+           y="87.874695"
+           id="text6687"><tspan
+             sodipodi:role="line"
+             id="tspan6689"
+             x="493.37317"
+             y="87.874695">Attack</tspan></text>
+      </g>
+      <text
+         id="text6677"
+         y="415.93362"
+         x="189.42859"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         xml:space="preserve"><tspan
+           y="415.93362"
+           x="189.42859"
+           id="tspan6679"
+           sodipodi:role="line"><tspan
+   id="tspan6695"
+   style="fill:#666666">using  </tspan>Short Bow (7 arrows remaining)</tspan></text>
+      <path
+         transform="matrix(0,0.12328769,-0.09677421,0,587.11523,108.33088)"
+         d="m -133,97.512512 26.84679,46.499998 -53.69358,0 L -133,97.512512 z"
+         inkscape:randomized="0"
+         inkscape:rounded="0"
+         inkscape:flatsided="true"
+         sodipodi:arg2="-0.52359878"
+         sodipodi:arg1="-1.5707963"
+         sodipodi:r2="15.5"
+         sodipodi:r1="31"
+         sodipodi:cy="128.51251"
+         sodipodi:cx="-133"
+         sodipodi:sides="3"
+         id="path5742-3"
+         style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.99999988;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         sodipodi:type="star" />
+      <text
+         id="text6721"
+         y="328.40839"
+         x="576.11273"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         xml:space="preserve"><tspan
+           y="328.40839"
+           x="576.11273"
+           id="tspan6723"
+           sodipodi:role="line">Ulag Gnrok, an orc</tspan></text>
+      <path
+         sodipodi:nodetypes="czzczzc"
+         id="path6727"
+         d="m 762.38347,330.71603 c -1.47052,-3.51524 -5.82723,-5.75983 -6.97432,-7.74998 -1.14085,-1.9793 1.03452,-5.79861 3.48716,-5.81321 2.41715,-0.0144 2.75066,0.6103 3.48716,2.08666 0,0 0.77674,-2.15582 3.48716,-2.08666 2.78205,0.071 4.77921,3.46189 3.48716,5.81321 -1.30701,2.37854 -5.69926,4.18289 -6.97432,7.74998 z"
+         style="color:#000000;fill:#800000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         inkscape:export-filename="/home/mauve/dev/wor/server_root/img/hp.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;text-anchor:end;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         x="750.42853"
+         y="327.93362"
+         id="text6729"><tspan
+           sodipodi:role="line"
+           id="tspan6731"
+           x="750.42853"
+           y="327.93362">60</tspan></text>
+      <text
+         id="text6786"
+         y="265.40839"
+         x="604.11273"
+         style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#800000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         xml:space="preserve"><tspan
+           y="265.40839"
+           x="604.11273"
+           id="tspan6788"
+           sodipodi:role="line">Mauve</tspan></text>
+      <path
+         sodipodi:nodetypes="czzczzc"
+         id="path6792"
+         d="m 762.38347,268.71603 c -1.47052,-3.51524 -5.82723,-5.75983 -6.97432,-7.74998 -1.14085,-1.9793 1.03452,-5.79861 3.48716,-5.81321 2.41715,-0.0144 2.75066,0.6103 3.48716,2.08666 0,0 0.77674,-2.15582 3.48716,-2.08666 2.78205,0.071 4.77921,3.46189 3.48716,5.81321 -1.30701,2.37854 -5.69926,4.18289 -6.97432,7.74998 z"
+         style="color:#000000;fill:#800000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         inkscape:export-filename="/home/mauve/dev/wor/server_root/img/hp.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;text-anchor:end;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+         x="750.42853"
+         y="265.93362"
+         id="text6794"><tspan
+           sodipodi:role="line"
+           id="tspan6796"
+           x="750.42853"
+           y="265.93362">212</tspan></text>
+      <image
+         y="248.93362"
+         x="574.42853"
+         id="image4627"
+         height="26"
+         width="24"
+         xlink:href="file:///home/mauve/Projects/WoR/icon-fire.png" />
+      <g
+         transform="translate(130.0554,328.05893)"
+         id="g6820">
+        <rect
+           style="color:#000000;fill:url(#linearGradient6931);fill-opacity:1;fill-rule:nonzero;stroke:#999999;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           id="rect6822"
+           width="112.00003"
+           height="23"
+           x="483.87314"
+           y="71.374695"
+           rx="3"
+           ry="3" />
+        <text
+           id="text6824"
+           y="87.874695"
+           x="493.37317"
+           style="font-size:15px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Trebuchet MS;-inkscape-font-specification:Trebuchet MS"
+           xml:space="preserve"><tspan
+             y="87.874695"
+             x="493.37317"
+             id="tspan6826"
+             sodipodi:role="line">Message Party</tspan></text>
+      </g>
+    </g>
+  </g>
+</svg>
