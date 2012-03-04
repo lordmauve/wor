@@ -6,38 +6,34 @@ import sys
 import random
 from optparse import OptionParser
 
-from wor.actors.player import Player, DuplicatePlayerName
-from Item import Item
-from Alignment import Alignment
-from Items.Rock import Rock
-
-
+from wor.actors.player import DuplicatePlayerName
+from wor.alignment import Alignment
 from wor.db import db
 
 
 ALIGN_MAP = {
-	'w': Alignment.WOOD,
-	'e': Alignment.EARTH,
-	'f': Alignment.FIRE,
-	't': Alignment.WATER,
-	'm': Alignment.METAL
+    'w': Alignment.WOOD,
+    'e': Alignment.EARTH,
+    'f': Alignment.FIRE,
+    't': Alignment.WATER,
+    'm': Alignment.METAL
 }
 
 
 def create_player(name, alignment, username):
-	try:
-		account = db.accounts().get_account(username)
-	except KeyError:
-		print >>sys.stderr, "The username specified does not exist in the database."
-		return
+    try:
+        account = db.accounts().get_account(username)
+    except KeyError:
+        print >>sys.stderr, "The username specified does not exist in the database."
+        return
 
-	try:
-		account.create_player(name, align)
-	except DuplicatePlayerName, e:
-		print >>sys.stderr, str(e)
-		db.abort()
-	else:
-		db.commit()
+    try:
+        account.create_player(name, align)
+    except DuplicatePlayerName, e:
+        print >>sys.stderr, str(e)
+        db.abort()
+    else:
+        db.commit()
 
 
 parser = OptionParser(usage='%prog [options] <account> <playername>')
@@ -46,15 +42,14 @@ parser.add_option('-a', '--align', type='choice', choices=ALIGN_MAP.keys(), help
 options, args = parser.parse_args()
 
 if len(args) != 2:
-	parser.error('You must specify a username and a player name.')
-
+    parser.error('You must specify a username and a player name.')
 
 if options.align:
-	# read alignment constant
-	align = ALIGN_MAP[options.align]
+    # read alignment constant
+    align = ALIGN_MAP[options.align]
 else:
-	# pick random alignment
-	align = random.choice(ALIGN_MAP.values())
+    # pick random alignment
+    align = random.choice(ALIGN_MAP.values())
 
 
 username, playername = args

@@ -2,8 +2,7 @@ from django import forms
 
 from wor.db import db
 from wor.accounts import AuthenticationFailure
-
-from Alignment import Alignment
+from wor.alignment import Alignment
 
 
 # FIXME: make Alignment properly enumerate the choices

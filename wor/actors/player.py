@@ -9,7 +9,7 @@ from wor.items.container import Inventory
 
 from SimpleTimedCounter import SimpleTimedCounter
 
-from Alignment import Alignment
+from wor.alignment import Alignment
 
 
 from wor.actions.base import ActionFailed
