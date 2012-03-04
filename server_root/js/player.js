@@ -75,7 +75,7 @@ function load_player_act(actions)
 			var actions = document.getElementById("held_item_actions");
 			fragments.push(act);
 		}
-		else if (act.group == 'movement' && /^move-/.match(act.uid)) {
+		else if (act.group == 'movement') {
 			new Action(act, move_panel);
 		} else {
 			new Action(act, actions_panel);

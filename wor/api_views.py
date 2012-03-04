@@ -1,4 +1,6 @@
-from django.http import Http404
+from django.http import Http404, HttpResponseNotAllowed
+from django.views.decorators.http import require_http_methods
+
 from wor.db import db
 
 from wor.items.base import Item
@@ -66,6 +68,7 @@ def actor_log(request, target=None):
     return JSONResponse(actor.get_messages(since))
 
 
+@require_http_methods(['GET', 'POST'])
 def actions(request):
     from wor.actions.base import ValidationError
     player = get_actor(request)
@@ -87,7 +90,7 @@ def actions(request):
         db.commit()
         return JSONResponse({'message': message})
     else:
-        return HttpNotAllowed(['GET', 'POST'])
+        return HttpResponseNotAllowed(['GET', 'POST'])
 
 
 def location(request, op, location_id=None):

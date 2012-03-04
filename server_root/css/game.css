@@ -200,32 +200,32 @@ body#sunset {
     font-size: 10px;
 }
 
-#movement #action-move-LR {
+#movement #action-here-move_lr {
 	top: 40px;
 	right: 25px;
 }
 
-#movement #action-move-LL {
+#movement #action-here-move_ll {
 	top: 40px;
 	left: 25px;
 }
 
-#movement #action-move-L {
+#movement #action-here-move_l {
 	top: 20px;
 	left: 0px;
 }
 
-#movement #action-move-R {
+#movement #action-here-move_r {
 	top: 20px;
 	right: 0px;
 }
 
-#movement #action-move-UR {
+#movement #action-here-move_ur {
 	top: 0px;
 	right: 25px;
 }
 
-#movement #action-move-UL {
+#movement #action-here-move_ul {
 	top: 0;
 	left: 25px;
 }

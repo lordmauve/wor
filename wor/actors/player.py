@@ -98,7 +98,7 @@ class Player(Actor):
         if self.ap <= 0:
             return []
 
-        actions = self.external_actions(self)
+        actions = self.external_actions(self, alias='self')
 
         # What can we do to the item we're holding?
         item = self.held_item()
@@ -111,7 +111,7 @@ class Player(Actor):
         # What can we do to the current location?
         loc = self.loc()
         if loc:
-            actions += loc.external_actions(self)
+            actions += loc.external_actions(self, alias='here')
 
         # What can we do to actors nearby?
         # FIXME: Fill in here
