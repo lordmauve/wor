@@ -1,29 +1,21 @@
 import random
-import os.path
-
-from BaseConfig import base_dir
+from functools import partial
+from pkg_resources import resource_string
 
 from wor.actors.mob import Mob
-from wor.actions import trading
 
-def random_name_from_file(filename):
-    """This opens the file and passes it twice to select a line
-    at random. Obviously this is inefficient; as an optimisation
-    we could index the file, or simply extract a bunch of names.
 
-    """
-    f = open(os.path.join(base_dir, filename))
-    num = 0
-    for l in f:
-        num += 1
-    f.seek(0)
-    which = random.randint(0, num)
-    for i, l in enumerate(f):
-        if i == which:
-            break
-    f.close()
-    return l.strip()
-    
+
+def random_name(resource):
+    """Return a random name from the resource name given"""
+    names = resource_string(__name__, resource)
+    return random.choice(names.splitlines())
+
+
+random_male_name = partial(random_name, 'names/male-names.txt')
+random_female_name = partial(random_name, 'names/female-names.txt')
+random_surname = partial(random_name, 'names/surnames.txt')
+
 
 class NPC(Mob):
     def __init__(self, name, behaviour):
@@ -43,17 +35,36 @@ class NPC(Mob):
         return ctx
 
 
-class HumanFemaleNPC(NPC):
-    def __init__(self, behaviour):
-        given = random_name_from_file('names/female-names.txt')
-        family = random_name_from_file('names/surnames.txt')
+class HumanNPC(NPC):
+    MALE = 0
+    FEMALE = 1
 
-        super(HumanFemaleNPC, self).__init__(given + ' ' + family, behaviour)
+    def __init__(self, behaviour=None, gender=None):
+        """Construct a new human NPC.
+
+        If gender is not given, it is picked at random.
+        """
+        if gender is None:
+            gender = random.randint(0, 1)
+        self.gender = gender
+
+        if gender == HumanNPC.MALE:
+            given = random_male_name()
+        else:
+            given = random_female_name()
+        family = random_surname()
+
+        super(HumanNPC, self).__init__(given + ' ' + family, behaviour)
 
 
-class HumanMaleNPC(NPC):
-    def __init__(self, behaviour):
-        given = random_name_from_file('names/male-names.txt')
-        family = random_name_from_file('names/surnames.txt')
+class HumanMaleNPC(HumanNPC):
+    """Subclass of NPC that is explicitly male."""
+    def __init__(self, behaviour=None):
+        super(HumanMaleNPC, self).__init__(behaviour, gender=HumanNPC.MALE)
 
-        super(HumanMaleNPC, self).__init__(given + ' ' + family, behaviour)
+
+class HumanFemaleNPC(HumanNPC):
+    """Subclass of NPC that is explicitly female."""
+    def __init__(self, behaviour=None):
+        super(HumanMaleNPC, self).__init__(behaviour, gender=HumanNPC.FEMALE)
+

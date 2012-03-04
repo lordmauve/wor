@@ -48,6 +48,9 @@ class Actor(Persistent, Triggerable, JSONSerialisable, ActionTarget):
     TO_HIT_MIN = 0.05
     TO_HIT_MAX = 0.95
 
+    _position = None
+    hp = 1
+
     def __init__(self):
         """Create a completely new actor"""
         super(Actor, self).__init__()
@@ -70,6 +73,7 @@ class Actor(Persistent, Triggerable, JSONSerialisable, ActionTarget):
         return self._position
 
     position = property(_get_position, _set_position)
+    pos = position
 
     def loc(self):
         """Return the Location (or Road for monsters) that we're stood on"""

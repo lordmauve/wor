@@ -1,4 +1,4 @@
-from wor.actors.npc import HumanFemaleNPC
+from wor.actors.npc import HumanNPC, HumanFemaleNPC
 from cost import Cost
 from wor.actions import trading
 
@@ -15,4 +15,23 @@ class Barmaid(HumanFemaleNPC):
     buy_tequila = trading.ActionBuy(
         item='drinks.Tequila',
         cost=Cost(gp=2, ap=1),
+    )
+
+
+class Trader(HumanNPC):
+    taxonomy = 'human.Trader'
+    short_name = 'the Trader'
+    full_name_format = '%s, a Trader'
+    
+    buy_bucket = trading.ActionBuy(
+        item='tools.Bucket',
+        cost=Cost(gp=12, ap=1),
+    )
+    buy_spade = trading.ActionBuy(
+        item='tools.Spade',
+        cost=Cost(gp=20, ap=1),
+    )
+    buy_pickaxe = trading.ActionBuy(
+        item='tools.PickAxe',
+        cost=Cost(gp=35, ap=1),
     )
