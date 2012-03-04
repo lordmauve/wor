@@ -185,7 +185,7 @@ class AggregateItem(Item):
                 "Cannot destroy %d items from an aggregate with only %d items"
                 % (num, self.count))
         elif self.count == num:
-            return self.destroy()
+            return self.destroy_all()
         else:
             self.count -= num
 
