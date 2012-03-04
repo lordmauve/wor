@@ -1,7 +1,0 @@
-######
-# Database host authentication
-
-host = "@DB_HOST@"
-name = "@DB_NAME@"
-user = "@DB_USER@"
-passwd = "@DB_PASS@"
