@@ -20,7 +20,7 @@ class Barmaid(HumanFemaleNPC):
 
 class Trader(HumanNPC):
     taxonomy = 'human.Trader'
-    short_name = 'the Trader'
+    short_name = 'a Trader'
     full_name_format = '%s, a Trader'
     
     buy_bucket = trading.ActionBuy(
