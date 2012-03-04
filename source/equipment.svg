@@ -1,0 +1,642 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="491"
+   height="700"
+   id="svg6613"
+   version="1.1"
+   inkscape:version="0.47pre0 r21549"
+   sodipodi:docname="equipment.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs6615">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective6621" />
+    <inkscape:perspective
+       id="perspective6594"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6688"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6713"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6738"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6761"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6786"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective8672"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective8693"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective8720"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective8720-6"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective8720-3"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective8757"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective8757-8"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="353.56577"
+     inkscape:cy="457.76366"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1680"
+     inkscape:window-height="975"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     showguides="true"
+     inkscape:guide-bbox="true" />
+  <metadata
+     id="metadata6618">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-29.99997,-31.362183)">
+    <g
+       id="g3688"
+       transform="matrix(0.39779453,0,0,0.39779453,136.15666,31.057149)"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         style="fill:#ffe6d5;stroke:#a05a2c;stroke-width:5.02772122"
+         d="m 330.02741,363.17444 c 6.63867,11.29309 1.85179,37.36314 4.53287,53.90375 -1.83379,23.2749 8.29453,44.89906 2.932,67.95736 -2.58549,30.24302 10.46748,60.30621 3.213,90.37702 -3.56267,17.19834 -2.88936,31.12635 7.72641,45.36054 -1.80619,29.87359 40.49992,-1.26876 19.49623,-15.28079 -6.14122,-14.31349 -12.07629,-30.95756 -4.3448,-45.77102 10.03112,-31.86758 24.21378,-65.8609 11.79194,-98.88105 -2.46227,-24.29428 4.56199,-46.73942 7.6437,-70.21771 3.27177,-25.77139 2.08143,-52.17165 -1.23006,-77.84456 -3.53585,-16.37348 -10.84127,-32.4039 -6.0419,-49.52421 0.74235,-7.85419 8.51104,-35.87411 7.77701,-12.53747 2.29501,23.23181 6.35887,46.88972 21.59693,65.57591 15.36406,18.83788 6.69945,42.60611 16.99825,63.3702 8.42821,9.47494 20.54162,7.86043 27.72219,-1.42234 -0.12681,-9.82233 -11.98821,-32.73435 0.87848,-12.23816 11.11024,-10.3248 -12.17406,-24.95381 -19.28361,-33.51789 -7.96969,-25.95254 -4.16821,-54.51971 -17.02244,-79.20624 -3.96108,-24.35274 -0.4194,-57.71089 -7.04,-82.02464 -3.71452,-26.54526 -37.40895,-17.84921 -55.35744,-30.62989 -6.11181,-13.73847 9.95825,-25.61773 9.96005,-39.78817 2.48106,-20.236086 -6.8144,-45.633273 -31.64933,-42.451159"
+         id="path2838"
+         sodipodi:nodetypes="ccccccccccccsccccccccc" />
+      <use
+         height="1052.3622"
+         width="744.09448"
+         transform="matrix(-1,0,0,1,660.55763,0)"
+         id="use2849"
+         xlink:href="#path2838"
+         y="0"
+         x="0" />
+      <path
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 328.22904,345.97697 c -18.82114,11.08592 -5.91192,44.84542 -11.88835,64.95769 -2.07799,31.10328 -4.31453,62.1968 -4.73178,93.34802 -6.95128,29.18551 0.20146,59.36392 1.89493,88.82489 -4.2793,9.36653 -20.75144,43.04719 -4.5028,39.63768 5.45267,-20.51325 18.93921,-35.2261 10.8356,-57.3435 -7.68405,-35.58449 9.37453,-71.27854 1.60223,-107.04381 2.69546,-21.98397 5.35967,-44.58669 5.23182,-67.28213 0.56721,-15.42945 0.686,-32.55022 3.3047,-44.42183 -1.13934,-2.71907 2.22979,-10.73212 -1.74635,-10.67701 z"
+         id="path2890" />
+      <path
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 274.34193,224.8593 c -4.35646,20.58881 -6.53156,41.83986 -12.28338,62.00507 -13.92178,32.63506 -29.17377,64.75451 -39.59036,98.74825 16.7196,3.89101 21.85206,-19.72643 22.93801,-33.43834 -4.52433,-23.67326 17.40052,-41.27803 24.64534,-62.23946 5.68429,-13.11625 4.97962,-41.21762 8.86975,-48.25801 2.26854,15.88047 10.09407,21.38769 4.51334,4.07127 -3.03086,-6.9629 -6.06197,-13.92597 -9.0927,-20.88878 z"
+         id="path2883" />
+      <path
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 380.64308,221.11976 c -7.18362,18.56999 -11.64045,55.49768 -12.02339,75.75109 3.88465,31.28945 7.21364,62.94458 1.36476,94.27187 -1.35425,23.56439 -13.7008,46.37675 -7.33053,70.04724 5.81057,25.10458 6.74508,51.09466 0.0697,76.11769 -2.59553,21.51751 -15.84383,43.31907 -5.31075,64.51966 1.01101,14.27127 16.21226,37.44131 15.50491,11.41391 -8.12553,-13.06918 -16.4452,-30.68057 -11.68467,-46.31066 10.33109,-33.3492 24.26899,-69.00982 12.56591,-103.97847 -1.54027,-9.49682 6.88961,-32.72632 8.64814,-69.03601 4.12045,-26.80177 2.6822,-54.37639 -0.66479,-81.15224 -3.51213,-16.35301 -10.84624,-32.3453 -6.04435,-49.44559 0.34396,-9.85214 4.27266,-18.40864 6.46825,-22.76967 1.86034,2.41693 -1.41433,-14.81354 -1.56319,-19.42882 z"
+         id="path2897"
+         sodipodi:nodetypes="cccccccccccccc" />
+      <path
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 383.29411,149.56121 c 12.70708,12.61393 15.86331,38.84086 17.10921,57.71715 3.21727,40.54104 15.7787,79.44033 22.21851,119.44344 13.62442,14.59449 15.53631,42.65311 23.6851,54.11401 11.38809,-4.21926 -12.48075,-38.64333 4.42151,-14.84363 11.071,-10.34219 -12.21406,-24.93171 -19.30461,-33.51659 -7.97991,-25.9472 -4.15083,-54.51393 -17.00225,-79.19966 -3.96572,-24.3517 -1.02853,-55.19856 -7.66179,-79.51026 -2.15643,-13.92097 -10.3974,-21.09973 -23.46568,-24.20446 z"
+         id="path2902"
+         sodipodi:nodetypes="ccccccccc" />
+      <path
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 344.7702,60.592456 c 1.9295,20.301267 9.28447,43.034644 -3.15821,61.466824 4.3389,9.93909 12.18098,28.16587 9.59665,8.07545 8.75491,-17.36025 16.35188,-38.881521 6.15496,-58.409428 -2.44081,-5.25567 -7.23608,-9.126462 -12.5934,-11.132846 z"
+         id="path2904" />
+      <path
+         style="opacity:0.5;color:#000000;fill:#ffe6d5;fill-opacity:1;fill-rule:nonzero;stroke:#a05a2c;stroke-width:2.5138607;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 283.39341,233.97658 c 3.93263,3.55151 36.51716,6.59562 42.13519,2.53676 5.618,-4.0588 2.45134,-30.40957 2.45134,-30.40957"
+         id="path6728"
+         sodipodi:nodetypes="csc" />
+      <path
+         id="path6751"
+         d="m 332.45383,233.97658 c 3.93264,3.55151 36.51717,6.59562 42.13522,2.53676 5.61798,-4.0588 2.80897,-48.70602 2.80897,-48.70602"
+         style="opacity:0.5;color:#000000;fill:#ffe6d5;fill-opacity:1;fill-rule:nonzero;stroke:#a05a2c;stroke-width:2.5138607;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </g>
+    <g
+       transform="matrix(0.39779453,0,0,0.39779453,138.07716,453.05715)"
+       id="g6662"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         id="fem_r"
+         d="m 330.02741,363.17444 c 6.63867,11.29309 1.85179,37.36314 4.53287,53.90375 -1.83379,23.2749 8.29453,44.89906 2.932,67.95736 -2.58549,30.24302 10.46748,60.30621 3.213,90.37702 -3.56267,17.19834 -2.88936,31.12635 7.72641,45.36054 -1.80619,29.87359 40.49992,-1.26876 19.49623,-15.28079 -6.14122,-14.31349 -12.07629,-30.95756 -4.3448,-45.77102 10.03112,-31.86758 21.69992,-66.48937 9.27808,-99.50952 -8.96716,-24.29428 7.06013,-46.11095 10.15756,-69.58924 3.27177,-25.77139 10.25148,-38.34542 5.05459,-71.55991 -3.53585,-22.02966 -21.52518,-39.31702 -16.72581,-56.43733 0.74235,-7.85419 12.9103,-35.24564 12.17627,-11.909 2.29501,23.23181 6.35887,46.88972 21.59693,65.57591 15.36406,18.83788 6.69945,42.60611 16.99825,63.3702 8.42821,9.47494 20.54162,7.86043 27.72219,-1.42234 -0.12681,-9.82233 -11.98821,-32.73435 0.87848,-12.23816 11.11024,-10.3248 -12.17406,-24.95381 -19.28361,-33.51789 -7.96969,-25.95254 -4.16821,-54.51971 -17.02244,-79.20624 -3.96108,-24.35274 -7.96099,-53.9401 -14.58159,-78.25385 -3.71452,-26.54526 -29.86736,-21.62 -47.81585,-34.40068 -6.11181,-13.73847 9.95825,-25.61773 9.96005,-39.78817 2.48106,-20.236086 -6.8144,-45.633273 -31.64933,-42.451159"
+         style="fill:#ffe6d5;stroke:#a05a2c;stroke-width:5.02772122"
+         inkscape:label="#path6664"
+         sodipodi:nodetypes="ccccccccccccsccccccccc" />
+      <use
+         x="0"
+         y="0"
+         xlink:href="#fem_r"
+         id="use6666"
+         transform="matrix(-1,0,0,1,660.55763,0)"
+         width="744.09448"
+         height="1052.3622" />
+      <path
+         id="path6668"
+         d="m 328.22904,345.97697 c -18.82114,11.08592 -5.91192,44.84542 -11.88835,64.95769 -2.07799,31.10328 -4.31453,62.1968 -4.73178,93.34802 -6.95128,29.18551 0.20146,59.36392 1.89493,88.82489 -4.2793,9.36653 -20.75144,43.04719 -4.5028,39.63768 5.45267,-20.51325 18.93921,-35.2261 10.8356,-57.3435 -7.68405,-35.58449 9.37453,-71.27854 1.60223,-107.04381 2.69546,-21.98397 5.35967,-44.58669 5.23182,-67.28213 0.56721,-15.42945 0.686,-32.55022 3.3047,-44.42183 -1.13934,-2.71907 2.22979,-10.73212 -1.74635,-10.67701 z"
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <path
+         id="path6670"
+         d="m 274.34193,224.8593 c -4.35646,20.58881 -6.53156,41.83986 -12.28338,62.00507 -13.92178,32.63506 -29.17377,64.75451 -39.59036,98.74825 16.7196,3.89101 21.85206,-19.72643 22.93801,-33.43834 -4.52433,-23.67326 17.40052,-41.27803 24.64534,-62.23946 5.68429,-13.11625 4.97962,-41.21762 8.86975,-48.25801 2.26854,15.88047 10.09407,21.38769 4.51334,4.07127 -3.03086,-6.9629 -6.06197,-13.92597 -9.0927,-20.88878 z"
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <path
+         sodipodi:nodetypes="cccccccccccccc"
+         id="path6672"
+         d="m 380.64308,221.11976 c -10.39351,16.64406 -24.01679,48.07188 -12.02339,75.75109 3.88465,31.28945 7.21364,62.94458 1.36476,94.27187 -1.35425,23.56439 -13.7008,46.37675 -7.33053,70.04724 5.81057,25.10458 6.74508,51.09466 0.0697,76.11769 -2.59553,21.51751 -15.84383,43.31907 -5.31075,64.51966 1.01101,14.27127 16.21226,37.44131 15.50491,11.41391 -8.12553,-13.06918 -16.4452,-30.68057 -11.68467,-46.31066 10.33109,-33.3492 24.26899,-69.00982 12.56591,-103.97847 -10.17347,-23.75342 4.21485,-46.10012 8.64814,-69.03601 4.12045,-26.80177 7.70992,-49.97713 4.36293,-76.75298 -3.51213,-16.35301 -20.90168,-37.37303 -16.09979,-54.47332 0.34396,-9.85214 9.30038,-17.78017 11.49597,-22.1412 1.86034,2.41693 -1.41433,-14.81354 -1.56319,-19.42882 z"
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <path
+         id="path6674"
+         d="m 382.03718,154.58893 c 12.70708,12.61393 17.12024,33.81314 18.36614,52.68943 3.21727,40.54104 15.7787,79.44033 22.21851,119.44344 13.62442,14.59449 15.53631,42.65311 23.6851,54.11401 11.38809,-4.21926 -12.48075,-38.64333 4.42151,-14.84363 11.071,-10.34219 -12.21406,-24.93171 -19.30461,-33.51659 -7.97991,-25.9472 -4.15083,-54.51393 -17.00225,-79.19966 -3.96572,-24.3517 -7.94165,-53.94163 -14.57491,-78.25333 -2.15643,-13.92097 -4.74121,-17.32894 -17.80949,-20.43367 z"
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         sodipodi:nodetypes="ccccccccc" />
+      <path
+         id="path6676"
+         d="m 344.7702,60.592456 c 1.9295,20.301267 9.28447,43.034644 -3.15821,61.466824 4.3389,9.93909 12.18098,28.16587 9.59665,8.07545 8.75491,-17.36025 16.35188,-38.881521 6.15496,-58.409428 -2.44081,-5.25567 -7.23608,-9.126462 -12.5934,-11.132846 z"
+         style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.79158551;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <g
+         id="g6809">
+        <path
+           sodipodi:nodetypes="cssc"
+           id="path6678"
+           d="m 365.9221,178.11488 c -1.83313,9.0557 25.17597,32.97705 24.79336,52.97247 -0.16969,8.86282 -7.9931,24.78176 -22.21879,24.94144 -45.32634,0.50881 -36.34688,-38.33961 -36.34688,-38.33961"
+           style="color:#000000;fill:#ffe6d5;fill-opacity:1;fill-rule:nonzero;stroke:#a05a2c;stroke-width:2.5138607;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <use
+           height="1052.3622"
+           width="744.09448"
+           transform="matrix(-1,0,0,1,661.99818,-3.688192e-7)"
+           id="use6701"
+           xlink:href="#path6678"
+           y="0"
+           x="0" />
+        <path
+           sodipodi:nodetypes="cscsc"
+           id="path6703"
+           d="m 337.92031,245.86822 c 0,0 18.49681,7.9116 35.50828,-4.71349 16.00409,-11.87746 -3.77079,-50.59144 -3.77079,-50.59144 0,0 33.30865,40.536 14.14047,57.81879 -17.69514,15.95465 -45.87796,-1.25693 -45.87796,-2.51386 z"
+           style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.31488839;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <path
+           style="opacity:0.15;color:#000000;fill:#784421;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.31488839;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           d="m 276.64496,244.61129 c 0,0 18.49681,7.9116 35.50828,-4.71349 16.00409,-11.87746 13.82623,-32.05172 13.82623,-32.05172 0,0 14.21943,28.27331 -9.74121,42.10716 -24.29133,14.02478 -39.5933,-4.08502 -39.5933,-5.34195 z"
+           id="path6726"
+           sodipodi:nodetypes="cscsc" />
+      </g>
+    </g>
+    <g
+       id="g6821"
+       transform="translate(-40,-20)"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         y="51.862183"
+         x="373.5"
+         height="26"
+         width="114"
+         id="rect6815"
+         style="color:#000000;fill:#ffeeaa;fill-opacity:1;fill-rule:nonzero;stroke:#aa8800;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <text
+         id="text6817"
+         y="69.362183"
+         x="430.41113"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         xml:space="preserve"><tspan
+           y="69.362183"
+           x="430.41113"
+           id="tspan6819"
+           sodipodi:role="line">Purple Helmet</tspan></text>
+    </g>
+    <g
+       transform="translate(-348,110)"
+       id="g6826"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         style="color:#000000;fill:#ffaaaa;fill-opacity:1;fill-rule:nonzero;stroke:#aa0000;stroke-width:0.99999987999999995;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect6828"
+         width="68"
+         height="26"
+         x="396.5"
+         y="51.862183" />
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         x="430.41113"
+         y="69.362183"
+         id="text6830"><tspan
+           sodipodi:role="line"
+           id="tspan6832"
+           x="430.41113"
+           y="69.362183">Cutlass</tspan></text>
+    </g>
+    <g
+       id="g6834"
+       transform="translate(-49,197)"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         y="51.862183"
+         x="382.5"
+         height="26"
+         width="96"
+         id="rect6836"
+         style="color:#000000;fill:#ffeeaa;fill-opacity:1;fill-rule:nonzero;stroke:#aa8800;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <text
+         id="text6838"
+         y="69.362183"
+         x="430.41113"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         xml:space="preserve"><tspan
+           y="69.362183"
+           x="430.41113"
+           id="tspan6840"
+           sodipodi:role="line">Warm Socks</tspan></text>
+    </g>
+    <g
+       transform="translate(-308,230)"
+       id="g6842"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         style="color:#000000;fill:#ffeeaa;fill-opacity:1;fill-rule:nonzero;stroke:#aa8800;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect6844"
+         width="152"
+         height="26"
+         x="354.5"
+         y="51.862183" />
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         x="430.41113"
+         y="69.362183"
+         id="text6846"><tspan
+           sodipodi:role="line"
+           id="tspan6848"
+           x="430.41113"
+           y="69.362183">Boots of the Optician</tspan></text>
+    </g>
+    <g
+       id="g6850"
+       transform="translate(15,485)"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         y="51.862183"
+         x="379.49997"
+         height="26"
+         width="99.999992"
+         id="rect6852"
+         style="color:#000000;fill:#ffeeaa;fill-opacity:1;fill-rule:nonzero;stroke:#aa8800;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <text
+         id="text6854"
+         y="69.362183"
+         x="430.41113"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         xml:space="preserve"><tspan
+           y="69.362183"
+           x="430.41113"
+           id="tspan6856"
+           sodipodi:role="line">Digital Watch</tspan></text>
+    </g>
+    <g
+       transform="translate(-287,404)"
+       id="g6858"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         style="color:#000000;fill:#ffeeaa;fill-opacity:1;fill-rule:nonzero;stroke:#aa8800;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect6860"
+         width="102"
+         height="26"
+         x="379.5"
+         y="51.862183" />
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         x="430.41113"
+         y="69.362183"
+         id="text6862"><tspan
+           sodipodi:role="line"
+           id="tspan6864"
+           x="430.41113"
+           y="69.362183">Sunglasses</tspan></text>
+    </g>
+    <g
+       id="g6866"
+       transform="translate(-319,476)"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         y="51.862183"
+         x="374.5"
+         height="26"
+         width="112"
+         id="rect6868"
+         style="color:#000000;fill:#ffeeaa;fill-opacity:1;fill-rule:nonzero;stroke:#aa8800;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <text
+         id="text6870"
+         y="69.362183"
+         x="430.41113"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         xml:space="preserve"><tspan
+           y="69.362183"
+           x="430.41113"
+           id="tspan6872"
+           sodipodi:role="line">A Bracada Bra</tspan></text>
+    </g>
+    <g
+       transform="translate(-308,653)"
+       id="g6874"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         style="color:#000000;fill:#ffeeaa;fill-opacity:1;fill-rule:nonzero;stroke:#aa8800;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect6876"
+         width="76"
+         height="26"
+         x="392.5"
+         y="51.862183" />
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         x="430.41113"
+         y="69.362183"
+         id="text6878"><tspan
+           sodipodi:role="line"
+           id="tspan6880"
+           x="430.41113"
+           y="69.362183">Flip-flops</tspan></text>
+    </g>
+    <path
+       style="color:#000000;fill:none;stroke:#aa8800;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 331.5,43.862183 -64,0 0,17"
+       id="path6882"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       id="path6884"
+       d="m 333.54615,260.86218 -58.0923,0"
+       style="color:#000000;fill:none;stroke:#aa8800;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       sodipodi:nodetypes="cc"
+       style="color:#000000;fill:#ffaaaa;stroke:#aa0000;stroke-width:0.99999987999999995;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;fill-opacity:1;fill-rule:nonzero"
+       d="m 226.10616,174.86218 -109.21232,0"
+       id="path6886"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <g
+       id="g6888"
+       transform="translate(36,110)"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate">
+      <rect
+         y="51.862183"
+         x="376.49997"
+         height="26"
+         width="108"
+         id="rect6890"
+         style="color:#000000;fill:#afc6e9;fill-opacity:1;fill-rule:nonzero;stroke:#162d50;stroke-width:0.99999987999999995;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <text
+         id="text6892"
+         y="69.362183"
+         x="430.41113"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         xml:space="preserve"><tspan
+           y="69.362183"
+           x="430.41113"
+           id="tspan6894"
+           sodipodi:role="line">Ace of Spades</tspan></text>
+    </g>
+    <path
+       sodipodi:nodetypes="cc"
+       style="color:#000000;fill:#afc6e9;stroke:#162d50;stroke-width:0.99999987999999995;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;fill-opacity:1;fill-rule:nonzero"
+       d="m 412.13338,174.86218 -103.26676,0"
+       id="path6898"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       id="path6900"
+       d="m 198.5,294.86217 68,0 0,-22"
+       style="color:#000000;fill:none;stroke:#aa8800;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-male.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="color:#000000;fill:none;stroke:#aa8800;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 194.5,468.86217 75,0 0,20"
+       id="path6902"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       id="path6904"
+       d="m 270.13792,540.86218 -102.27584,0"
+       style="color:#000000;fill:none;stroke:#aa8800;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       sodipodi:nodetypes="cc"
+       style="color:#000000;fill:#afc6e9;stroke:#162d50;stroke-width:0.99999987999999995;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;fill-opacity:1;fill-rule:nonzero"
+       d="m 413.13792,595.86218 -102.27584,0"
+       id="path6906"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="color:#000000;fill:none;stroke:#aa8800;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 160.50001,716.86217 110,0 0,-22"
+       id="path6908"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       id="path6931"
+       d="m 394.50001,549.86217 -87,0 0,38"
+       style="color:#000000;fill:none;stroke:#aa8800;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <g
+       transform="translate(28,531)"
+       id="g6933"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         style="color:#000000;fill:#afc6e9;fill-opacity:1;fill-rule:nonzero;stroke:#162d50;stroke-width:0.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect6935"
+         width="90"
+         height="26"
+         x="385.5"
+         y="51.862183" />
+      <text
+         xml:space="preserve"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         x="430.41113"
+         y="69.362183"
+         id="text6937"><tspan
+           sodipodi:role="line"
+           id="tspan6939"
+           x="430.41113"
+           y="69.362183">Gin &amp; Tonic</tspan></text>
+    </g>
+    <path
+       id="path6941"
+       d="m 228.13792,595.86218 -102.27584,0"
+       style="color:#000000;fill:#ffaaaa;stroke:#aa0000;stroke-width:0.99999987999999995;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;fill-opacity:1;fill-rule:nonzero"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <g
+       id="g6943"
+       transform="translate(-352,531)"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         y="51.862183"
+         x="382.49997"
+         height="26"
+         width="96"
+         id="rect6945"
+         style="color:#000000;fill:#ffaaaa;fill-opacity:1;fill-rule:nonzero;stroke:#aa0000;stroke-width:0.99999987999999995;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <text
+         id="text6947"
+         y="69.362183"
+         x="430.41113"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;font-family:Arial;-inkscape-font-specification:Arial"
+         xml:space="preserve"><tspan
+           y="69.362183"
+           x="430.41113"
+           id="tspan6949"
+           sodipodi:role="line">King of Clubs</tspan></text>
+    </g>
+    <g
+       id="g8786"
+       transform="translate(212,-45)"
+       inkscape:export-filename="/home/mauve/Projects/WoR/equipment-concept-female.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         id="path8778"
+         d="m 440.99997,450.36218 12,-12"
+         style="color:#000000;fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <path
+         style="color:#000000;fill:none;stroke:#000000;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 452.99997,450.36218 -12,-12"
+         id="path8780" />
+    </g>
+  </g>
+</svg>
