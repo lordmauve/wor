@@ -259,7 +259,7 @@ class ItemContainer(Persistent):
             self.remove(item).destroy()
         return rv
 
-    def split_or_remove(self, item, num_items):
+    def split_or_remove(self, item, num_items=1):
         split_item = self.split(item, num_items)
         if split_item is None:
             split_item = self.remove(item)

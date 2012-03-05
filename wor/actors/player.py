@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import re
 import time
 import logging
 
@@ -9,6 +10,7 @@ from wor.items.container import Inventory
 
 from SimpleTimedCounter import SimpleTimedCounter
 
+from wor.db import db
 from wor.alignment import Alignment
 
 
@@ -132,15 +134,21 @@ class Player(Actor):
     def perform_action(self, action_id, data):
         """Despatch an action to the target object. The action_id is a
         full one."""
-        actions = self.get_actions() + self.get_contextual_actions()
-        for a in actions:
-            if a.get_uid() != action_id:
-                continue
-            message = a.perform(self, data)
-            self.last_action = time.time()
-            return message
+        mo = re.match(r'^(\d+)-(\w+)$', action_id)
+        
+        if mo:
+            obj = db.get_for_id(int(mo.group(1)))
+            actions = obj.external_actions(self)
         else:
-            raise ActionFailed(u"I don't understand what you want to do.")
+            actions = self.get_actions() + self.get_contextual_actions()
+
+        for a in actions:
+            if a.get_uid() == action_id:
+                message = a.perform(self, data)
+                self.last_action = time.time()
+                return message
+
+        raise ActionFailed(u"I don't understand what you want to do.")
 
     def say_boo(self):
         """Test action"""

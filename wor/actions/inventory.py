@@ -17,10 +17,14 @@ class ActionChangeItem(PersonalAction):
 
 
 class ConsumeAction(Action):
+    """Consume an item from the player's inventory."""
+
     group = 'inventory'
     caption = u"Consume"
     message = u"You consume %(target)s."
 
     def do(self, actor, target):
-        target.destroy()
-        return self.message % {'target': target}
+        inst = actor.inventory.split_or_remove(target)
+        msg = self.message % {'target': inst}
+        inst.destroy()
+        return msg
