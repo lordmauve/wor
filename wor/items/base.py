@@ -155,12 +155,12 @@ class AggregateItem(Item):
 
     def description(self):
         if self.count == 1:
-            return getattr(self, 'desc', self.name_for())
+            return getattr(self, 'desc', unicode(self))
         else:
             try:
                 return self.desc_plural % self.count
             except AttributeError:
-                return self.name_for()
+                return getattr(self, 'desc', unicode(self))
 
     def merge(self, new_item):
         """Merge the given item with this item, if possible.  Return 

@@ -64,7 +64,7 @@ body#sunset {
 	-moz-border-radius: 6px;
 }
 
-#map-bubble .description {
+.collapsible .description {
 	font-size: 13px;
 	margin: 0 5px 6px;
 	text-align: justify;
