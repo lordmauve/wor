@@ -1,3 +1,5 @@
+
+
 class ActionTarget(object):
     """Mix-in class for objects that can have actions bound to them."""
     def external_actions(self, player, alias=None):
@@ -201,11 +203,13 @@ class BoundAction(object):
         return '<BoundAction %s on %s>' % (self.name, self.target)
 
     def get_uid(self):
+        from wor.db import db
+
         if self.alias:
             return '%s-%s' % (self.alias, self.name)
 
         try:
-            id = str(''.join('%02x' % ord(c) for c in self.target._p_oid))
+            id = db.id(self.target)
         except AttributeError:
             id = str(self.target.id)
         return '%s-%s' % (id, self.name)
