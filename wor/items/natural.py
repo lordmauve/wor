@@ -1,5 +1,6 @@
 from base import AggregateItem
 
+
 class Twig(AggregateItem):
     name = 'a twig'
     name_plural = '%d twigs'

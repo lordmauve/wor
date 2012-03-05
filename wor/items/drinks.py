@@ -14,7 +14,7 @@ class Ale(AggregateItem):
     group = "Drinks"
 
     drink = ConsumeAction(
-        name="Drink",
+        caption=u"Drink",
         cost=Cost(ap=1, hp=-3)
     )
 
@@ -35,3 +35,8 @@ class Tequila(Item):
         if self.worm:
             return self.desc_worm
         return self.desc
+
+    drink = ConsumeAction(
+        caption=u"Drink",
+        cost=Cost(ap=1, hp=-5)
+    )

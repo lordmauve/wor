@@ -1,6 +1,6 @@
 #coding: utf8
 
-from base import Item, AggregateItem
+from .base import AggregateItem
 
 class GoldPiece(AggregateItem):
     name = 'denarius'
