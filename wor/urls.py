@@ -1,6 +1,7 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, include, url
 
-urlpatterns = patterns('api_views',
+
+urlpatterns = patterns('wor.api_views',
     (r'^api/actors$', 'actors'),
     (r'^api/items/names$', 'item_names'),
     (r'^api/items/names/(\w+)', 'item_names'),
@@ -18,10 +19,12 @@ urlpatterns = patterns('api_views',
 
     (r'^api/item/(\d+)/desc', 'item'),
 
-    (r'^', include('ui.urls')),
-    (r'^editor/', include('editor.urls')),
+    (r'^', include('wor.ui.urls')),
+    (r'^editor/', include('wor.editor.urls')),
 )
 
-urlpatterns += patterns('', 
-    (r'(.*)', 'django.views.static.serve', {'document_root': '../server_root/', 'show_indexes': True}),
+urlpatterns += patterns('',
+    (r'(.*)', 'django.views.static.serve', {
+        'document_root': 'server_root/', 'show_indexes': True
+    }),
 )

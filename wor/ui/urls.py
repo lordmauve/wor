@@ -1,12 +1,12 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url
 
-urlpatterns = patterns('ui.views',
+urlpatterns = patterns('wor.ui.views',
     (r'^$', 'login'),
     (r'^game$', 'game'),
     url(r'^register$', 'register', name='register'),
 )
 
-urlpatterns += patterns('', 
+urlpatterns += patterns('',
     (r'^assets/(.*)', 'django.views.static.serve', {'document_root': '../server_root/', 'show_indexes': True}),
 )
 

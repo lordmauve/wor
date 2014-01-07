@@ -1,5 +1,5 @@
 from wor.actors.npc import HumanNPC, HumanFemaleNPC
-from cost import Cost
+from wor.cost import Cost
 from wor.actions import trading
 
 
@@ -22,7 +22,7 @@ class Trader(HumanNPC):
     taxonomy = 'human.Trader'
     short_name = 'a Trader'
     full_name_format = '%s, a Trader'
-    
+
     buy_bucket = trading.ActionBuy(
         item='tools.Bucket',
         cost=Cost(gp=12, ap=1),

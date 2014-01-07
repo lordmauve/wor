@@ -1,6 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.conf import settings
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from wor.db import db
 
@@ -55,6 +56,7 @@ def login(request):
     return render_to_response('login.html', {'form': form})
 
 
+@ensure_csrf_cookie
 def game(request):
     if 'account' not in request.session:
         return HttpResponseRedirect('/')

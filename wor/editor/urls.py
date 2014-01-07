@@ -1,6 +1,6 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url
 
-urlpatterns = patterns('editor.views',
+urlpatterns = patterns('wor.editor.views',
     (r'^$', 'regions'),
     url(r'^new-region$', 'create_region', name='create-region'),
     (r'^(?P<region_id>[^/]+)/$', 'edit_region'),
