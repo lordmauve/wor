@@ -39,7 +39,7 @@ def get_actor(request):
 def actor_detail(request, op, target=None):
     player = get_actor(request)
 
-    if target is None: 
+    if target is None:
         actor = player
     else:
         actor = db.world().get_actor(int(target))
@@ -60,7 +60,7 @@ def inventory(request):
 
 def actor_log(request, target=None):
     player = get_actor(request)
-    if target is None: 
+    if target is None:
         actor = player
     else:
         actor = db.world().get_actor(int(target))
@@ -99,7 +99,7 @@ def location(request, op, location_id=None):
     player = get_actor(request)
     if location_id is None:
         location = player.loc()
-    else:    
+    else:
         location = Location.load(int(location_id))
 
     if op == 'desc':

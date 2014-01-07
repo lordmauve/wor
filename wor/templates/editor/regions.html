@@ -4,7 +4,7 @@
 
 {% block content %}
 	<h2>Regions</h2>
-	<p><a href="{% url create-region %}">Create a new region</a></p>
+	<p><a href="{% url 'create-region' %}">Create a new region</a></p>
 	<ul>
 		{% for name, region in regions %}
 			<li><a href="/editor/{{name}}/">{{region}}</a></li>
